@@ -1,5 +1,5 @@
-﻿<!--
-***********************************************************************************************
+<!--
+****************************************************************************************************
 Microsoft.Common.CurrentVersion.targets
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
@@ -11,9 +11,8 @@ contains all the steps that are common among the different .NET languages, such 
 Visual Basic, and Visual C#.
 
 Copyright (C) Microsoft Corporation. All rights reserved.
-***********************************************************************************************
+****************************************************************************************************
 -->
-
 <Project DefaultTargets="Build" TreatAsLocalProperty="OutDir" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="'$(MicrosoftCommonPropsHasBeenImported)' != 'true' and Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />

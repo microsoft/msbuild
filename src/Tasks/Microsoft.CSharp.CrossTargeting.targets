@@ -1,5 +1,5 @@
 <!--
-***********************************************************************************************
+****************************************************************************************************
 Microsoft.CSharp.CrossTargeting.targets
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
@@ -7,9 +7,8 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           impossible to load or build your projects from the command-line or the IDE.
 
 Copyright (C) Microsoft Corporation. All rights reserved.
-***********************************************************************************************
+****************************************************************************************************
 -->
-
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <!-- Import design time targets for Roslyn Project System. These are only available if Visual Studio is installed. -->

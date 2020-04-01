@@ -1,5 +1,5 @@
-﻿<!--
-***********************************************************************************************
+<!--
+****************************************************************************************************
 Microsoft.Common.targets
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
@@ -11,9 +11,8 @@ contains all the steps that are common among the different .NET languages, such 
 Visual Basic, and Visual C#.
 
 Copyright (C) Microsoft Corporation. All rights reserved.
-***********************************************************************************************
+****************************************************************************************************
 -->
-
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <!--

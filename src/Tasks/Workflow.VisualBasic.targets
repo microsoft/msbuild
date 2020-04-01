@@ -1,4 +1,15 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<!--
+****************************************************************************************************
+Workflow.VisualBasic.targets
+
+WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
+          created a backup copy.  Incorrect changes to this file will make it
+          impossible to load or build your projects from the command-line or the IDE.
+
+Copyright (C) Microsoft Corporation. All rights reserved.
+****************************************************************************************************
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
    <!--
         With MSBuild 12, we've changed MSBuildToolsPath to for the first time point to a directory
