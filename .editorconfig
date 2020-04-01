@@ -3,20 +3,54 @@
 # top-most EditorConfig file
 root = true
 
-# Default settings:
-# A newline ending every file
-# Use 4 spaces as indentation
+# Defaults
 [*]
-insert_final_newline = true
-indent_style = space
+charset = utf-8
 indent_size = 4
+indent_style = space
+insert_final_newline = false
 trim_trailing_whitespace = true
 
-[project.json]
+# Bash scripts
+[*.sh]
 indent_size = 2
+end_of_line = lf
+
+# Batch scripts
+[*.{cmd,bat}]
+end_of_line = crlf
+
+# MSBuild XML Build files
+[*.{props,targets,tasks,overridetasks}]
+indent_size = 2
+
+# MSBuild XML Project files
+[*.{csproj,vbproj,shproj,proj,projitems}]
+indent_size = 2
+
+# VisualStudio XML Source files
+[*.{xaml,xml,xsd}]
+indent_size = 2
+
+# VisualStudio XML Configuration files
+[*.{ruleset,config,nuspec,resx,vsixmanifest,vsct}]
+indent_size = 2
+
+# YAML config files
+[*.{yml,yaml}]
+indent_size = 2
+
+# C++ Files
+[*.{cpp,h,in}]
+curly_bracket_next_line = true
+indent_brace_style = Allman
 
 # C# files
 [*.cs]
+
+# License header
+file_header_template = Licensed to the .NET Foundation under one or more agreements.\nThe .NET Foundation licenses this file to you under the MIT license.\n
+
 # New line preferences
 csharp_new_line_before_open_brace = all
 csharp_new_line_before_else = true
@@ -156,44 +190,5 @@ csharp_space_between_square_brackets = false
 # Analyzers
 dotnet_code_quality.ca1802.api_surface = private, internal
 dotnet_code_quality.ca2208.api_surface = public
-
-# License header
-file_header_template = Licensed to the .NET Foundation under one or more agreements.\nThe .NET Foundation licenses this file to you under the MIT license.\n
-
-# C++ Files
-[*.{cpp,h,in}]
-curly_bracket_next_line = true
-indent_brace_style = Allman
-
-# Xml project files
-[*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,nativeproj,locproj}]
-indent_size = 2
-
-[*.{csproj,vbproj,proj,nativeproj,locproj}]
-charset = utf-8
-
-# Xml build files
-[*.builds]
-indent_size = 2
-
-# Xml files
-[*.{xml,stylecop,resx,ruleset}]
-indent_size = 2
-
-# Xml config files
-[*.{props,targets,config,nuspec}]
-indent_size = 2
-
-# YAML config files
-[*.{yml,yaml}]
-indent_size = 2
-
-# Shell scripts
-[*.sh]
-end_of_line = lf
-[*.{cmd, bat}]
-end_of_line = crlf
-
-[src/**/*.{cs,vb}]
 # IDE0005: Remove unnecessary usings/imports
 dotnet_diagnostic.IDE0005.severity = warning
