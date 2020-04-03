@@ -42,7 +42,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <TargetPlatformMonikers>@(_TargetFrameworkInfo->'%(TargetPlatformMonikers)')</TargetPlatformMonikers>
         <AdditionalPropertiesFromProject>$(_AdditionalPropertiesFromProject)</AdditionalPropertiesFromProject>
         <HasSingleTargetFramework>false</HasSingleTargetFramework>
-        <!-- indicate to caller that project is RID agnostic so that a global property RuntimeIdentifier value can be removed -->
+        <!-- indicate to caller that project is RID agnostic so that a global property $(RuntimeIdentifiers) value can be removed -->
         <IsRidAgnostic>false</IsRidAgnostic>
         <IsRidAgnostic Condition=" '$(RuntimeIdentifier)' == '' and '$(RuntimeIdentifiers)' == '' ">true</IsRidAgnostic>
         <!-- Extract necessary information for SetPlatform negotiation -->
@@ -79,18 +79,18 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
   ============================================================
-                                       DispatchToInnerBuilds
+                      DispatchToInnerBuilds
 
-     Builds this project with /t:$(InnerTarget) /p:TargetFramework=X for each
-     value X in $(TargetFrameworks)
+    Builds this project with /t:$(InnerTarget) /p:TargetFramework=X for each
+    value X in $(TargetFrameworks)
 
-     [IN]
-     $(TargetFrameworks) - Semicolon delimited list of target frameworks.
-     $(InnerTargets) - The targets to build for each target framework
+    [IN]
+    $(TargetFrameworks) - Semicolon delimited list of target frameworks.
+    $(InnerTargets) - The targets to build for each target framework
 
-     [OUT]
-     @(InnerOutput) - The combined output items of the inner targets across
-                      all target frameworks..
+    [OUT]
+    @(InnerOutput) - The combined output items of the inner targets across
+                    all target frameworks.
   ============================================================
   -->
   <Target Name="DispatchToInnerBuilds"
@@ -107,21 +107,21 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
   ============================================================
-                                       Build
+                            Build
 
-   Cross-targeting version of Build.
+    Cross-targeting version of Build.
 
-   [IN]
-   $(TargetFrameworks) - Semicolon delimited list of target frameworks.
+    [IN]
+    $(TargetFrameworks) - Semicolon delimited list of target frameworks.
 
-   $(InnerTargets)     - The targets to build for each target framework. Defaults
-                         to 'Build' if unset, but allows override to support
-                         `msbuild /p:InnerTargets=X;Y;Z` which will build X, Y,
-                         and Z targets for each target framework.
+    $(InnerTargets)     - The targets to build for each target framework. Defaults
+                          to 'Build' if unset, but allows override to support
+                          `msbuild /p:InnerTargets=X;Y;Z` which will build X, Y,
+                          and Z targets for each target framework.
 
-   [OUT]
-   @(InnerOutput) - The combined output items of the inner targets across
-                    all builds.
+    [OUT]
+    @(InnerOutput) - The combined output items of the inner targets across
+                     all builds.
   ============================================================
   -->
   <Target Name="Build" DependsOnTargets="_SetBuildInnerTarget;DispatchToInnerBuilds" />
@@ -135,19 +135,19 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
   ============================================================
-                                       Clean
+                            Clean
 
-   Cross-targeting version of clean.
+    Cross-targeting version of clean.
 
-   Inner-build dispatch is a clone of DispatchToInnerBuilds;
-   the only reason it's replicated is that it must be a different
-   target to be run in the same build (e.g. by Rebuild or by
-   a /t:Clean;Build invocation.
+    Inner-build dispatch is a clone of 'DispatchToInnerBuilds';
+    the only reason it's replicated is that it must be a different
+    target to be run in the same build (e.g. by Rebuild or by
+    a `/t:Clean;Build` invocation.
   ============================================================
   -->
   <Target Name="Clean"
           DependsOnTargets="_ComputeTargetFrameworkItems">
-    <!-- If this logic is changed, also update DispatchToInnerBuilds -->
+    <!-- If this logic is changed, also update 'DispatchToInnerBuilds' -->
     <MSBuild Projects="@(_InnerBuildProjects)"
              Condition="'@(_InnerBuildProjects)' != '' "
              Targets="Clean"
@@ -156,16 +156,14 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
   ============================================================
-                                       Rebuild
+                            Rebuild
 
-   Cross-targeting version of rebuild.
+    Cross-targeting version of rebuild.
   ============================================================
   -->
   <Target Name="Rebuild" DependsOnTargets="Clean;Build" />
 
-  <!--
-    This will import NuGet restore targets. We need restore to work before any package assets are available.
-  -->
+  <!-- This will import NuGet restore targets. We need restore to work before any package assets are available. -->
   <PropertyGroup>
     <MSBuildUseVisualStudioDirectoryLayout Condition="'$(MSBuildUseVisualStudioDirectoryLayout)'==''">$([MSBuild]::IsRunningFromVisualStudio())</MSBuildUseVisualStudioDirectoryLayout>
     <NuGetRestoreTargets Condition="'$(NuGetRestoreTargets)'=='' and '$(MSBuildUseVisualStudioDirectoryLayout)'=='true'">$([MSBuild]::GetToolsDirectory32())\..\..\..\Common7\IDE\CommonExtensions\Microsoft\NuGet\NuGet.targets</NuGetRestoreTargets>
@@ -176,9 +174,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(CustomAfterMicrosoftCommonCrossTargetingTargets)" Condition="'$(CustomAfterMicrosoftCommonCrossTargetingTargets)' != '' and Exists('$(CustomAfterMicrosoftCommonCrossTargetingTargets)')"/>
 
-  <!--
-    Allow extensions like NuGet restore to work before any package assets are available.
-  -->
+  <!-- Allow extensions like NuGet restore to work before any package assets are available. -->
   <PropertyGroup>
     <ImportByWildcardAfterMicrosoftCommonCrossTargetingTargets Condition="'$(ImportByWildcardAfterMicrosoftCommonCrossTargetingTargets)' == ''">true</ImportByWildcardAfterMicrosoftCommonCrossTargetingTargets>
   </PropertyGroup>
@@ -187,15 +183,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
           Condition="'$(ImportByWildcardAfterMicrosoftCommonCrossTargetingTargets)' == 'true' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.CrossTargeting.targets\ImportAfter')"/>
 
   <!--
-    Import project extensions which usually come from packages.  Package management systems will create a file at:
-      $(MSBuildProjectExtensionsPath)\$(MSBuildProjectFile).<SomethingUnique>.targets
+      Import project extensions which usually come from packages.  Package management systems will create a file at:
+        '$(MSBuildProjectExtensionsPath)\$(MSBuildProjectFile).<SomethingUnique>.targets'
 
-    Each package management system should use a unique moniker to avoid collisions.  It is a wild-card iport so the package
-    management system can write out multiple files but the order of the import is alphabetic because MSBuild sorts the list.
+      Each package management system should use a unique moniker to avoid collisions.  It is a wild-card iport so the package
+      management system can write out multiple files but the order of the import is alphabetic because MSBuild sorts the list.
 
-    This is the same import that would happen in an inner (non-cross targeting) build. Package management systems are responsible for generating
-    appropriate conditions based on $(IsCrossTargetingBuild) to pull in only those package targets that are meant to participate in a cross-targeting
-    build.
+      This is the same import that would happen in an inner (non-cross targeting) build. Package management systems are responsible
+      for generating appropriate conditions based on $(IsCrossTargetingBuild) to pull in only those package targets that are meant
+      to participate in a cross-targeting build.
   -->
   <PropertyGroup>
     <ImportProjectExtensionTargets Condition="'$(ImportProjectExtensionTargets)' == ''">true</ImportProjectExtensionTargets>
@@ -208,9 +204,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   </PropertyGroup>
 
   <!--
-        Determine the path to the directory build targets file if the user did not disable $(ImportDirectoryBuildTargets) and
-        they did not already specify an absolute path to use via $(DirectoryBuildTargetsPath)
-    -->
+      Determine the path to the directory build targets file if the user did not disable $(ImportDirectoryBuildTargets) and
+      they did not already specify an absolute path to use via $(DirectoryBuildTargetsPath)
+  -->
   <PropertyGroup Condition="'$(ImportDirectoryBuildTargets)' == 'true' and '$(DirectoryBuildTargetsPath)' == ''">
     <_DirectoryBuildTargetsFile Condition="'$(_DirectoryBuildTargetsFile)' == ''">Directory.Build.targets</_DirectoryBuildTargetsFile>
     <_DirectoryBuildTargetsBasePath Condition="'$(_DirectoryBuildTargetsBasePath)' == ''">$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildProjectDirectory), '$(_DirectoryBuildTargetsFile)'))</_DirectoryBuildTargetsBasePath>
