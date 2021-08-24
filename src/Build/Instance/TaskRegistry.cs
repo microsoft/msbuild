@@ -531,17 +531,34 @@ namespace Microsoft.Build.Execution
                 // match the given name
                 foreach (KeyValuePair<RegisteredTaskIdentity, List<RegisteredTaskRecord>> registration in registrations)
                 {
-                    // if the given task name is longer than the registered task name
-                    // we will use the longer name to help disambiguate between multiple matches
-                    string mostSpecificTaskName = (taskName.Length > registration.Key.Name.Length) ? taskName : registration.Key.Name;
-
-                    taskRecord = GetMatchingRegistration(mostSpecificTaskName, registration.Value, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation);
-
-                    if (taskRecord != null)
+                    if (registration.Key.TaskIdentityParameters != null && registration.Key.TaskIdentityParameters.ContainsKey("Architecture"))
                     {
-                        break;
+                        taskRecord = GetMatchingRegistration(registration.Key.Name, registration.Value, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation);
                     }
                 }
+
+                if (taskRecord == null)
+                {
+                    // look for the given task name in the registry; if not found, gather all registered task names that partially
+                    // match the given name
+                    foreach (KeyValuePair<RegisteredTaskIdentity, List<RegisteredTaskRecord>> registration in registrations)
+                    {
+                        // Prefer the taskRecord that has Architecture defined
+
+
+                        // if the given task name is longer than the registered task name
+                        // we will use the longer name to help disambiguate between multiple matches
+                        string mostSpecificTaskName = (taskName.Length > registration.Key.Name.Length) ? taskName : registration.Key.Name;
+
+                        taskRecord = GetMatchingRegistration(mostSpecificTaskName, registration.Value, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation);
+
+                        if (taskRecord != null)
+                        {
+                            break;
+                        }
+                    }
+                }
+
             }
 
             // If we didn't find the task but we have a fallback registry in the toolset state, try that one.
@@ -606,14 +623,32 @@ namespace Microsoft.Build.Execution
         private Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> GetRelevantRegistrations(RegisteredTaskIdentity taskIdentity, bool exactMatchRequired)
         {
             Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> relevantTaskRegistrations =
-                new Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+                new Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact); //todo: modify to be architecturepreferred?
 
             List<RegisteredTaskRecord> taskAssemblies;
+
+            // Are there multiple definitions of the task?
+            //  
 
             if (exactMatchRequired && _taskRegistrations.TryGetValue(taskIdentity, out taskAssemblies))
             {
                 relevantTaskRegistrations[taskIdentity] = taskAssemblies;
-                return relevantTaskRegistrations;
+                int numTasks = 0;
+
+                foreach (KeyValuePair<RegisteredTaskIdentity, List<RegisteredTaskRecord>> taskRegistration in _taskRegistrations)
+                {
+                    if (taskRegistration.Key.Name == taskIdentity.Name)
+                    {
+                        numTasks++;
+                        relevantTaskRegistrations[taskRegistration.Key] = taskRegistration.Value;
+                    }
+                }
+
+                if (numTasks > 1)
+                {
+
+                }
+                    return relevantTaskRegistrations;
             }
 
             // look through all task declarations for partial matches
