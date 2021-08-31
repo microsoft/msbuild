@@ -481,6 +481,15 @@ namespace Microsoft.Build.Execution
             // Try the current task registry
             if (taskRecord == null && _taskRegistrations?.Count > 0)
             {
+                // Does this task have an architecture-specific variation?
+                // Just use that!
+                if (superImportantTasks.TryGetValue(taskIdentity.Name, out List<RegisteredTaskRecord> records))
+                {
+                    // Just take the first for now.
+                    taskRecord = records[0];
+                    return taskRecord;
+                }
+
                 if (exactMatchRequired)
                 {
                     if (_cachedTaskRecordsWithExactMatch != null && _cachedTaskRecordsWithExactMatch.TryGetValue(taskIdentity, out taskRecord))
@@ -628,6 +637,10 @@ namespace Microsoft.Build.Execution
             return relevantTaskRegistrations;
         }
 
+        // Create another set containing architecture-specific task entries.
+        // Then when we look for them, check if the name exists in that.
+        Dictionary<string, List<RegisteredTaskRecord>> superImportantTasks = new Dictionary<string, List<RegisteredTaskRecord>>();
+
         /// <summary>
         /// Registers an evaluated using task tag for future
         /// consultation
@@ -653,7 +666,27 @@ namespace Microsoft.Build.Execution
                 _taskRegistrations[taskIdentity] = registeredTaskEntries;
             }
 
-            registeredTaskEntries.Add(new RegisteredTaskRecord(taskName, assemblyLoadInfo, taskFactory, taskFactoryParameters, inlineTaskRecord));
+            RegisteredTaskRecord newRecord = new RegisteredTaskRecord(taskName, assemblyLoadInfo, taskFactory, taskFactoryParameters, inlineTaskRecord);
+
+            if (taskFactoryParameters != null && taskFactoryParameters.ContainsKey("Architecture"))
+            {
+                if (superImportantTasks.ContainsKey(taskName))
+                {
+                    if (superImportantTasks[taskName] == null)
+                    {
+                        superImportantTasks[taskName] = new();
+                    }
+                }
+                else
+                {
+                    superImportantTasks.Add(taskName, new ());
+                }
+
+                superImportantTasks[taskName].Add(newRecord);
+            }
+            
+
+            registeredTaskEntries.Add(newRecord);
         }
 
         private static Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> CreateRegisteredTaskDictionary(int? capacity = null)
