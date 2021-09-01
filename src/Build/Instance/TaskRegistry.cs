@@ -483,11 +483,9 @@ namespace Microsoft.Build.Execution
             {
                 // Does this task have an architecture-specific variation?
                 // Just use that!
-                if (superImportantTasks.TryGetValue(taskIdentity.Name, out List<RegisteredTaskRecord> records))
+                if (superImportantTasks.TryGetValue(taskIdentity.Name, out RegisteredTaskRecord rec))
                 {
-                    // Just take the first for now.
-                    taskRecord = records[0];
-                    return taskRecord;
+                    return rec;
                 }
 
                 if (exactMatchRequired)
@@ -639,7 +637,7 @@ namespace Microsoft.Build.Execution
 
         // Create another set containing architecture-specific task entries.
         // Then when we look for them, check if the name exists in that.
-        Dictionary<string, List<RegisteredTaskRecord>> superImportantTasks = new Dictionary<string, List<RegisteredTaskRecord>>();
+        Dictionary<string, RegisteredTaskRecord> superImportantTasks = new Dictionary<string, RegisteredTaskRecord>();
 
         /// <summary>
         /// Registers an evaluated using task tag for future
@@ -668,23 +666,15 @@ namespace Microsoft.Build.Execution
 
             RegisteredTaskRecord newRecord = new RegisteredTaskRecord(taskName, assemblyLoadInfo, taskFactory, taskFactoryParameters, inlineTaskRecord);
 
-            if (taskFactoryParameters != null && taskFactoryParameters.ContainsKey("Architecture"))
+            // When Runtime is defined (and Architecture isn't), Architecture will be set to `*` which shouldn't be prioritized.
+            if (taskFactoryParameters != null && taskFactoryParameters.TryGetValue("Architecture", out string s) && s != MSBuildConstants.CharactersForExpansion[0])
             {
-                if (superImportantTasks.ContainsKey(taskName))
+                // First UsingTask wins
+                if (!superImportantTasks.ContainsKey(taskName))
                 {
-                    if (superImportantTasks[taskName] == null)
-                    {
-                        superImportantTasks[taskName] = new();
-                    }
+                    superImportantTasks[taskName] = newRecord;
                 }
-                else
-                {
-                    superImportantTasks.Add(taskName, new ());
-                }
-
-                superImportantTasks[taskName].Add(newRecord);
             }
-            
 
             registeredTaskEntries.Add(newRecord);
         }
