@@ -1,5 +1,5 @@
-﻿<!--
-***********************************************************************************************
+<!--
+****************************************************************************************************
 Microsoft.Common.CurrentVersion.targets
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
@@ -11,9 +11,8 @@ contains all the steps that are common among the different .NET languages, such 
 Visual Basic, and Visual C#.
 
 Copyright (C) Microsoft Corporation. All rights reserved.
-***********************************************************************************************
+****************************************************************************************************
 -->
-
 <Project DefaultTargets="Build" TreatAsLocalProperty="OutDir" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="'$(MicrosoftCommonPropsHasBeenImported)' != 'true' and Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -131,7 +130,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     (eg. obj\Debug). If this property is overridden, then setting BaseIntermediateOutputPath has no effect.
 
     Ensure any and all path property has a trailing slash, so it can be concatenated.
-    -->
+  -->
 
   <PropertyGroup>
     <!-- Example, AnyCPU -->
@@ -785,10 +784,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <!--
     ***********************************************************************************************
     ***********************************************************************************************
-                                                                Build Section
+                                            Build Section
     ***********************************************************************************************
     ***********************************************************************************************
-    -->
+  -->
 
   <Target Name="_AddOutputPathToGlobalPropertiesToRemove">
     <PropertyGroup>
@@ -798,15 +797,16 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ============================================================
-                                        _CheckForInvalidConfigurationAndPlatform
+              _CheckForInvalidConfigurationAndPlatform
 
-    This target checks for errors in statically defined properties.  By setting BeforeTargets, we try
-    to ensure that the target runs before any build related targets.
+    This target checks for errors in statically defined build properties.
+    By setting BeforeTargets, we try to ensure that the target runs before any build related targets.
+
     If your target requires this check and is running as a BeforeTargets of one of the first targets
     of $(BuildDependsOn), $(RebuildDependsOn), or $(CleanDependsOn) you will need to set your DependsOn
     to this target.
     ============================================================
-    -->
+  -->
   <Target
       Name="_CheckForInvalidConfigurationAndPlatform"
       BeforeTargets="$(BuildDependsOn);Build;$(RebuildDependsOn);Rebuild;$(CleanDependsOn);Clean">
@@ -828,9 +828,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <Error Condition="'$(IntermediateOutputPath)' != '' and !HasTrailingSlash('$(IntermediateOutputPath)')" Text="The IntermediateOutputPath must end with a trailing slash." />
     <Error Condition="'$(BaseIntermediateOutputPath)' != '' and !HasTrailingSlash('$(BaseIntermediateOutputPath)')" Text="The BaseIntermediateOutputPath must end with a trailing slash." />
 
-    <!-- Also update the value of PlatformTargetAsMSBuildArchitecture per the value of Prefer32Bit.  We are doing
-         this here because Prefer32Bit may be set anywhere in the targets, so we can't depend on it having the
-         correct value when we're trying to figure out PlatformTargetAsMSBuildArchitecture -->
+    <!--
+      Also update the value of PlatformTargetAsMSBuildArchitecture per the value of Prefer32Bit.  We are doing
+      this here because Prefer32Bit may be set anywhere in the targets, so we can't depend on it having the
+      correct value when we're trying to figure out PlatformTargetAsMSBuildArchitecture
+    -->
     <PropertyGroup Condition="'$(Prefer32Bit)' == 'true' and ('$(PlatformTarget)' == 'AnyCPU' or '$(PlatformTarget)' == '') and '$(PlatformTargetAsMSBuildArchitectureExplicitlySet)' != 'true'">
       <PlatformTargetAsMSBuildArchitecture>x86</PlatformTargetAsMSBuildArchitecture>
     </PropertyGroup>
@@ -848,7 +850,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!--
       Log a warning if:
         1. $(EnableBaseIntermediateOutputPathMismatchWarning) is 'true'
-        2. $(BaseIntermediateOutputPath) was set in the body of a project after its default value was set in Microsoft.Common.props
+        2. $(BaseIntermediateOutputPath) was set in the body of a project after its default value was set in 'Microsoft.Common.props'
         3. $(BaseIntermediateOutputPath) is not the same as $(MSBuildProjectExtensionsPath)
 
       Similar to the error above, there are cases when users set $(BaseIntermediateOutputPath) in the body of their project and things build but only by coincidence.
@@ -5668,9 +5670,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!--
     ============================================================
-                                        CleanPublishFolder
+                        CleanPublishFolder
     ============================================================
-    -->
+  -->
   <Target
       Name="CleanPublishFolder">
 

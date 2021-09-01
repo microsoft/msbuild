@@ -1,5 +1,5 @@
-﻿<!--
-***********************************************************************************************
+<!--
+****************************************************************************************************
 Microsoft.CSharp.targets
 
 WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and have
@@ -12,9 +12,8 @@ of the build process is defined in Microsoft.Common.targets, which is imported b
 this file.
 
 Copyright (C) Microsoft Corporation. All rights reserved.
-***********************************************************************************************
+****************************************************************************************************
 -->
-
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
    <!--
