@@ -149,6 +149,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectRootElementCacheBase RootElementCache { get; set; }
 
+        internal bool PrioritizeArchitectureInUsingTasks = true;
+
         /// <summary>
         /// Creates a task registry that does not fall back to any other task registry.
         /// Default constructor does no work because the tables are initialized lazily when a task is registered
@@ -483,7 +485,7 @@ namespace Microsoft.Build.Execution
             {
                 // Does this task have an architecture-specific variation?
                 // Just use that!
-                if (superImportantTasks.TryGetValue(taskIdentity.Name, out RegisteredTaskRecord rec))
+                if (PrioritizeArchitectureInUsingTasks && superImportantTasks.TryGetValue(taskIdentity.Name, out RegisteredTaskRecord rec))
                 {
                     return rec;
                 }
