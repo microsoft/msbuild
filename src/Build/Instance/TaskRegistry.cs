@@ -619,9 +619,16 @@ namespace Microsoft.Build.Execution
 
             List<RegisteredTaskRecord> taskAssemblies;
 
-            if (exactMatchRequired && _taskRegistrations.TryGetValue(taskIdentity, out taskAssemblies))
+            // if we find an exact match
+            if (_taskRegistrations.TryGetValue(taskIdentity, out taskAssemblies))
             {
+                // we're done
                 relevantTaskRegistrations[taskIdentity] = taskAssemblies;
+                return relevantTaskRegistrations;
+            }
+
+            if (exactMatchRequired)
+            {
                 return relevantTaskRegistrations;
             }
 
