@@ -24,6 +24,7 @@
     <CustomBeforeMicrosoftCommonTargets>$(MSBuildThisFileDirectory)Directory.BeforeCommon.targets</CustomBeforeMicrosoftCommonTargets>
 
     <Platforms>AnyCPU;x64</Platforms>
+    <DisableImplicitNamespaceImports>true</DisableImplicitNamespaceImports>
 
     <!-- Defaults for target frameworks and architecture -->
     <LibraryTargetFrameworks>$(FullFrameworkTFM);netstandard2.0</LibraryTargetFrameworks>
