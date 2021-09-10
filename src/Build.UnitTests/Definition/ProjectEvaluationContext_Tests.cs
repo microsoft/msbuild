@@ -129,6 +129,41 @@ namespace Microsoft.Build.UnitTests.Definition
             Should.Throw<ArgumentException>(() => EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated, fileSystem));
         }
 
+        [Fact]
+        public void EvaluationShouldUseDirectoryCache()
+        {
+            var projectFile = _env.CreateFile("1.proj", @"<Project> <ItemGroup Condition=`Exists('1.file')`> <Compile Include='*.cs'/> </ItemGroup> </Project>".Cleanup()).Path;
+
+            var projectCollection = _env.CreateProjectCollection().Collection;
+            var directoryCacheFactory = new Helpers.LoggingDirectoryCacheFactory();
+
+            var project = Project.FromFile(
+                projectFile,
+                new ProjectOptions
+                {
+                    ProjectCollection = projectCollection,
+                    DirectoryCacheFactory = directoryCacheFactory,
+                }
+            );
+
+            directoryCacheFactory.DirectoryCaches.Count.ShouldBe(1);
+            var directoryCache = directoryCacheFactory.DirectoryCaches[0];
+
+            directoryCache.EvaluationId.ShouldBe(project.LastEvaluationId);
+
+            directoryCache.ExistenceChecks.OrderBy(kvp => kvp.Key).ShouldBe(
+                new Dictionary<string, int>
+                {
+                    { _env.DefaultTestDirectory.Path, 1},
+                    { Path.Combine(_env.DefaultTestDirectory.Path, "1.file"), 2 }
+                }.OrderBy(kvp => kvp.Key));
+            directoryCache.Enumerations.ShouldBe(
+                new Dictionary<string, int>
+                {
+                    { _env.DefaultTestDirectory.Path, 1 }
+                });
+        }
+
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]

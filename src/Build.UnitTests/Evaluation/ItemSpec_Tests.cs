@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
         {
             var itemDictionary = ToItemDictionary(items);
 
-            return new ProjectInstanceExpander(new PropertyDictionary<ProjectPropertyInstance>(), itemDictionary, (IFileSystem) FileSystems.Default);
+            return new ProjectInstanceExpander(new PropertyDictionary<ProjectPropertyInstance>(), itemDictionary);
         }
 
         private static ItemDictionary<ProjectItemInstance> ToItemDictionary(Dictionary<string, string[]> itemTypes)

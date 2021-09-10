@@ -396,7 +396,7 @@ namespace Microsoft.Build.UnitTests
             metadataDictionary["Culture"] = "french";
             StringMetadataTable itemMetadata = new StringMetadataTable(metadataDictionary);
 
-            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, itemBag, itemMetadata, FileSystems.Default);
+            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, itemBag, itemMetadata);
 
             foreach (string file in FilesWithExistenceChecks)
             {

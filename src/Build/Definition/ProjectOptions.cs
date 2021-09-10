@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.FileSystem;
 
 namespace Microsoft.Build.Definition
 {
@@ -38,5 +39,10 @@ namespace Microsoft.Build.Definition
         /// The <see cref="EvaluationContext"/> to use for evaluation.
         /// </summary>
         public EvaluationContext EvaluationContext { get; set; }
+
+        /// <summary>
+        /// Provides <see cref="IDirectoryCache"/> to be used for evaluation.
+        /// </summary>
+        public IDirectoryCacheFactory DirectoryCacheFactory { get; set; }
     }
 }

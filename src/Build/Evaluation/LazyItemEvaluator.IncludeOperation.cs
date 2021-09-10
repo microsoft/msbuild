@@ -113,7 +113,8 @@ namespace Microsoft.Build.Evaluation
                                 includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
                                     _rootDirectory,
                                     glob,
-                                    excludePatternsForGlobs
+                                    excludePatternsForGlobs,
+                                    fileMatcher: FileMatcher
                                 );
                             }
                             if (MSBuildEventSource.Log.IsEnabled())

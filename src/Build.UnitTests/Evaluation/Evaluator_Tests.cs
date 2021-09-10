@@ -4298,7 +4298,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void VerifyConditionEvaluatorResetStateOnFailure()
         {
             PropertyDictionary<ProjectPropertyInstance> propertyBag = new PropertyDictionary<ProjectPropertyInstance>();
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag, FileSystems.Default);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(propertyBag);
             string condition = " '$(TargetOSFamily)' >= '3' ";
 
             // Give an incorrect value for the property "TargetOSFamily", and then the evaluation should throw an exception.

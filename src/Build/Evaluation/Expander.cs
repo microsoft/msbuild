@@ -13,6 +13,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -302,22 +303,49 @@ namespace Microsoft.Build.Evaluation
         private readonly IFileSystem _fileSystem;
 
         /// <summary>
+        /// Non-null if the expander was constructed for evaluation.
+        /// </summary>
+        internal EvaluationContext EvaluationContext { get; }
+
+        /// <summary>
         /// Creates an expander passing it some properties to use.
         /// Properties may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, IFileSystem fileSystem)
+        internal Expander(IPropertyProvider<P> properties)
         {
             _properties = properties;
             _usedUninitializedProperties = new UsedUninitializedProperties();
-            _fileSystem = fileSystem;
+            _fileSystem = FileSystems.Default;
+        }
+
+        /// <summary>
+        /// Creates an expander passing it some properties to use and the evaluation context.
+        /// Properties may be null.
+        /// </summary>
+        internal Expander(IPropertyProvider<P> properties, EvaluationContext evaluationContext)
+        {
+            _properties = properties;
+            _usedUninitializedProperties = new UsedUninitializedProperties();
+            _fileSystem = evaluationContext.FileSystem;
+            EvaluationContext = evaluationContext;
         }
 
         /// <summary>
         /// Creates an expander passing it some properties and items to use.
         /// Either or both may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IFileSystem fileSystem)
-            : this(properties, fileSystem)
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items)
+            : this(properties)
+        {
+            _items = items;
+        }
+
+        /// <summary>
+        /// Creates an expander passing it some properties and items to use, and the evaluation context.
+        /// Either or both may be null.
+        /// </summary>
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, EvaluationContext evaluationContext)
+            : this(properties, evaluationContext)
         {
             _items = items;
         }
@@ -326,8 +354,8 @@ namespace Microsoft.Build.Evaluation
         /// Creates an expander passing it some properties, items, and/or metadata to use.
         /// Any or all may be null.
         /// </summary>
-        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IMetadataTable metadata, IFileSystem fileSystem)
-            : this(properties, items, fileSystem)
+        internal Expander(IPropertyProvider<P> properties, IItemProvider<I> items, IMetadataTable metadata)
+            : this(properties, items)
         {
             _metadata = metadata;
         }
@@ -2216,7 +2244,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             foreach (
                                 var resultantItem in
-                                EngineFileUtilities.Default.GetFileListEscaped(
+                                EngineFileUtilities.GetFileListEscaped(
                                     item.ProjectDirectory,
                                     item.EvaluatedIncludeEscaped,
                                     forceEvaluate: true))

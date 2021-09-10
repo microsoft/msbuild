@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using ObjectModel = System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -20,6 +19,7 @@ using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
@@ -189,6 +189,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private Evaluator(
             IEvaluatorData<P, I, M, D> data,
+            Project project,
             ProjectRootElement projectRootElement,
             ProjectLoadSettings loadSettings,
             int maxNodeCount,
@@ -206,6 +207,7 @@ namespace Microsoft.Build.Evaluation
         {
             ErrorUtilities.VerifyThrowInternalNull(data, nameof(data));
             ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowInternalNull(evaluationContext, nameof(evaluationContext));
             ErrorUtilities.VerifyThrowInternalNull(loggingService, nameof(loggingService));
             ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
 
@@ -220,12 +222,20 @@ namespace Microsoft.Build.Evaluation
                 // Wrap the IEvaluatorData<> object passed in.
                 data = new PropertyTrackingEvaluatorDataWrapper<P, I, M, D>(data, _evaluationLoggingContext, Traits.Instance.LogPropertyTracking);
             }
-            _evaluationContext = evaluationContext ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
+
+            // If the host wishes to provide a directory cache for this evaluation, create a new EvaluationContext with the right file system.
+            _evaluationContext = evaluationContext;
+            IDirectoryCache directoryCache = project?.GetDirectoryCacheForEvaluation(_evaluationLoggingContext.BuildEventContext.EvaluationId);
+            if (directoryCache is not null)
+            {
+                IFileSystem fileSystem = new DirectoryCacheFileSystemWrapper(evaluationContext.FileSystem, directoryCache);
+                _evaluationContext = evaluationContext.ContextWithFileSystem(fileSystem);
+            }
 
             // Create containers for the evaluation results
-            data.InitializeForEvaluation(toolsetProvider, _evaluationContext.FileSystem);
+            data.InitializeForEvaluation(toolsetProvider, _evaluationContext);
 
-            _expander = new Expander<P, I>(data, data, _evaluationContext.FileSystem);
+            _expander = new Expander<P, I>(data, data, _evaluationContext);
 
             // This setting may change after the build has started, therefore if the user has not set the property to true on the build parameters we need to check to see if it is set to true on the environment variable.
             _expander.WarnForUninitializedProperties = BuildParameters.WarnOnUninitializedProperty || Traits.Instance.EscapeHatches.WarnOnUninitializedProperty;
@@ -284,6 +294,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal static void Evaluate(
             IEvaluatorData<P, I, M, D> data,
+            Project project,
             ProjectRootElement root,
             ProjectLoadSettings loadSettings,
             int maxNodeCount,
@@ -295,13 +306,14 @@ namespace Microsoft.Build.Evaluation
             BuildEventContext buildEventContext,
             ISdkResolverService sdkResolverService,
             int submissionId,
-            EvaluationContext evaluationContext = null,
+            EvaluationContext evaluationContext,
             bool interactive = false)
         {
             MSBuildEventSource.Log.EvaluateStart(root.ProjectFileLocation.File);
             var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
             var evaluator = new Evaluator<P, I, M, D>(
                 data,
+                project,
                 root,
                 loadSettings,
                 maxNodeCount,
@@ -357,7 +369,7 @@ namespace Microsoft.Build.Evaluation
                     else
                     {
                         // The expression is not of the form "@(X)". Treat as string
-                        string[] includeSplitFilesEscaped = EngineFileUtilities.Default.GetFileListEscaped(rootDirectory, includeSplitEscaped);
+                        string[] includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(rootDirectory, includeSplitEscaped, excludeSpecsEscaped: null, forceEvaluate: false, fileMatcher: expander.EvaluationContext?.FileMatcher);
 
                         if (includeSplitFilesEscaped.Length > 0)
                         {
@@ -2009,7 +2021,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     // Expand the wildcards and provide an alphabetical order list of import statements.
-                    importFilesEscaped = _evaluationContext.EngineFileUtilities.GetFileListEscaped(directoryOfImportingFile, importExpressionEscapedItem, forceEvaluate: true);
+                    importFilesEscaped = EngineFileUtilities.GetFileListEscaped(directoryOfImportingFile, importExpressionEscapedItem, forceEvaluate: true, fileMatcher: _evaluationContext.FileMatcher);
                 }
                 catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
                 {

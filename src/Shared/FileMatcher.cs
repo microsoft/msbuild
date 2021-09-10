@@ -244,7 +244,7 @@ namespace Microsoft.Build.Shared
             {
                 case FileSystemEntity.Files: return GetAccessibleFiles(fileSystem, path, pattern, projectDirectory, stripProjectDirectory);
                 case FileSystemEntity.Directories: return GetAccessibleDirectories(fileSystem, path, pattern);
-                case FileSystemEntity.FilesAndDirectories: return GetAccessibleFilesAndDirectories(fileSystem,path, pattern);
+                case FileSystemEntity.FilesAndDirectories: return GetAccessibleFilesAndDirectories(fileSystem, path, pattern);
                 default:
                     ErrorUtilities.VerifyThrow(false, "Unexpected filesystem entity type.");
                     break;
@@ -1664,12 +1664,18 @@ namespace Microsoft.Build.Shared
             internal string wildcardDirectoryPart = string.Empty;
         }
 
+        // TODO: Remove this overload and fix callers to pass ReadOnlySpan<char>.
+        internal static bool IsMatch(string input, string pattern)
+        {
+            return IsMatch(input.AsSpan(), pattern);
+        }
+
         /// <summary>
         /// A wildcard (* and ?) matching algorithm that tests whether the input string matches against the pattern.
         /// </summary>
         /// <param name="input">String which is matched against the pattern.</param>
         /// <param name="pattern">Pattern against which string is matched.</param>
-        internal static bool IsMatch(string input, string pattern)
+        internal static bool IsMatch(ReadOnlySpan<char> input, string pattern)
         {
             if (input == null)
             {
@@ -1705,9 +1711,12 @@ namespace Microsoft.Build.Shared
             // to using the string indexer. The iIndex and pIndex parameters are only used
             // when we have to compare two non ASCII characters. Using just string.Compare for
             // character comparison, would reduce the speed by approx. 5 times.
-            bool CompareIgnoreCase(char inputChar, char patternChar, int iIndex, int pIndex)
+            bool CompareIgnoreCase(ref ReadOnlySpan<char> input, int iIndex, int pIndex)
 #endif
             {
+                char inputChar = input[iIndex];
+                char patternChar = pattern[pIndex];
+
                 // We will mostly be comparing ASCII characters, check English letters first.
                 char inputCharLower = (char)(inputChar | 0x20);
                 if (inputCharLower >= 'a' && inputCharLower <= 'z')
@@ -1721,7 +1730,7 @@ namespace Microsoft.Build.Shared
                     // and a non ASCII character cannot have its lowercase/uppercase inside the ASCII table
                     return inputChar == patternChar;
                 }
-                return string.Compare(input, iIndex, pattern, pIndex, 1, StringComparison.OrdinalIgnoreCase) == 0;
+                return MemoryExtensions.Equals(input.Slice(iIndex, 1), pattern.AsSpan(pIndex, 1), StringComparison.OrdinalIgnoreCase);
             }
 #if MONO
             ; // The end of the CompareIgnoreCase anonymous function
@@ -1761,7 +1770,7 @@ namespace Microsoft.Build.Shared
                                     break;
                                 }
                                 // If the tail doesn't match, we can safely return e.g. ("aaa", "*b")
-                                if (!CompareIgnoreCase(input[inputTailIndex], pattern[patternTailIndex], patternTailIndex, inputTailIndex) &&
+                                if (!CompareIgnoreCase(ref input, inputTailIndex, patternTailIndex) &&
                                     pattern[patternTailIndex] != '?')
                                 {
                                     return false;
@@ -1781,7 +1790,7 @@ namespace Microsoft.Build.Shared
                         // The ? wildcard cannot be skipped as we will have a wrong result for e.g. ("aab" "*?b")
                         if (pattern[patternIndex] != '?')
                         {
-                            while (!CompareIgnoreCase(input[inputIndex], pattern[patternIndex], inputIndex, patternIndex))
+                            while (!CompareIgnoreCase(ref input, inputIndex, patternIndex))
                             {
                                 // Return if there is no character that match e.g. ("aa", "*b")
                                 if (++inputIndex >= inputLength)
@@ -1796,7 +1805,7 @@ namespace Microsoft.Build.Shared
                     }
 
                     // If we have a match, step to the next character
-                    if (CompareIgnoreCase(input[inputIndex], pattern[patternIndex], inputIndex, patternIndex) ||
+                    if (CompareIgnoreCase(ref input, inputIndex, patternIndex) ||
                         pattern[patternIndex] == '?')
                     {
                         patternIndex++;
@@ -2557,14 +2566,14 @@ namespace Microsoft.Build.Shared
         private static bool DirectoryEndsWithPattern(string directoryPath, string pattern)
         {
             int index = directoryPath.LastIndexOfAny(FileUtilities.Slashes);
-            return (index != -1 && IsMatch(directoryPath.Substring(index + 1), pattern));
+            return (index != -1 && IsMatch(directoryPath.AsSpan(index + 1), pattern));
         }
 
         /// <summary>
         /// Returns true if <paramref name="pattern"/> is <code>*</code> or <code>*.*</code>.
         /// </summary>
         /// <param name="pattern">The filename pattern to check.</param>
-        private static bool IsAllFilesWildcard(string pattern) => pattern?.Length switch
+        internal static bool IsAllFilesWildcard(string pattern) => pattern?.Length switch
         {
             1 => pattern[0] == '*',
             3 => pattern[0] == '*' && pattern[1] == '.' && pattern[2] == '*',

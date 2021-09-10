@@ -2019,6 +2019,65 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        internal sealed class LoggingDirectoryCacheFactory : IDirectoryCacheFactory
+        {
+            public List<LoggingDirectoryCache> DirectoryCaches { get; } = new();
+
+            public IDirectoryCache GetDirectoryCacheForEvaluation(int evaluationId)
+            {
+                var directoryCache = new LoggingDirectoryCache(evaluationId);
+                DirectoryCaches.Add(directoryCache);
+                return directoryCache;
+            }
+        }
+
+        internal sealed class LoggingDirectoryCache : IDirectoryCache
+        {
+            internal int EvaluationId { get; }
+
+            public ConcurrentDictionary<string, int> ExistenceChecks { get; } = new();
+            public ConcurrentDictionary<string, int> Enumerations { get; } = new();
+
+            public LoggingDirectoryCache(int evaluationId)
+            {
+                EvaluationId = evaluationId;
+            }
+
+            public bool DirectoryExists(string path)
+            {
+                IncrementExistenceChecks(path);
+                return Directory.Exists(path);
+            }
+
+            public bool FileExists(string path)
+            {
+                IncrementExistenceChecks(path);
+                return File.Exists(path);
+            }
+
+            public IEnumerable<TResult> EnumerateDirectories<TResult>(string path, string pattern, FindPredicate predicate, FindTransform<TResult> transform)
+            {
+                IncrementEnumerations(path);
+                return Enumerable.Empty<TResult>();
+            }
+
+            public IEnumerable<TResult> EnumerateFiles<TResult>(string path, string pattern, FindPredicate predicate, FindTransform<TResult> transform)
+            {
+                IncrementEnumerations(path);
+                return Enumerable.Empty<TResult>();
+            }
+
+            private void IncrementExistenceChecks(string path)
+            {
+                ExistenceChecks.AddOrUpdate(path, p => 1, (p, c) => c + 1);
+            }
+
+            private void IncrementEnumerations(string path)
+            {
+                Enumerations.AddOrUpdate(path, p => 1, (p, c) => c + 1);
+            }
+        }
+
         internal class LoggingFileSystem : MSBuildFileSystemBase
         {
             private int _fileSystemCalls;

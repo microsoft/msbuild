@@ -32,6 +32,7 @@ using Microsoft.Build.Utilities;
 using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>.ItemExpressionFragment;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
+using Microsoft.Build.FileSystem;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -67,6 +68,11 @@ namespace Microsoft.Build.Evaluation
         internal bool IsLinked => implementationInternal.IsLinked;
         internal ProjectLink Link => implementation;
         object ILinkableObject.Link => IsLinked ? Link : null;
+
+        /// <summary>
+        /// Host-provided factory for <see cref="IDirectoryCache"/> interfaces to be used during evaluation.
+        /// </summary>
+        private readonly IDirectoryCacheFactory _directoryCacheFactory;
 
         /// <summary>
         /// Default project template options (include all features).
@@ -250,11 +256,12 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The <see cref="ProjectCollection"/> the project is added to.</param>
         /// <param name="loadSettings">The <see cref="ProjectLoadSettings"/> to use for evaluation.</param>
         public Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
-            : this(xml, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null)
+            : this(xml, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null, null)
         {
         }
 
-        private Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
+        private Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings,
+            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
@@ -264,6 +271,7 @@ namespace Microsoft.Build.Evaluation
             implementationInternal = (IProjectLinkInternal)defaultImplementation;
             implementation = defaultImplementation;
 
+            _directoryCacheFactory = directoryCacheFactory;
             defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
         }
 
@@ -342,21 +350,23 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
         /// <param name="loadSettings">The load settings for this project.</param>
         public Project(XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
-            : this(xmlReader, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null)
+            : this(xmlReader, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null, null)
         {
         }
 
-        private Project(XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
+        private Project(XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings,
+            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xmlReader, nameof(xmlReader));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
             ProjectCollection = projectCollection;
-            var defailtImplementation = new ProjectImpl(this, xmlReader, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
-            implementationInternal = (IProjectLinkInternal)defailtImplementation;
-            implementation = defailtImplementation;
+            var defaultImplementation = new ProjectImpl(this, xmlReader, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            implementationInternal = (IProjectLinkInternal)defaultImplementation;
+            implementation = defaultImplementation;
 
-            defailtImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            _directoryCacheFactory = directoryCacheFactory;
+            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
         }
 
         /// <summary>
@@ -436,26 +446,29 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
         /// <param name="loadSettings">The load settings for this project.</param>
         public Project(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
-            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null)
+            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null, null)
         {
         }
 
-        private Project(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
+        private Project(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings,
+            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
 
             ProjectCollection = projectCollection;
-            var defailtImplementation = new ProjectImpl(this, projectFile, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
-            implementationInternal = (IProjectLinkInternal)defailtImplementation;
-            implementation = defailtImplementation;
+            var defaultImplementation = new ProjectImpl(this, projectFile, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            implementationInternal = (IProjectLinkInternal)defaultImplementation;
+            implementation = defaultImplementation;
+
+            _directoryCacheFactory = directoryCacheFactory;
 
             // Note: not sure why only this ctor flavor do TryUnloadProject
             // seems the XmlReader based one should also clean the same way.
             try
             {
-                defailtImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+                defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
             }
             catch (Exception ex)
             {
@@ -488,7 +501,8 @@ namespace Microsoft.Build.Evaluation
                 options.SubToolsetVersion,
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
-                options.EvaluationContext);
+                options.EvaluationContext,
+                options.DirectoryCacheFactory);
         }
 
         /// <summary>
@@ -505,7 +519,8 @@ namespace Microsoft.Build.Evaluation
                 options.SubToolsetVersion,
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
-                options.EvaluationContext);
+                options.EvaluationContext,
+                options.DirectoryCacheFactory);
         }
 
         /// <summary>
@@ -522,7 +537,8 @@ namespace Microsoft.Build.Evaluation
                 options.SubToolsetVersion,
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
-                options.EvaluationContext);
+                options.EvaluationContext,
+                options.DirectoryCacheFactory);
         }
 
         /// <summary>
@@ -1765,6 +1781,17 @@ namespace Microsoft.Build.Evaluation
         {
             ErrorUtilities.VerifyThrowInternalNull(otherXml, nameof(otherXml));
             ErrorUtilities.VerifyThrowInvalidOperation(ReferenceEquals(Xml, otherXml), "OM_CannotModifyEvaluatedObjectInImportedFile", otherXml.Location.File);
+        }
+
+        /// <summary>
+        /// Returns <see cref="IDirectoryCache"/> as provided by the <see cref="IDirectoryCacheFactory"/> passed when creating the
+        /// project, specific for a given evaluation ID.
+        /// </summary>
+        /// <param name="evaluationId">The evaluation ID for which the cache is requested.</param>
+        /// <returns></returns>
+        internal IDirectoryCache GetDirectoryCacheForEvaluation(int evaluationId)
+        {
+            return _directoryCacheFactory?.GetDirectoryCacheForEvaluation(evaluationId);
         }
 
         /// <summary>
@@ -3623,6 +3650,7 @@ namespace Microsoft.Build.Evaluation
 
                 Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(
                     _data,
+                    Owner,
                     Xml,
                     loadSettings,
                     ProjectCollection.MaxNodeCount,
@@ -4164,7 +4192,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Prepares the data object for evaluation.
             /// </summary>
-            public void InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem)
+            public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext)
             {
                 DefaultTargets = null;
                 Properties = new PropertyDictionary<ProjectProperty>();
@@ -4172,7 +4200,7 @@ namespace Microsoft.Build.Evaluation
                 Items = new ItemDictionary<ProjectItem>();
                 ItemsIgnoringCondition = new ItemDictionary<ProjectItem>();
                 ItemsByEvaluatedIncludeCache = new MultiDictionary<string, ProjectItem>(StringComparer.OrdinalIgnoreCase);
-                Expander = new Expander<ProjectProperty, ProjectItem>(Properties, Items, fileSystem);
+                Expander = new Expander<ProjectProperty, ProjectItem>(Properties, Items, evaluationContext);
                 ItemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinition>(MSBuildNameIgnoreCaseComparer.Default);
                 Targets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);
                 ImportClosure = new List<ResolvedImport>();

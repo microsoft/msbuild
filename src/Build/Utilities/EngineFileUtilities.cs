@@ -12,10 +12,8 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Internal
 {
-    internal class EngineFileUtilities
+    internal static class EngineFileUtilities
     {
-        private readonly FileMatcher _fileMatcher;
-
         // Regexes for wildcard filespecs that should not get expanded
         // By default all wildcards are expanded.
         private static List<Regex> s_lazyWildCardExpansionRegexes;
@@ -34,13 +32,6 @@ namespace Microsoft.Build.Internal
             s_lazyWildCardExpansionRegexes = PopulateRegexFromEnvironment();
         }
 
-        public static EngineFileUtilities Default = new EngineFileUtilities(FileMatcher.Default);
-
-        public EngineFileUtilities(FileMatcher fileMatcher)
-        {
-            _fileMatcher = fileMatcher;
-        }
-
         /// <summary>
         /// Used for the purposes of evaluating an item specification. Given a filespec that may include wildcard characters * and
         /// ?, we translate it into an actual list of files. If the input filespec doesn't contain any wildcard characters, and it
@@ -54,14 +45,14 @@ namespace Microsoft.Build.Internal
         /// <param name="directoryEscaped">The directory to evaluate, escaped.</param>
         /// <param name="filespecEscaped">The filespec to evaluate, escaped.</param>
         /// <returns>Array of file paths, unescaped.</returns>
-        internal string[] GetFileListUnescaped
+        internal static string[] GetFileListUnescaped
             (
             string directoryEscaped,
             string filespecEscaped
             )
 
         {
-            return GetFileList(directoryEscaped, filespecEscaped, returnEscaped: false, forceEvaluateWildCards: false);
+            return GetFileList(directoryEscaped, filespecEscaped, returnEscaped: false, forceEvaluateWildCards: false, excludeSpecsEscaped: null, fileMatcher: FileMatcher.Default);
         }
 
         /// <summary>
@@ -78,16 +69,18 @@ namespace Microsoft.Build.Internal
         /// <param name="filespecEscaped">The filespec to evaluate, escaped.</param>
         /// <param name="excludeSpecsEscaped">Filespecs to exclude, escaped.</param>
         /// <param name="forceEvaluate">Whether to force file glob expansion when eager expansion is turned off</param>
+        /// <param name="fileMatcher"></param>
         /// <returns>Array of file paths, escaped.</returns>
-        internal string[] GetFileListEscaped
+        internal static string[] GetFileListEscaped
             (
             string directoryEscaped,
             string filespecEscaped,
             IEnumerable<string> excludeSpecsEscaped = null,
-            bool forceEvaluate = false
+            bool forceEvaluate = false,
+            FileMatcher fileMatcher = null
             )
         {
-            return GetFileList(directoryEscaped, filespecEscaped, returnEscaped: true, forceEvaluate, excludeSpecsEscaped);
+            return GetFileList(directoryEscaped, filespecEscaped, returnEscaped: true, forceEvaluate, excludeSpecsEscaped, fileMatcher ?? FileMatcher.Default);
         }
 
         internal static bool FilespecHasWildcards(string filespecEscaped)
@@ -119,14 +112,16 @@ namespace Microsoft.Build.Internal
         /// <param name="returnEscaped"><code>true</code> to return escaped specs.</param>
         /// <param name="forceEvaluateWildCards">Whether to force file glob expansion when eager expansion is turned off</param>
         /// <param name="excludeSpecsEscaped">The exclude specification, escaped.</param>
+        /// <param name="fileMatcher"></param>
         /// <returns>Array of file paths.</returns>
-        private string[] GetFileList
+        private static string[] GetFileList
             (
             string directoryEscaped,
             string filespecEscaped,
             bool returnEscaped,
             bool forceEvaluateWildCards,
-            IEnumerable<string> excludeSpecsEscaped = null
+            IEnumerable<string> excludeSpecsEscaped,
+            FileMatcher fileMatcher
             )
         {
             ErrorUtilities.VerifyThrowInternalLength(filespecEscaped, nameof(filespecEscaped));
@@ -156,7 +151,7 @@ namespace Microsoft.Build.Internal
                 // as a relative path, we will get back a bunch of relative paths.
                 // If the filespec started out as an absolute path, we will get
                 // back a bunch of absolute paths.
-                fileList = _fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+                fileList = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
 
                 ErrorUtilities.VerifyThrow(fileList != null, "We must have a list of files here, even if it's empty.");
 
