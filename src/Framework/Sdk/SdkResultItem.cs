@@ -34,13 +34,18 @@ namespace Microsoft.Build.Framework
         {
             if (obj is SdkResultItem item &&
                    ItemSpec == item.ItemSpec &&
-                   Metadata?.Count == item.Metadata?.Count)
+                   Metadata.Count == item.Metadata?.Count)
             {
-                if (Metadata != null)
+                foreach (var kvp in Metadata)
                 {
-                    foreach (var kvp in Metadata)
+                    var itemValue = "";
+                    if (!item.Metadata.TryGetValue(kvp.Key, out itemValue))
                     {
-                        if (item.Metadata[kvp.Key] != kvp.Value)
+                        return false;
+                    }
+                    else
+                    {
+                        if (kvp.Value != itemValue)
                         {
                             return false;
                         }
