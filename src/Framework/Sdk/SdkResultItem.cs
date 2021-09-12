@@ -62,10 +62,13 @@ namespace Microsoft.Build.Framework
             int hashCode = -849885975;
             hashCode = hashCode ^ ItemSpec.GetHashCode();
 
-            foreach (var kvp in Metadata)
+            if (Metadata != null && Metadata.Count > 0)
             {
-                hashCode = hashCode ^ kvp.Key.GetHashCode();
-                hashCode = hashCode ^ kvp.Value.GetHashCode();
+                foreach (var kvp in Metadata)
+                {
+                    hashCode = hashCode ^ kvp.Key.GetHashCode();
+                    hashCode = hashCode ^ kvp.Value.GetHashCode();
+                }
             }
 
             return hashCode;
