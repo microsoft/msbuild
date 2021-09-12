@@ -60,15 +60,12 @@ namespace Microsoft.Build.Framework
         public override int GetHashCode()
         {
             int hashCode = -849885975;
-            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(ItemSpec);
+            hashCode = hashCode ^ ItemSpec.GetHashCode();
 
-            if (Metadata != null)
+            foreach (var kvp in Metadata)
             {
-                foreach (var kvp in Metadata)
-                {
-                    hashCode = (hashCode * -1521134295) + kvp.Key.GetHashCode();
-                    hashCode = (hashCode * -1521134295) + kvp.Value.GetHashCode();
-                }
+                hashCode = hashCode ^ kvp.Key.GetHashCode();
+                hashCode = hashCode ^ kvp.Value.GetHashCode();
             }
 
             return hashCode;
