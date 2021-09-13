@@ -38,8 +38,7 @@ namespace Microsoft.Build.Framework
             {
                 foreach (var kvp in Metadata)
                 {
-                    var itemValue = "";
-                    if (!item.Metadata.TryGetValue(kvp.Key, out itemValue))
+                    if (!item.Metadata.TryGetValue(kvp.Key, out var itemValue))
                     {
                         return false;
                     }
