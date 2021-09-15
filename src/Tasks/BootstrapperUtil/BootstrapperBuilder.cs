@@ -1902,7 +1902,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     XmlElement filesNode = applicationElement.OwnerDocument.CreateElement("Files");
                     XmlElement fileNode = filesNode.OwnerDocument.CreateElement("File");
                     AddAttribute(fileNode, "Name", settings.ApplicationFile);
-                    AddAttribute(fileNode, URLNAME_ATTRIBUTE, Uri.EscapeUriString(settings.ApplicationFile));
+                    AddAttribute(fileNode, URLNAME_ATTRIBUTE, Uri.EscapeDataString(settings.ApplicationFile));
                     filesNode.AppendChild(fileNode);
                     applicationElement.AppendChild(filesNode);
                 }

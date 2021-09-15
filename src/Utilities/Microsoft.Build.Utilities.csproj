@@ -25,7 +25,7 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
   </ItemGroup>
 

@@ -900,6 +900,7 @@ namespace Microsoft.Build.Tasks
         public string TargetFrameworkIdentifier { get { throw null; } set { } }
         public string TargetFrameworkVersion { get { throw null; } set { } }
         public string TimestampUrl { get { throw null; } set { } }
+        [System.Runtime.Versioning.SupportedOSPlatformAttribute("windows")]
         public override bool Execute() { throw null; }
     }
     public abstract partial class TaskExtension : Microsoft.Build.Utilities.Task
@@ -1997,10 +1998,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [System.Runtime.InteropServices.ComVisibleAttribute(false)]
     public static partial class SecurityUtilities
     {
+        [System.Runtime.Versioning.SupportedOSPlatformAttribute("windows")]
         public static void SignFile(System.Security.Cryptography.X509Certificates.X509Certificate2 cert, System.Uri timestampUrl, string path) { }
+        [System.Runtime.Versioning.SupportedOSPlatformAttribute("windows")]
         public static void SignFile(string certPath, System.Security.SecureString certPassword, System.Uri timestampUrl, string path) { }
+        [System.Runtime.Versioning.SupportedOSPlatformAttribute("windows")]
         public static void SignFile(string certThumbprint, System.Uri timestampUrl, string path) { }
+        [System.Runtime.Versioning.SupportedOSPlatformAttribute("windows")]
         public static void SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion) { }
+        [System.Runtime.Versioning.SupportedOSPlatformAttribute("windows")]
         public static void SignFile(string certThumbprint, System.Uri timestampUrl, string path, string targetFrameworkVersion, string targetFrameworkIdentifier) { }
     }
     [System.Runtime.InteropServices.ComVisibleAttribute(false)]

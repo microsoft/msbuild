@@ -1,28 +1,33 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Deployment.Internal.CodeSigning;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Permissions;
-using System.Security.Policy;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
+
+#if RUNTIME_TYPE_NETCORE
+using System.Runtime.Versioning;
+#else
+using Microsoft.Build.Framework;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Security.Permissions;
+using System.Security.Policy;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
+#endif
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -478,6 +483,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="certThumbprint">Hexadecimal string that contains the SHA-1 hash of the certificate.</param>
         /// <param name="timestampUrl">URL that specifies an address of a time stamping server.</param>
         /// <param name="path">Path of the file to sign with the certificate.</param>
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         public static void SignFile(string certThumbprint, Uri timestampUrl, string path)
         {
             SignFile(certThumbprint, timestampUrl, path, null, null);
@@ -490,6 +498,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="timestampUrl">URL that specifies an address of a time stamping server.</param>
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         public static void SignFile(string certThumbprint,
                                     Uri timestampUrl,
                                     string path,
@@ -506,6 +517,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
         /// <param name="targetFrameworkIdentifier">.NET Framework identifier for the target.</param>
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         public static void SignFile(string certThumbprint,
                                     Uri timestampUrl,
                                     string path,
@@ -563,6 +577,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="timestampUrl">URL that specifies an address of a time stamping server.</param>
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <remarks>This function is only for signing a manifest, not a PE file.</remarks>
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         public static void SignFile(string certPath, SecureString certPassword, Uri timestampUrl, string path)
         {
             X509Certificate2 cert = new X509Certificate2(certPath, certPassword, X509KeyStorageFlags.PersistKeySet);
@@ -583,6 +600,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <remarks>This function can only sign a PE file if the X509Certificate2 parameter represents a certificate in the
         /// current user's personal certificate store.</remarks>
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         public static void SignFile(X509Certificate2 cert, Uri timestampUrl, string path)
         {
             // setup resources
@@ -590,6 +610,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             SignFileInternal(cert, timestampUrl, path, true, resources);
         }
 
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         private static void SignFileInternal(X509Certificate2 cert, Uri timestampUrl, string path, bool targetFrameworkSupportsSha256, System.Resources.ResourceManager resources)
         {
             if (cert == null)

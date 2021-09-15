@@ -96,7 +96,7 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         private readonly ReadOnlySpan<char> _inlineSpan;
 
-#if NETSTANDARD
+#if RUNTIME_TYPE_NETCORE
         /// <summary>
         /// .NET Core does not keep a reference to the containing object in <see cref="ReadOnlySpan{char}"/>. In particular,
         /// it cannot recover the string if the span represents one. We have to hold the reference separately to be able to
@@ -122,7 +122,7 @@ namespace Microsoft.NET.StringTools
             _inlineSpan = span;
             _spans = null;
             Length = span.Length;
-#if NETSTANDARD
+#if RUNTIME_TYPE_NETCORE
             _inlineSpanString = null;
 #endif
         }
@@ -141,7 +141,7 @@ namespace Microsoft.NET.StringTools
             _inlineSpan = str.AsSpan();
             _spans = null;
             Length = str.Length;
-#if NETSTANDARD
+#if RUNTIME_TYPE_NETCORE
             _inlineSpanString = str;
 #endif
         }
@@ -154,7 +154,7 @@ namespace Microsoft.NET.StringTools
             _inlineSpan = default(ReadOnlySpan<char>);
             _spans = stringBuilder.Spans;
             Length = stringBuilder.Length;
-#if NETSTANDARD
+#if RUNTIME_TYPE_NETCORE
             _inlineSpanString = null;
 #endif
         }
@@ -220,7 +220,7 @@ namespace Microsoft.NET.StringTools
             // Special case: if we hold just one string, we can directly return it.
             if (_inlineSpan.Length == Length)
             {
-#if NETSTANDARD
+#if RUNTIME_TYPE_NETCORE
                 if (_inlineSpanString != null)
                 {
                     return _inlineSpanString;

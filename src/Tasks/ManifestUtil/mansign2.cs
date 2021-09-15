@@ -13,6 +13,10 @@ using System.Text;
 using System.Xml;
 using System.Runtime.InteropServices;
 
+#if RUNTIME_TYPE_NETCORE
+using System.Runtime.Versioning;
+#endif
+
 using _FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
 namespace System.Deployment.Internal.CodeSigning
@@ -328,12 +332,17 @@ namespace System.Deployment.Internal.CodeSigning
             _manifestDom = manifestDom ?? throw new ArgumentNullException(nameof(manifestDom));
             _useSha256 = useSha256;
         }
-
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         internal void Sign(CmiManifestSigner2 signer)
         {
             Sign(signer, null);
         }
 
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         internal void Sign(CmiManifestSigner2 signer, string timeStampUrl)
         {
             // Reset signer infos.
@@ -466,6 +475,9 @@ namespace System.Deployment.Internal.CodeSigning
         /// <param name="useSha256">Whether to use sha256</param>
         /// <returns></returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Cryptographic.Standard", "CA5358:RSAProviderNeeds2048bitKey", Justification = "SHA1 is retained for compatibility reasons as an option in VisualStudio signing page and consequently in the trust manager, default is SHA2.")]
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         internal static RSACryptoServiceProvider GetFixedRSACryptoServiceProvider(RSACryptoServiceProvider oldCsp, bool useSha256)
         {
             if (!useSha256)
@@ -494,6 +506,9 @@ namespace System.Deployment.Internal.CodeSigning
             return fixedRsa;
         }
 
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         private static void ReplacePublicKeyToken(XmlDocument manifestDom, AsymmetricAlgorithm snKey, bool useSha256)
         {
             // Make sure we can find the publicKeyToken attribute.
@@ -690,6 +705,9 @@ namespace System.Deployment.Internal.CodeSigning
             return licenseDom;
         }
 
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         private static void AuthenticodeSignLicenseDom(XmlDocument licenseDom, CmiManifestSigner2 signer, string timeStampUrl, bool useSha256)
         {
             // Make sure it is RSA, as this is the only one Fusion will support.
@@ -901,6 +919,9 @@ namespace System.Deployment.Internal.CodeSigning
             signatureNode.AppendChild(dsObject);
         }
 
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         private static void StrongNameSignManifestDom(XmlDocument manifestDom, XmlDocument licenseDom, CmiManifestSigner2 signer, bool useSha256)
         {
             RSA snKey = signer.StrongNameKey as RSA;
@@ -1230,6 +1251,9 @@ namespace System.Deployment.Internal.CodeSigning
             _error = errorCode;
         }
 
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         internal CmiAuthenticodeSignerInfo(Win32.AXL_SIGNER_INFO signerInfo,
                                             Win32.AXL_TIMESTAMPER_INFO timestamperInfo)
         {
@@ -1348,6 +1372,9 @@ namespace System.Deployment.Internal.CodeSigning
 
         private CmiAuthenticodeTimestamperInfo() { }
 
+#if RUNTIME_TYPE_NETCORE
+        [SupportedOSPlatform("windows")]
+#endif
         internal CmiAuthenticodeTimestamperInfo(Win32.AXL_TIMESTAMPER_INFO timestamperInfo)
         {
             _error = (int)timestamperInfo.dwError;

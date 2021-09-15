@@ -26,8 +26,8 @@
     <Platforms>AnyCPU;x64</Platforms>
 
     <!-- Defaults for target frameworks and architecture -->
-    <LibraryTargetFrameworks>$(FullFrameworkTFM);netstandard2.0</LibraryTargetFrameworks>
-    <LibraryTargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">netstandard2.0</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks>$(FullFrameworkTFM);net6.0</LibraryTargetFrameworks>
+    <LibraryTargetFrameworks Condition="'$(DotNetBuildFromSource)' == 'true'">net6.0</LibraryTargetFrameworks>
     <LibraryTargetFrameworks Condition="'$(MonoBuild)'=='true'">$(FullFrameworkTFM)</LibraryTargetFrameworks>
     <PlatformTarget>AnyCPU</PlatformTarget>
 

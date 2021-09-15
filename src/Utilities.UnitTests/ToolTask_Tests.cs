@@ -694,7 +694,15 @@ namespace Microsoft.Build.UnitTests
 
             string cmdPath = ToolTask.FindOnPath(shellName);
 
-            cmdPath.ShouldBeOneOf(expectedCmdPath);
+            if (NativeMethodsShared.IsWindows)
+            {
+                cmdPath.ShouldBe(expectedCmdPath[0], StringCompareShould.IgnoreCase);
+            }
+            else
+            {
+                cmdPath.ShouldBeOneOf(expectedCmdPath);
+            }
+
         }
 
         /// <summary>

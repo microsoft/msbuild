@@ -15,7 +15,7 @@
     <PackageReference Update="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsVersion)" />
     <PackageReference Update="Microsoft.Net.Compilers.Toolset" Version="$(MicrosoftNetCompilersToolsetVersion)" />
     <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" />
-    <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.16.30" />
+    <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="2.3.2262-g94fae01e" />
     <PackageReference Update="Microsoft.Win32.Registry" Version="4.3.0" />
     <PackageReference Update="NuGet.Build.Tasks" Version="$(NuGetBuildTasksVersion)" />
     <PackageReference Update="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" />

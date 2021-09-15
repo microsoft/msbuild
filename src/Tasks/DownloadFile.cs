@@ -148,7 +148,11 @@ namespace Microsoft.Build.Tasks
                     {
                         // HttpRequestException does not have the status code so its wrapped and thrown here so that later on we can determine
                         // if a retry is possible based on the status code
+#if RUNTIME_TYPE_NETCORE
+                        throw new HttpRequestException(e.Message, e.InnerException, response.StatusCode);
+#else
                         throw new CustomHttpRequestException(e.Message, e.InnerException, response.StatusCode);
+#endif
                     }
 
                     if (!TryGetFileName(response, out string filename))
@@ -218,17 +222,30 @@ namespace Microsoft.Build.Tasks
             }
 
             // Some HttpRequestException have an inner exception that has the real error
-            if (actualException is HttpRequestException httpRequestException && httpRequestException.InnerException != null)
+            if (actualException is HttpRequestException httpRequestException)
             {
-                actualException = httpRequestException.InnerException;
-
-                // An IOException inside of a HttpRequestException means that something went wrong while downloading
-                if (actualException is IOException)
+                if (httpRequestException.InnerException != null)
                 {
-                    return true;
+                    actualException = httpRequestException.InnerException;
+
+                    // An IOException inside of a HttpRequestException means that something went wrong while downloading
+                    if (actualException is IOException)
+                    {
+                        return true;
+                    }
                 }
+
+#if RUNTIME_TYPE_NETCORE
+                switch (httpRequestException.StatusCode)
+                {
+                    case HttpStatusCode.InternalServerError:
+                    case HttpStatusCode.RequestTimeout:
+                        return true;
+                }
+#endif
             }
 
+#if !RUNTIME_TYPE_NETCORE
             if (actualException is CustomHttpRequestException customHttpRequestException)
             {
                 // A wrapped CustomHttpRequestException has the status code from the error
@@ -239,6 +256,7 @@ namespace Microsoft.Build.Tasks
                         return true;
                 }
             }
+#endif
 
             if (actualException is WebException webException)
             {
@@ -285,6 +303,7 @@ namespace Microsoft.Build.Tasks
             return !String.IsNullOrWhiteSpace(filename);
         }
 
+#if !RUNTIME_TYPE_NETCORE
         /// <summary>
         /// Represents a wrapper around the <see cref="HttpRequestException"/> that also contains the <see cref="HttpStatusCode"/>.
         /// </summary>
@@ -297,9 +316,12 @@ namespace Microsoft.Build.Tasks
             }
 
             public HttpStatusCode StatusCode { get; }
-        }
 
-        private bool ShouldSkip(HttpResponseMessage response, FileInfo destinationFile)
+
+        }
+#endif
+
+private bool ShouldSkip(HttpResponseMessage response, FileInfo destinationFile)
         {
             return SkipUnchangedFiles
                    && destinationFile.Exists

@@ -231,6 +231,14 @@
   <ItemGroup>
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
+  <!-- Because projects are no longer targeting netstandard2.0,
+       manually download this library for RoslynCodeTaskFactory.
+       See target AddRefAssemblies below. -->
+  <ItemGroup>
+    <PackageDownload Include="netstandard.library">
+      <Version>[2.0.3]</Version>
+    </PackageDownload>
+  </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <!-- File for Assemblies we depend on -->
     <Reference Include="System" />

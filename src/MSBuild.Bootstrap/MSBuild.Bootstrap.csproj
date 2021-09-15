@@ -20,7 +20,7 @@
   <ItemGroup>
     <!-- This file is needed so the dotnet CLI knows how to map preview SDK versions to tfms (because tfms do not have preview information on them) -->
     <!-- This is because according to semver, 2.1.0-preview is not >= 2.1.0 -->
-    <Content Include="$(RepoRoot).dotnet\sdk\$(DotNetCliVersion)\Microsoft.NETCoreSdk.BundledVersions.props" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(NETCoreSdkBundledVersionsProps)" CopyToOutputDirectory="PreserveNewest" />
 
     <!-- Include NuGet build tasks -->
     <PackageReference Include="NuGet.Build.Tasks" />
@@ -36,7 +36,7 @@
 
     <Content Include="$(MSBuildExtensionsPath)\**\*" LinkBase="Extensions" CopyToOutputDirectory="PreserveNewest" />
 
-    <Content Include="$(RepoRoot).dotnet\sdk\$(DotNetCliVersion)\RuntimeIdentifierGraph.json" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="$(RuntimeIdentifierGraphPath)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!-- Use deps file from this project with additional dependencies listed instead of the one generated in the MSBuild project -->
