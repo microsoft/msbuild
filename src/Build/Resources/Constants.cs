@@ -300,9 +300,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.Environment::GetLogicalDrives", environmentType);
 
 // All the following properties only have getters
-#if FEATURE_GET_COMMANDLINE
                         availableStaticMethods.TryAdd("System.Environment::CommandLine", environmentType);
-#endif
 #if FEATURE_64BIT_ENVIRONMENT_QUERY
                         availableStaticMethods.TryAdd("System.Environment::Is64BitOperatingSystem", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::Is64BitProcess", environmentType);

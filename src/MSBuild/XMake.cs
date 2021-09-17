@@ -208,11 +208,7 @@ namespace Microsoft.Build.CommandLine
         /// </remarks>
         /// <returns>0 on success, 1 on failure</returns>
         [MTAThread]
-        public static int Main(
-#if !FEATURE_GET_COMMANDLINE
-            string [] args
-#endif
-            )
+        public static int Main()
         {
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
@@ -222,13 +218,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             // return 0 on success, non-zero on failure
-            int exitCode = ((s_initialized && Execute(
-#if FEATURE_GET_COMMANDLINE
-                Environment.CommandLine
-#else
-                ConstructArrayArg(args)
-#endif
-            ) == ExitType.Success) ? 0 : 1);
+            int exitCode = ((s_initialized && Execute(Environment.CommandLine) == ExitType.Success) ? 0 : 1);
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
             {
@@ -237,23 +227,6 @@ namespace Microsoft.Build.CommandLine
 
             return exitCode;
         }
-
-#if !FEATURE_GET_COMMANDLINE
-        /// <summary>
-        /// Insert the command executable path as the first element of the args array.
-        /// </summary>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        private static string[] ConstructArrayArg(string[] args)
-        {
-            string[] newArgArray = new string[args.Length + 1];
-
-            newArgArray[0] = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-            Array.Copy(args, 0, newArgArray, 1, args.Length);
-
-            return newArgArray;
-        }
-#endif // !FEATURE_GET_COMMANDLINE
 
         /// <summary>
         /// Append output file with elapsedTime
@@ -476,13 +449,7 @@ namespace Microsoft.Build.CommandLine
         /// is ignored.</param>
         /// <returns>A value of type ExitType that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
-        public static ExitType Execute(
-#if FEATURE_GET_COMMANDLINE
-            string commandLine
-#else
-            string [] commandLine
-#endif
-            )
+        public static ExitType Execute(string commandLine)
         {
             // Indicate to the engine that it can toss extraneous file content
             // when it loads microsoft.*.targets. We can't do this in the general case,
@@ -505,9 +472,7 @@ namespace Microsoft.Build.CommandLine
                     break;
             }
 
-#if FEATURE_GET_COMMANDLINE
             ErrorUtilities.VerifyThrowArgumentLength(commandLine, nameof(commandLine));
-#endif
 
 #if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
             AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
@@ -518,13 +483,7 @@ namespace Microsoft.Build.CommandLine
             ConsoleCancelEventHandler cancelHandler = Console_CancelKeyPress;
             try
             {
-#if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStart(commandLine);
-#else
-                if (MSBuildEventSource.Log.IsEnabled()) {
-                    MSBuildEventSource.Log.MSBuildExeStart(string.Join(" ", commandLine));
-                }
-#endif
                 Console.CancelKeyPress += cancelHandler;
 
                 // check the operating system the code is running on
@@ -839,13 +798,7 @@ namespace Microsoft.Build.CommandLine
                 // Wait for any pending cancel, so that we get any remaining messages
                 s_cancelComplete.WaitOne();
 
-#if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStop(commandLine);
-#else
-                if (MSBuildEventSource.Log.IsEnabled()) {
-                    MSBuildEventSource.Log.MSBuildExeStop(string.Join(" ", commandLine));
-                }
-#endif
             }
             /**********************************************************************************************************************
              * WARNING: Do NOT add any more catch blocks above!
@@ -1611,24 +1564,13 @@ namespace Microsoft.Build.CommandLine
         /// <param name="switchesFromAutoResponseFile"></param>
         /// <param name="switchesNotFromAutoResponseFile"></param>
         /// <returns>Combined bag of switches.</returns>
-        private static void GatherAllSwitches(
-#if FEATURE_GET_COMMANDLINE
-            string commandLine,
-#else
-            string [] commandLine,
-#endif
+        private static void GatherAllSwitches(string commandLine,
             out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile)
         {
-#if FEATURE_GET_COMMANDLINE
             // split the command line on (unquoted) whitespace
             var commandLineArgs = QuotingUtilities.SplitUnquoted(commandLine);
 
             s_exeName = FileUtilities.FixFilePath(QuotingUtilities.Unquote(commandLineArgs[0]));
-#else
-            var commandLineArgs = new List<string>(commandLine);
-
-            s_exeName = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-#endif
 
 #if USE_MSBUILD_DLL_EXTN
             var msbuildExtn = ".dll";
