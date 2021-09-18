@@ -219,7 +219,7 @@ namespace Microsoft.Build.Tasks
             XmlDocument doc = new XmlDocument();
             try
             {
-                XmlReaderSettings settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                XmlReaderSettings settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
                 XmlReader reader = XmlReader.Create(new StringReader("<XsltParameters>" + xsltParametersXml + "</XsltParameters>"), settings);
                 doc.Load(reader);
             }

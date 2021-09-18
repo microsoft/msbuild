@@ -103,7 +103,7 @@ namespace Microsoft.Build.Tasks
             {
                 using (FileStream fs = new FileStream(_xmlInputPath.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    XmlReaderSettings xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                    XmlReaderSettings xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
                     using (XmlReader sr = XmlReader.Create(fs, xrs))
                     {
                         xmlDoc.Load(sr);
@@ -219,7 +219,7 @@ namespace Microsoft.Build.Tasks
             var doc = new XmlDocument();
             try
             {
-                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
                 using (XmlReader reader = XmlReader.Create(new StringReader("<Namespaces>" + namepaces + "</Namespaces>"), settings))
                 {
                     doc.Load(reader);

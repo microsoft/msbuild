@@ -211,7 +211,7 @@ namespace Microsoft.Build.Tasks
             var doc = new XmlDocument();
             try
             {
-                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit };
                 using (XmlReader reader = XmlReader.Create(new StringReader("<Namespaces>" + namepaces + "</Namespaces>"), settings))
                 {
                     doc.Load(reader);
@@ -314,7 +314,7 @@ namespace Microsoft.Build.Tasks
             /// Creates correct reader based on the input type.
             /// </summary>
             /// <returns>The XmlReader object</returns>
-            public XmlReader CreateReader(bool prohibitDtd)
+            public XmlReader CreateReader(bool prohibitDtd = true)
             {
                 var settings = new XmlReaderSettings
                 {
