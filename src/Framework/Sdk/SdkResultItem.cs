@@ -34,7 +34,7 @@ namespace Microsoft.Build.Framework
         {
             if (obj is SdkResultItem item &&
                    ItemSpec == item.ItemSpec &&
-                   Metadata.Count == item.Metadata?.Count)
+                   Metadata?.Count == item.Metadata?.Count)
             {
                 foreach (var kvp in Metadata)
                 {
@@ -61,12 +61,12 @@ namespace Microsoft.Build.Framework
             int hashCode = -849885975;
             hashCode = hashCode ^ ItemSpec.GetHashCode();
 
-            if (Metadata != null && Metadata.Count > 0)
+            if (Metadata != null)
             {
                 foreach (var kvp in Metadata)
                 {
-                    hashCode = hashCode ^ kvp.Key.GetHashCode();
-                    hashCode = hashCode ^ kvp.Value.GetHashCode();
+                    hashCode = hashCode ^ $"K{kvp.Key}".GetHashCode();
+                    hashCode = hashCode ^ (kvp.Value != null ? $"V{kvp.Value}".GetHashCode() : "V".GetHashCode());
                 }
             }
 
