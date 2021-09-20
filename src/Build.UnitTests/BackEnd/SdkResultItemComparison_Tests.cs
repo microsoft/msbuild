@@ -22,7 +22,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             sdkResultItem2.Metadata.Add("key2", "value2");
             sdkResultItem2.Metadata.Add("key1", "value1");
 
-            Assert.True(sdkResultItem1.Equals(sdkResultItem2));
+            sdkResultItem1.ShouldBe(sdkResultItem2);
         }
 
         [Fact]
