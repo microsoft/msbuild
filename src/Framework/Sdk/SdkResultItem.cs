@@ -6,6 +6,9 @@ using System.Collections.Generic;
 
 namespace Microsoft.Build.Framework
 {
+
+    #nullable enable
+    
     /// <summary>
     /// The value of an item and any associated metadata to be added by an SDK resolver.  See <see cref="SdkResult.ItemsToAdd"/>
     /// </summary>
@@ -65,8 +68,7 @@ namespace Microsoft.Build.Framework
             {
                 foreach (var kvp in Metadata)
                 {
-                    hashCode = hashCode ^ $"K{kvp.Key}".GetHashCode();
-                    hashCode = hashCode ^ (kvp.Value != null ? $"V{kvp.Value}".GetHashCode() : "V".GetHashCode());
+                    hashCode ^= $"{kvp.Key.GetHashCode()}: {(kvp.Value ?? "V").GetHashCode()}";
                 }
             }
 
