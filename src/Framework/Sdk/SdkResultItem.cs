@@ -36,7 +36,7 @@ namespace Microsoft.Build.Framework
                    ItemSpec == item.ItemSpec &&
                    Metadata?.Count == item.Metadata?.Count)
             {
-                foreach (var kvp in Metadata)
+                return Metadata.All(m => item.Metadata.TryGetValue(m.Key, out var itemValue) && itemValue == m.Value);
                 {
                     if (!item.Metadata.TryGetValue(kvp.Key, out var itemValue))
                     {
