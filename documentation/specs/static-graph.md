@@ -128,8 +128,8 @@ Multitargeting supporting SDKs MUST implement the following properties and seman
   - *Standalone inner build*, when `$($(InnerBuildProperty))` is not empty and `$($(InnerBuildPropertyValues))` is empty. These are inner builds that were not generated from an outer build.
   - *Non multitargeting build*, when both `$($(InnerBuildProperty))` and  `$($(InnerBuildPropertyValues))` are empty.
 - Node edges
-  - When project A references multitargeting project B, and B is identified as an outer build, the graph node for project A will reference both the outer build of B, and all the inner builds of B. The edges to the inner builds are speculative, as at build time only one inner build gets referenced. However, the graph cannot know at evaluation time which inner build will get chosen.
-  - When multitargeting project B is a root, then the outer build node for B will reference the inner builds of B.
+  - When project A references multitargeting project B, and B is identified as an outer build, the graph node for project A will reference both the outer build of B, and **all the inner builds of B**. The edges to the inner builds are **speculative**, as at build time only one inner build gets referenced. However, the graph cannot know at evaluation time which inner build will get chosen.
+  - When multitargeting project B is a root, then the outer build node for B will reference **all the inner builds of B**.
   - For multitargeting projects, the `ProjectReference` item gets applied only to inner builds. An outer build cannot have its own distinct `ProjectReference`s, it is the inner builds that reference other project files, not the outer build. This constraint might get relaxed in the future via additional configuration, to allow outer build specific references.
 
 These specific rules represent the minimal rules required to represent multitargeting in `Microsoft.Net.Sdk`. As we adopt SDKs whose multitargeting complexity that cannot be expressed with the above rules, we'll extend the rules.
@@ -151,9 +151,13 @@ For example, here is a trimmed down `Microsoft.Net.Sdk` multitargeting project:
 </Project>
 ```
 
-To summarize, there are two main patterns for build dimensions which are handled:
-1. The project multitargets, in which case the SDK needs to specify the multitargeting build dimensions.
-2. A different set of global properties are used to choose the dimension like with Configuration or Platform. The project graph supports this via multiple entry points.
+To summarize, there are two main patterns for specifying build dimensions:
+1. Multitargeting based. A multitargeting project self describes supported build dimensions. In this case the SDK needs to specify the multitargeting build dimensions. The graph then extracts innerbuilds from a given outer build. For example, the `TargetFramework` build dimension gets specified this way.
+2. Global Property based: A top level set of global properties get applied to the graph entrypoints and get propagated downward through the graph. For example, the `Configuration` and `Platform` build dimensions get specified this way.
+
+Why does an outerbuild need to generate speculative edges to all of its innerbuilds? Why can't it use nuget to prune the speculative edges down to the compatible set?
+- One big design constraint we imposed on static graph was to keep it agnostic of SDK implementation details. So the graph must not know about particular details of one language's SDK. We wanted a generic design that all language SDKs can leverage. We considered that calling nuget to get the compatible TargetFramework values breaks this rule, as both the concept of "nuget" and the concept of "TargetFramework" are implementation details of the .net SDK. If someone were to write a Java SDK, would "calling nuget to get the compatible TargetFramework" still be relevant? A solution to this is to allow SDKs to configure the graph with an extension point on "how to collapse multiple speculative innerbuild edges into a smaller compatible set", but we didn't have the time to design it yet.
+- There is a conflicting need between build everything or just building a "TF slice" through the graph. Outer loop builds (CI builds) that publish binaries need to build all the packages for all the supported TFs, so they need the graph to express all possible combinations. Inner loop builds (dev-at-work) can be sliced down to only the TF that the dev is working on in order to reduce build times. Again, we didn't have time to design how to express these two things so we went with "express everything" because that allows both scenarios to work.
 
 ### Executing targets on a graph
 When building a graph, project references should be built before the projects that reference them, as opposed to the existing msbuild scheduler which builds projects just in time.
@@ -172,11 +176,16 @@ Note that graph cycles are disallowed, even if they're using disconnected target
 [BuildManager.PendBuildRequest(GraphBuildRequestData requestData)](https://github.com/microsoft/msbuild/blob/37c5a9fec416b403212a63f95f15b03dbd5e8b5d/src/Build/BackEnd/BuildManager/BuildManager.cs#L676)
 
 ### Inferring which targets to run for a project within the graph
-In the classic traversal, the referencing project chooses which targets to call on the referenced projects and may call into a project multiple times with different target lists and global properties (examples in [project reference protocol](../ProjectReference-Protocol.md)). When building a graph, where projects are built before the projects that reference them, we have to determine the target list to execute on each project statically.
+In the classic MSBuild build (i.e. execution of targets), the referencing project chooses which targets to call on the referenced projects and may call into a project multiple times with different target lists and global properties (examples in [project reference protocol](../ProjectReference-Protocol.md)). This is a top-down traversal of dependencies. These calls are made via the [MSBuild task](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-task?view=vs-2019). When building a graph, projects are built before the projects that reference them. This is a bottom-up traversal. Therefore the graph needs to determine the list of targets to execute on a specific project `B` **before** building the referencing projects that reference `B`.
 
-To do this, SDKs MUST explicitly describe the project-to-project calling patterns in such a way that a graph build can infer the entry targets for a project.
+The static graph contains the structural information on which reference projects a referencing project depends on. But it does not contain information on what "depends" means. At build time "depends" means that a referencing evaluated project will call a subset of reference evaluations with some targets. Subset because the static graph is an inferred graph, therefore there are ambiguities during graph construction, and thus it needs to be conservative and represent a superset of the "runtime graph". The "runtime graph" is the actual graph that gets executed during a real build. We cannot know the runtime graph because that would require us to analyze msbuild xml code inside of targets in order to find the `MSBuild task` invocations. This means doing heavy program analysis, like symbolic execution. That would make things very complicated, slower, and would probably introduce even more ambiguity, so a larger superset conservative graph. So we kept it simple and only looked at evaluation time msbuild xml code (i.e. msbuild xml code outside of `<Target>` elements).
+To summarize, the static graph does not have insights into the `MSBuild task` callsites. It does not know callsite specific information such as the `Targets="Foo;Bar"` or `Properties="Foo=Bar"` `MSBuild task` attributes.
+Since the graph does not have access to MSBuild task callsites, it does not know what targets will get called for a given graph edge. 
 
-Each project specifies the project reference protocol targets it supports, in the form of a target mapping: `target -> targetList`. The `target` represents the project reference entry target, and the `targetList` represents the list of targets that `target` ends up calling on each referenced project.
+To infer target information we use a flow analysis to propagate target information down the graph. The flow analysis uses the `ProjectReferenceTargets` protocol (described further down) to infer how one incoming target on a graph node (e.g. `Build`) generates multiple outgoing targets to its referenced nodes (e.g. `GetTargetFrameworks`, `GetNativeManifest`, `Build`).
+SDKs **must** explicitly describe the project-to-project calling patterns via the `ProjectReferenceTargets` protocol in such a way that a graph based build can correctly infer the entry targets for a graph node.
+
+Each project needs to specify the project reference protocol targets it supports, in the form of a target mapping: `incoming target -> outgoing target list`. The `incoming target` represents the project reference entry target, and the `outgoing target list` represents the list of targets that `incoming target` ends up calling on each referenced project.
 
 For example, a simple recursive rule would be `A -> A`, which says that a project called with target `A` will call target `A` on its referenced projects. Here's an example execution with two nodes:
 
@@ -349,7 +358,7 @@ namespace Microsoft.Build.Experimental.Graph
 ```
 
 ## Isolated builds
-Building a project in isolation means that any build results for project references must be pre-computed and provided as input.
+Building a project in isolation means enforcing the constraint that whenever a graph node is built, all the target calls that it does on its references **do not execute** because their results are already available. This means that any BuildResult objects for project references must be pre-computed and somehow provided as inputs to the referencing project.
 
 If a project uses the MSBuild task, the build result must be in MSBuild's build result cache instead of just-in-time executing targets on that referenced project. If it is not in the build result cache, an error will be logged and the build will fail. If the project is calling into itself either via `CallTarget` or the MSBuild task with a different set of global properties, this will be allowed to support multitargeting and other build dimensions implemented in a similar way.
 
