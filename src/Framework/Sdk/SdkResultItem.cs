@@ -40,21 +40,6 @@ namespace Microsoft.Build.Framework
                    Metadata?.Count == item.Metadata?.Count)
             {
                 return Metadata.All(m => item.Metadata.TryGetValue(m.Key, out var itemValue) && itemValue == m.Value);
-                {
-                    if (!item.Metadata.TryGetValue(kvp.Key, out var itemValue))
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        if (kvp.Value != itemValue)
-                        {
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
             }
             return false;
         }
