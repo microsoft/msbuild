@@ -20,6 +20,7 @@ namespace Microsoft.Build.Framework
 
         public SdkResultItem()
         {
+            ItemSpec = "";
             Metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
