@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Microsoft.Build.Framework
@@ -32,14 +33,14 @@ namespace Microsoft.Build.Framework
         public SdkResultItem(string itemSpec, Dictionary<string, string> metadata)
         {
             ItemSpec = itemSpec;
-            Metadata = metadata;
+            Metadata = metadata ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
         public override bool Equals(object obj)
         {
             if (obj is SdkResultItem item &&
                    ItemSpec == item.ItemSpec &&
-                   Metadata?.Count == item.Metadata?.Count)
+                   Metadata?.Count == item.Metadata.Count)
             {
                 return Metadata.All(m => item.Metadata.TryGetValue(m.Key, out var itemValue) && itemValue == m.Value);
             }
