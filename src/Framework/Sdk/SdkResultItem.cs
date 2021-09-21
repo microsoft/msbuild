@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Microsoft.Build.Framework
 {
@@ -53,7 +54,7 @@ namespace Microsoft.Build.Framework
             {
                 foreach (var kvp in Metadata)
                 {
-                    hashCode ^= $"{kvp.Key.GetHashCode()}: {(kvp.Value ?? "V").GetHashCode()}";
+                    hashCode ^= $"{kvp.Key.GetHashCode()}: {(kvp.Value ?? "V").GetHashCode()}".GetHashCode();
                 }
             }
 
