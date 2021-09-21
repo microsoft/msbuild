@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
+using Shouldly;
 using System;
 using System.Collections.Generic;
 using Xunit;
@@ -31,7 +32,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var sdkResultItem1 = new SdkResultItem("anyspec", new Dictionary<string, string>());
             var sdkResultItem2 = new SdkResultItem("anyspec", null);
 
-            Assert.True(!sdkResultItem1.Equals(sdkResultItem2));
+            sdkResultItem1.ShouldNotBe(sdkResultItem2);
         }
 
         [Fact]
@@ -49,7 +50,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             sdkResultItem2.Metadata.Add("key1", "value1");
             var hashSdkItem2 = sdkResultItem2.GetHashCode();
 
-            Assert.True(hashSdkItem1 == hashSdkItem2);
+            hashSdkItem1.ShouldBe(hashSdkItem2);
         }
 
     }
