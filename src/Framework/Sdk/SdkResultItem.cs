@@ -21,7 +21,7 @@ namespace Microsoft.Build.Framework
 
         public SdkResultItem()
         {
-            ItemSpec = "";
+            ItemSpec = string.Empty;
             Metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
