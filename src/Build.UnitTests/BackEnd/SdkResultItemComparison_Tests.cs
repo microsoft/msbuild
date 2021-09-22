@@ -32,7 +32,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var sdkResultItem1 = new SdkResultItem("anyspec", new Dictionary<string, string>());
             var sdkResultItem2 = new SdkResultItem("anyspec", null);
 
-            sdkResultItem1.ShouldNotBe(sdkResultItem2);
+            // Should bt the same, because passed null metadata will have value of new Dictionnary<String,String> like sdkResultItem1
+            sdkResultItem1.ShouldBe(sdkResultItem2);
         }
 
         [Fact]
