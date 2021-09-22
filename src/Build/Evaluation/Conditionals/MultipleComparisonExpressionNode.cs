@@ -48,36 +48,48 @@ namespace Microsoft.Build.Evaluation
             // and we know which do, then we already have enough information to evaluate this expression.
             // That means we don't have to fully expand a condition like " '@(X)' == '' " 
             // which is a performance advantage if @(X) is a huge item list.
-            if (LeftChild.EvaluatesToEmpty(state) || RightChild.EvaluatesToEmpty(state))
+            bool leftEmpty = LeftChild.EvaluatesToEmpty(state);
+            bool rightEmpty = RightChild.EvaluatesToEmpty(state);
+            if (leftEmpty || rightEmpty)
             {
                 UpdateConditionedProperties(state);
 
-                return Compare(LeftChild.EvaluatesToEmpty(state), RightChild.EvaluatesToEmpty(state));
+                return Compare(leftEmpty, rightEmpty);
             }
 
-            if (LeftChild.CanNumericEvaluate(state) && RightChild.CanNumericEvaluate(state))
+            if (LeftChild.TryNumericEvaluate(state, out double leftNumericValue))
             {
-                return Compare(LeftChild.NumericEvaluate(state), RightChild.NumericEvaluate(state));
+                // The left child evaluating to a number and the right child not evaluating to a number
+                // is insufficient to say they are not equal because $(MSBuildToolsVersion) evaluates to
+                // the string "Current" most of the time but when doing numeric comparisons, is treated
+                // as a version and returns "17.0" (or whatever the current tools version is). This means
+                // that if '$(MSBuildToolsVersion)' is "equal" to BOTH '17.0' and 'Current' (if 'Current'
+                // is 17.0).
+                if (RightChild.TryNumericEvaluate(state, out double rightNumericValue))
+                {
+                    return Compare(leftNumericValue, rightNumericValue);
+                }
             }
-            else if (LeftChild.CanBoolEvaluate(state) && RightChild.CanBoolEvaluate(state))
+
+            if (LeftChild.TryBoolEvaluate(state, out bool leftBoolValue))
             {
-                return Compare(LeftChild.BoolEvaluate(state), RightChild.BoolEvaluate(state));
+                return RightChild.TryBoolEvaluate(state, out bool rightBoolValue) ?
+                    Compare(leftBoolValue, rightBoolValue) :
+                    this is NotEqualExpressionNode; // If the left child is a bool, and the right child is not, then they are not equal. Return true for != and false for ==
             }
-            else // string comparison
-            {
-                string leftExpandedValue = LeftChild.GetExpandedValue(state);
-                string rightExpandedValue = RightChild.GetExpandedValue(state);
 
-                ProjectErrorUtilities.VerifyThrowInvalidProject
-                    (leftExpandedValue != null && rightExpandedValue != null,
-                     state.ElementLocation,
-                     "IllFormedCondition",
-                     state.Condition);
+            string leftExpandedValue = LeftChild.GetExpandedValue(state);
+            string rightExpandedValue = RightChild.GetExpandedValue(state);
 
-                UpdateConditionedProperties(state);
+            ProjectErrorUtilities.VerifyThrowInvalidProject
+                (leftExpandedValue != null && rightExpandedValue != null,
+                    state.ElementLocation,
+                    "IllFormedCondition",
+                    state.Condition);
 
-                return Compare(leftExpandedValue, rightExpandedValue);
-            }
+            UpdateConditionedProperties(state);
+
+            return Compare(leftExpandedValue, rightExpandedValue);
         }
 
         /// <summary>

@@ -110,12 +110,14 @@ namespace Microsoft.Build.Evaluation
         {
             List<ItemExpressionCapture> subExpressions = null;
 
-            if (expression.IndexOf('@') < 0)
+            int startInd = expression.IndexOf('@', start, end - start);
+
+            if (startInd < 0)
             {
                 return null;
             }
 
-            for (int i = start; i < end; i++)
+            for (int i = startInd; i < end; i++)
             {
                 int restartPoint;
                 int startPoint;

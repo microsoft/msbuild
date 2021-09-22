@@ -73,8 +73,23 @@ namespace Microsoft.Build.Evaluation
         {
             // Check if the value can be formatted as a Version number
             // This is needed for nodes that identify as Numeric but can't be parsed as numbers (e.g. 8.1.1.0 vs 8.1)
-            Version unused;
-            return Version.TryParse(_value, out unused);
+            return Version.TryParse(_value, out _);
+        }
+
+        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result)
+        {
+            result = default;
+            return false;
+        }
+
+        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result)
+        {
+            return ConversionUtilities.TryConvertDecimalOrHexToDouble(_value, out result);
+        }
+
+        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result)
+        {
+            return Version.TryParse(_value, out result);
         }
 
         /// <summary>

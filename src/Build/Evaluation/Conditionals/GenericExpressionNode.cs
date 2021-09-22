@@ -18,6 +18,9 @@ namespace Microsoft.Build.Evaluation
         internal abstract bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state);
         internal abstract double NumericEvaluate(ConditionEvaluator.IConditionEvaluationState state);
         internal abstract Version VersionEvaluate(ConditionEvaluator.IConditionEvaluationState state);
+        internal abstract bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result);
+        internal abstract bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result);
+        internal abstract bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result);
 
         /// <summary>
         /// Returns true if this node evaluates to an empty string,

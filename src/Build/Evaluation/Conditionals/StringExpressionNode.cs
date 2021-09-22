@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
@@ -85,6 +84,37 @@ namespace Microsoft.Build.Evaluation
             return Version.TryParse(GetExpandedValue(state), out _);
         }
 
+        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result)
+        {
+            return ConversionUtilities.TryConvertStringToBool(GetExpandedValue(state), out result);
+        }
+
+        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result)
+        {
+            if (ShouldBeTreatedAsVisualStudioVersion(state))
+            {
+                result = ConversionUtilities.ConvertDecimalOrHexToDouble(MSBuildConstants.CurrentVisualStudioVersion);
+                return true;
+            }
+            else
+            {
+                return ConversionUtilities.TryConvertDecimalOrHexToDouble(GetExpandedValue(state), out result);
+            }
+        }
+
+        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result)
+        {
+            if (ShouldBeTreatedAsVisualStudioVersion(state))
+            {
+                result = Version.Parse(MSBuildConstants.CurrentVisualStudioVersion);
+                return true;
+            }
+            else
+            {
+                return Version.TryParse(GetExpandedValue(state), out result);
+            }
+        }
+
         /// <summary>
         /// Returns true if this node evaluates to an empty string,
         /// otherwise false.
@@ -98,6 +128,25 @@ namespace Microsoft.Build.Evaluation
             {
                 if (_expandable)
                 {
+                    switch (_value.Length)
+                    {
+                        case 0:
+                            _cachedExpandedValue = String.Empty;
+                            return true;
+                        // If the length is 1 or 2, it can't possibly be a property, item, or metadata, and it isn't empty.
+                        case 1:
+                        case 2:
+                            _cachedExpandedValue = _value;
+                            return false;
+                        default:
+                            if (_value[1] != '(' || _value[_value.Length - 1] != ')' || (_value[0] != '$' && _value[0] != '%' && _value[0] != '@'))
+                            {
+                                // This isn't just a property, item, or metadata value, and it isn't empty.
+                                return false;
+                            }
+                            break;
+                    }
+
                     string expandBreakEarly = state.ExpandIntoStringBreakEarly(_value);
 
                     if (expandBreakEarly == null)

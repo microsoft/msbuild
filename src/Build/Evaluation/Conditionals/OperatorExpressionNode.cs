@@ -56,6 +56,24 @@ namespace Microsoft.Build.Evaluation
             return false;
         }
 
+        internal override bool TryBoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, out bool result)
+        {
+            result = BoolEvaluate(state);
+            return true;
+        }
+
+        internal override bool TryNumericEvaluate(ConditionEvaluator.IConditionEvaluationState state, out double result)
+        {
+            result = default;
+            return false;
+        }
+
+        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result)
+        {
+            result = default;
+            return false;
+        }
+
         /// <summary>
         /// Value after any item and property expressions are expanded
         /// </summary>
