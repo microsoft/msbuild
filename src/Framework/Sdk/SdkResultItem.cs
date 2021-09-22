@@ -17,7 +17,7 @@ namespace Microsoft.Build.Framework
     public class SdkResultItem
     {
         public string ItemSpec { get; set; }
-        public Dictionary<string, string> Metadata { get;}
+        public Dictionary<string, string>? Metadata { get;}
 
         public SdkResultItem()
         {
@@ -40,7 +40,7 @@ namespace Microsoft.Build.Framework
         {
             if (obj is SdkResultItem item &&
                    ItemSpec == item.ItemSpec &&
-                   item.Metadata != null &&
+                   item.Metadata is not null &&
                    Metadata?.Count == item.Metadata.Count)
             {
                 return Metadata.All(m => item.Metadata.TryGetValue(m.Key, out var itemValue) && itemValue == m.Value);
