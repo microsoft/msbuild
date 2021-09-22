@@ -3672,6 +3672,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <CustomAdditionalCompileInputs Include="$(IntermediateOutputPath)$(MSBuildProjectFile).CoreCompileInputs.cache" />
       <CoreCompileCache Include="@(Compile)" />
+      <CoreCompileCache Include="@(EmbeddedResource)" />
       <CoreCompileCache Include="@(ReferencePath)" />
       <CoreCompileCache Include="$(DefineConstants)" />
     </ItemGroup>
