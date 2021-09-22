@@ -32,8 +32,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var sdkResultItem1 = new SdkResultItem("anyspec", new Dictionary<string, string>());
             var sdkResultItem2 = new SdkResultItem("anyspec", null);
 
-            // Should bt the same, because passed null metadata will have value of new Dictionnary<String,String> like sdkResultItem1
-            sdkResultItem1.ShouldBe(sdkResultItem2);
+            // Should not be the same, because passing metadata = null is allowed and the Metadata property value allows null.
+            sdkResultItem1.ShouldNotBe(sdkResultItem2);
         }
 
         [Fact]

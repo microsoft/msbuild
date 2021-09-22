@@ -33,13 +33,14 @@ namespace Microsoft.Build.Framework
         public SdkResultItem(string itemSpec, Dictionary<string, string> metadata)
         {
             ItemSpec = itemSpec;
-            Metadata = metadata ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Metadata = metadata;
         }
 
         public override bool Equals(object obj)
         {
             if (obj is SdkResultItem item &&
                    ItemSpec == item.ItemSpec &&
+                   item.Metadata != null &&
                    Metadata?.Count == item.Metadata.Count)
             {
                 return Metadata.All(m => item.Metadata.TryGetValue(m.Key, out var itemValue) && itemValue == m.Value);
