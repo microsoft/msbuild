@@ -30,7 +30,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="itemSpec">The value (itemspec) for the item</param>
         /// <param name="metadata">A dictionary of item metadata.  This should be created with <see cref="StringComparer.OrdinalIgnoreCase"/> for the comparer.</param>
-        public SdkResultItem(string itemSpec, Dictionary<string, string> metadata)
+        public SdkResultItem(string itemSpec, Dictionary<string, string>? metadata)
         {
             ItemSpec = itemSpec;
             Metadata = metadata;
