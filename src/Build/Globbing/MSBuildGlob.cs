@@ -71,6 +71,11 @@ namespace Microsoft.Build.Globbing
         public string FilenamePart => _state.Value.FilenamePart;
 
         /// <summary>
+        ///     The regex
+        /// </summary>
+        public Regex Regex => _state.Value.Regex;
+
+        /// <summary>
         ///     Whether the glob was parsed sucsesfully from a string.
         ///     Illegal glob strings contain:
         ///     - invalid path characters (other than the wildcard characters themselves)

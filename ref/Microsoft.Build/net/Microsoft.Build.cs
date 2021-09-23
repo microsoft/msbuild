@@ -1540,6 +1540,7 @@ namespace Microsoft.Build.Globbing
         public string FilenamePart { get { throw null; } }
         public string FixedDirectoryPart { get { throw null; } }
         public bool IsLegal { get { throw null; } }
+        public System.Text.RegularExpressions.Regex Regex { get { throw null; } }
         public string WildcardDirectoryPart { get { throw null; } }
         public bool IsMatch(string stringToMatch) { throw null; }
         public Microsoft.Build.Globbing.MSBuildGlob.MatchInfoResult MatchInfo(string stringToMatch) { throw null; }
