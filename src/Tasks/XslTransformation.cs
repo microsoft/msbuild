@@ -334,7 +334,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (XmlMode == XmlModes.XmlFile)
                 {
-                    return XmlReader.Create(_data[itemPos]);
+                    return XmlReader.Create(new StreamReader(_data[itemPos]), null, _data[itemPos]);
                 }
                 else // xmlModes.Xml 
                 {
@@ -459,7 +459,7 @@ namespace Microsoft.Build.Tasks
                             _log.LogMessageFromResources(MessageImportance.Low, "XslTransform.UseTrustedSettings", _data);
                         }
 
-                        xslct.Load(new XPathDocument(XmlReader.Create(_data)), settings, new XmlUrlResolver());
+                        xslct.Load(new XPathDocument(XmlReader.Create(new StreamReader(_data), null, _data)), settings, new XmlUrlResolver());
                         break;
                     case XslModes.XsltCompiledDll:
 #if FEATURE_COMPILED_XSL
