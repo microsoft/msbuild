@@ -27,7 +27,6 @@ using Microsoft.Build.Utilities;
 
 using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 using Task = System.Threading.Tasks.Task;
-using DotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
 
@@ -434,9 +433,9 @@ namespace Microsoft.Build.BackEnd
 
             // Repeat the executable name as the first token of the command line because the command line
             // parser logic expects it and will otherwise skip the first argument
-            commandLineArgs = msbuildLocation + " " + commandLineArgs;
+            commandLineArgs = $"\"{msbuildLocation}\" {commandLineArgs}";
 
-            BackendNativeMethods.STARTUP_INFO startInfo = new BackendNativeMethods.STARTUP_INFO();
+            BackendNativeMethods.STARTUP_INFO startInfo = new();
             startInfo.cb = Marshal.SizeOf<BackendNativeMethods.STARTUP_INFO>();
 
             // Null out the process handles so that the parent process does not wait for the child process
@@ -466,8 +465,8 @@ namespace Microsoft.Build.BackEnd
                 creationFlags |= BackendNativeMethods.CREATE_NEW_CONSOLE;
             }
 
-            BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new BackendNativeMethods.SECURITY_ATTRIBUTES();
-            BackendNativeMethods.SECURITY_ATTRIBUTES threadSecurityAttributes = new BackendNativeMethods.SECURITY_ATTRIBUTES();
+            BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new();
+            BackendNativeMethods.SECURITY_ATTRIBUTES threadSecurityAttributes = new();
             processSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
             threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
 
@@ -480,8 +479,8 @@ namespace Microsoft.Build.BackEnd
             if (!NativeMethodsShared.IsMono)
             {
                 // Run the child process with the same host as the currently-running process.
-                exeName = GetCurrentHost();
-                commandLineArgs = "\"" + msbuildLocation + "\" " + commandLineArgs;
+                string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(exeName, 2), "dotnet.exe");
+                exeName = File.Exists(dotnetExe) ? dotnetExe : GetCurrentHost();
             }
 #endif
 
