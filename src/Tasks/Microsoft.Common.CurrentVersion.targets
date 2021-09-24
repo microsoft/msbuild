@@ -1615,11 +1615,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ======================================================================================
   -->
 
-  <!-- Managed projects need to have PlatformTarget set for SetPlatform negotiation. Default to $(Platform), which is AnyCPU by default. -->
   <PropertyGroup>
-    <PlatformTarget Condition="'$(EnableDynamicPlatformResolution)' == 'true' and '$(PlatformTarget)' == ''
-                                and '$(MSBuildProjectExtension)' != '.vcxproj' and '$(MSBuildProjectExtension)' != '.nativeproj'">$(Platform)</PlatformTarget>
-
     <UseDefaultPlatformLookupTables Condition="'$(UseDefaultPlatformLookupTables)' == ''">true</UseDefaultPlatformLookupTables>
   </PropertyGroup>
 
@@ -1642,12 +1638,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                               Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"/>
     </ItemGroup>
 
-    <!-- Managed Platform "source of truth" is $(PlatformTarget). For cpp it's $(Platform) -->
-    <PropertyGroup>
-      <CurrentPlatform>$(PlatformTarget)</CurrentPlatform>
-      <CurrentPlatform Condition="'$(MSBuildProjectExtension)' == '.vcxproj' or '$(MSBuildProjectExtension)' == '.nativeproj'">$(Platform)</CurrentPlatform>
-    </PropertyGroup>
-
     <!-- Assign default PlatformLookupTables when doing Managed <-> Unmanaged hops -->
     <ItemGroup>
       <!-- If we're looking at a c++ project from a managed project, map managed platforms to native platforms. -->
@@ -1663,7 +1653,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </ItemGroup>
 
     <GetCompatiblePlatform AnnotatedProjects="@(_ProjectReferencePlatformPossibilities)"
-                           CurrentProjectPlatform="$(CurrentPlatform)"
+                           CurrentProjectPlatform="$(Platform)"
                            PlatformLookupTable="$(PlatformLookupTable)"
                            Condition="'@(_ProjectReferencePlatformPossibilities)' != ''">
       <Output ItemName="_ProjectsWithPlatformAssignment" TaskParameter="AssignedProjectsWithPlatform" />
@@ -1675,13 +1665,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup Condition="'@(_ProjectsWithPlatformAssignment)' != ''">
       <ProjectsWithNearestPlatform Include="@(_ProjectsWithPlatformAssignment)"/>
       <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != ''">
-        <SetPlatform>PlatformTarget=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
-        <SetPlatform Condition="'%(ProjectsWithNearestPlatform.IsVcxOrNativeProj)' == 'true'">Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
+        <SetPlatform>Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
       </ProjectsWithNearestPlatform>
 
+      <!-- When GetCompatiblePlatform fails to assign NearestPlatform, undefine Platform and let that project build "on its own" -->
       <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' == ''">
-        <UndefineProperties Condition="'%(ProjectsWithNearestPlatform.IsVcxOrNativeProj)' == 'true'">%(ProjectsWithNearestPlatform.UndefineProperties);Platform</UndefineProperties>
-        <UndefineProperties Condition="'%(ProjectsWithNearestPlatform.IsVcxOrNativeProj)' != 'true'">%(ProjectsWithNearestPlatform.UndefineProperties);PlatformTarget</UndefineProperties>
+        <UndefineProperties>%(ProjectsWithNearestPlatform.UndefineProperties);Platform</UndefineProperties>
       </ProjectsWithNearestPlatform>
 
       <_MSBuildProjectReferenceExistent Remove="@(_MSBuildProjectReferenceExistent)" Condition="'%(_MSBuildProjectReferenceExistent.SkipGetPlatformProperties)' != 'true'"/>
