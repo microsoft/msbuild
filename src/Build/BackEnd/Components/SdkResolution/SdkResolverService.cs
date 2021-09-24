@@ -11,6 +11,7 @@ using System.IO;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
+using Microsoft.Build.Eventing;
 
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
@@ -115,7 +116,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 try
                 {
+                    MSBuildEventSource.Log.SdkResolverResolveSdkStart();
                     result = (SdkResult)sdkResolver.Resolve(sdk, context, resultFactory);
+                    MSBuildEventSource.Log.SdkResolverResolveSdkStop(sdkResolver.Name, sdk.Name, solutionPath, projectPath, result?.Path, result?.Success ?? false);
                 }
                 catch (Exception e) when ((e is FileNotFoundException || e is FileLoadException) && sdkResolver.GetType().GetTypeInfo().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal))
                 {
@@ -232,8 +235,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     return;
                 }
 
+                MSBuildEventSource.Log.SdkResolverServiceInitializeStart();
                 _resolvers = _sdkResolverLoader.LoadResolvers(loggingContext, location);
+                MSBuildEventSource.Log.SdkResolverServiceInitializeStop(_resolvers.Count);
             }
+
         }
 
         private void SetResolverState(int submissionId, SdkResolver resolver, object state)

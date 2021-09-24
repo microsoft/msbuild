@@ -429,7 +429,7 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(57, result);
         }
-        
+
         [Event(58, Keywords = Keywords.All)]
         public void CopyUpToDateStart(string path)
         {
@@ -452,6 +452,42 @@ namespace Microsoft.Build.Eventing
         public void WriteLinesToFileUpToDateStop(string fileItemSpec, bool wasUpToDate)
         {
             WriteEvent(61, fileItemSpec, wasUpToDate);
+        }
+
+        [Event(62, Keywords = Keywords.All)]
+        public void SdkResolverServiceInitializeStart()
+        {
+            WriteEvent(62);
+        }
+
+        [Event(63, Keywords = Keywords.All)]
+        public void SdkResolverServiceInitializeStop(int resolverCount)
+        {
+            WriteEvent(63, resolverCount);
+        }
+
+        [Event(64, Keywords = Keywords.All)]
+        public void SdkResolverResolveSdkStart()
+        {
+            WriteEvent(64);
+        }
+
+        [Event(65, Keywords = Keywords.All)]
+        public void SdkResolverResolveSdkStop(string resolverName, string sdkName, string solutionPath, string projectPath, string sdkPath, bool success)
+        {
+            WriteEvent(65, resolverName, sdkName, solutionPath, projectPath, sdkPath, success);
+        }
+
+        [Event(66, Keywords = Keywords.All)]
+        public void CachedSdkResolverServiceResolveSdkStart(string sdkName, string solutionPath, string projectPath)
+        {
+            WriteEvent(66, sdkName, solutionPath, projectPath);
+        }
+
+        [Event(67, Keywords = Keywords.All)]
+        public void CachedSdkResolverServiceResolveSdkStop(string sdkName, string solutionPath, string projectPath, bool success)
+        {
+            WriteEvent(67, sdkName, solutionPath, projectPath, success);
         }
 
         #endregion
