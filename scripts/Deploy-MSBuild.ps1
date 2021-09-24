@@ -65,11 +65,6 @@ $filesToCopyToBin = @(
     FileToCopy "$bootstrapBinDirectory\Microsoft.Build.Utilities.Core.dll"
     FileToCopy "$bootstrapBinDirectory\Microsoft.NET.StringTools.dll"
 
-    FileToCopy "$bootstrapBinDirectory\en\Microsoft.Build.resources.dll" "en"
-    FileToCopy "$bootstrapBinDirectory\en\Microsoft.Build.Tasks.Core.resources.dll" "en"
-    FileToCopy "$bootstrapBinDirectory\en\Microsoft.Build.Utilities.Core.resources.dll" "en"
-    FileToCopy "$bootstrapBinDirectory\en\MSBuild.resources.dll" "en"
-
     FileToCopy "$bootstrapBinDirectory\Microsoft.Common.CrossTargeting.targets"
     FileToCopy "$bootstrapBinDirectory\Microsoft.Common.CurrentVersion.targets"
     FileToCopy "$bootstrapBinDirectory\Microsoft.Common.targets"
@@ -115,7 +110,7 @@ if ($runtime -eq "Desktop") {
         FileToCopy "$bootstrapBinDirectory\System.Text.Json.dll"
         FileToCopy "$bootstrapBinDirectory\System.Threading.Tasks.Dataflow.dll"
         FileToCopy "$bootstrapBinDirectory\System.Threading.Tasks.Extensions.dll"
-        FileToCopy "$bootstrapBinDirectory\System.ValueTuple.dll"    
+        FileToCopy "$bootstrapBinDirectory\System.ValueTuple.dll"
     )
 } else {
     $runtimeSpecificFiles = @(
