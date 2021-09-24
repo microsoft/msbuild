@@ -3878,7 +3878,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PropertyGroup>
       <_ALExeToolPath>$(TargetFrameworkSDKToolsDirectory)</_ALExeToolPath>
-      <_ALExeToolPath Condition="'$(PlatformTarget)' == 'x64'">$(TargetFrameworkSDKToolsDirectory)$(PlatformTarget)\</_ALExeToolPath>
+      <_ALExeToolPath Condition="'$(PlatformTarget)' == 'x64' and !$(_ALExeToolPath.EndsWith('x64\'))">$(TargetFrameworkSDKToolsDirectory)x64\</_ALExeToolPath>
     </PropertyGroup>
 
     <MakeDir
