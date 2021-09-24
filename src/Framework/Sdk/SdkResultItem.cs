@@ -3,19 +3,25 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Microsoft.Build.Framework
 {
+
+    #nullable enable
+    
     /// <summary>
     /// The value of an item and any associated metadata to be added by an SDK resolver.  See <see cref="SdkResult.ItemsToAdd"/>
     /// </summary>
     public class SdkResultItem
     {
         public string ItemSpec { get; set; }
-        public Dictionary<string, string> Metadata { get;}
+        public Dictionary<string, string>? Metadata { get;}
 
         public SdkResultItem()
         {
+            ItemSpec = string.Empty;
             Metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
 
@@ -24,7 +30,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="itemSpec">The value (itemspec) for the item</param>
         /// <param name="metadata">A dictionary of item metadata.  This should be created with <see cref="StringComparer.OrdinalIgnoreCase"/> for the comparer.</param>
-        public SdkResultItem(string itemSpec, Dictionary<string, string> metadata)
+        public SdkResultItem(string itemSpec, Dictionary<string, string>? metadata)
         {
             ItemSpec = itemSpec;
             Metadata = metadata;
@@ -34,20 +40,10 @@ namespace Microsoft.Build.Framework
         {
             if (obj is SdkResultItem item &&
                    ItemSpec == item.ItemSpec &&
-                   Metadata?.Count == item.Metadata?.Count)
+                   item.Metadata is not null &&
+                   Metadata?.Count == item.Metadata.Count)
             {
-                if (Metadata != null)
-                {
-                    foreach (var kvp in Metadata)
-                    {
-                        if (item.Metadata[kvp.Key] != kvp.Value)
-                        {
-                            return false;
-                        }
-                    }
-                }
-
-                return true;
+                return Metadata.All(m => item.Metadata.TryGetValue(m.Key, out var itemValue) && itemValue == m.Value);
             }
             return false;
         }
@@ -55,14 +51,13 @@ namespace Microsoft.Build.Framework
         public override int GetHashCode()
         {
             int hashCode = -849885975;
-            hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(ItemSpec);
+            hashCode = hashCode ^ ItemSpec.GetHashCode();
 
             if (Metadata != null)
             {
                 foreach (var kvp in Metadata)
                 {
-                    hashCode = (hashCode * -1521134295) + kvp.Key.GetHashCode();
-                    hashCode = (hashCode * -1521134295) + kvp.Value.GetHashCode();
+                    hashCode ^= $"{kvp.Key}: {kvp.Value ?? "V"}".GetHashCode();
                 }
             }
 
