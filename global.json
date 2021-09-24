@@ -15,6 +15,6 @@
   },
   "msbuild-sdks": {
     "Microsoft.Build.CentralPackageVersions": "2.0.1",
-    "Microsoft.DotNet.Arcade.Sdk": "6.0.0-beta.21460.7"
+    "Microsoft.DotNet.Arcade.Sdk": "6.0.0-beta.21473.5"
   }
 }
