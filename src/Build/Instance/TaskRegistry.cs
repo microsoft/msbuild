@@ -149,6 +149,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectRootElementCacheBase RootElementCache { get; set; }
 
+        internal bool PrioritizeArchitectureInUsingTasks = true;
+
         /// <summary>
         /// Creates a task registry that does not fall back to any other task registry.
         /// Default constructor does no work because the tables are initialized lazily when a task is registered
@@ -481,6 +483,13 @@ namespace Microsoft.Build.Execution
             // Try the current task registry
             if (taskRecord == null && _taskRegistrations?.Count > 0)
             {
+                // Does this task have an architecture-specific variation?
+                // Just use that!
+                if (PrioritizeArchitectureInUsingTasks && superImportantTasks.TryGetValue(taskIdentity.Name, out RegisteredTaskRecord rec))
+                {
+                    return rec;
+                }
+
                 if (exactMatchRequired)
                 {
                     if (_cachedTaskRecordsWithExactMatch != null && _cachedTaskRecordsWithExactMatch.TryGetValue(taskIdentity, out taskRecord))
@@ -635,6 +644,10 @@ namespace Microsoft.Build.Execution
             return relevantTaskRegistrations;
         }
 
+        // Create another set containing architecture-specific task entries.
+        // Then when we look for them, check if the name exists in that.
+        Dictionary<string, RegisteredTaskRecord> superImportantTasks = new Dictionary<string, RegisteredTaskRecord>();
+
         /// <summary>
         /// Registers an evaluated using task tag for future
         /// consultation
@@ -660,7 +673,19 @@ namespace Microsoft.Build.Execution
                 _taskRegistrations[taskIdentity] = registeredTaskEntries;
             }
 
-            registeredTaskEntries.Add(new RegisteredTaskRecord(taskName, assemblyLoadInfo, taskFactory, taskFactoryParameters, inlineTaskRecord));
+            RegisteredTaskRecord newRecord = new RegisteredTaskRecord(taskName, assemblyLoadInfo, taskFactory, taskFactoryParameters, inlineTaskRecord);
+
+            // When Runtime is defined (and Architecture isn't), Architecture will be set to `*` which shouldn't be prioritized.
+            if (taskFactoryParameters != null && taskFactoryParameters.TryGetValue("Architecture", out string s) && s != MSBuildConstants.CharactersForExpansion[0])
+            {
+                // First UsingTask wins
+                if (!superImportantTasks.ContainsKey(taskName))
+                {
+                    superImportantTasks[taskName] = newRecord;
+                }
+            }
+
+            registeredTaskEntries.Add(newRecord);
         }
 
         private static Dictionary<RegisteredTaskIdentity, List<RegisteredTaskRecord>> CreateRegisteredTaskDictionary(int? capacity = null)
