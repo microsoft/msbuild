@@ -1092,7 +1092,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</comment>
   </data>
   <data name="UnsupportedOS" UESanitized="true" Visibility="Public">
-    <value>MSBUILD : error MSB1015: MSBuild does not run on this version of the operating system. It is only supported on Windows 2000, Windows XP, and later versions.</value>
+    <value>MSBUILD : error MSB1015: MSBuild does not run on this version of the operating system. It is only supported on Windows 10 and later versions.</value>
     <comment>{StrBegin="MSBUILD : error MSB1015: "}LOCALIZATION: The error prefix "MSBUILD : error MSBxxxx:" should not be localized.</comment>
   </data>
   <data name="Using35Engine" UESanitized="true" Visibility="Public">

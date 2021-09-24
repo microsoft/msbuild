@@ -1331,8 +1331,8 @@ Copyright (C) Microsoft Corporation. Todos los derechos reservados.
     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="UnsupportedOS">
-        <source>MSBUILD : error MSB1015: MSBuild does not run on this version of the operating system. It is only supported on Windows 2000, Windows XP, and later versions.</source>
-        <target state="translated">MSBUILD : error MSB1015: MSBuild no se puede ejecutar en esta versión del sistema operativo. Solo es compatible con Windows 2000, Windows XP y versiones posteriores.</target>
+        <source>MSBUILD : error MSB1015: MSBuild does not run on this version of the operating system. It is only supported on Windows 10 and later versions.</source>
+        <target state="needs-review-translation">MSBUILD : error MSB1015: MSBuild no se puede ejecutar en esta versión del sistema operativo. Solo es compatible con Windows 2000, Windows XP y versiones posteriores.</target>
         <note>{StrBegin="MSBUILD : error MSB1015: "}LOCALIZATION: The error prefix "MSBUILD : error MSBxxxx:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="Using35Engine">

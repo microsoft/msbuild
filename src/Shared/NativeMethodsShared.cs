@@ -876,33 +876,6 @@ namespace Microsoft.Build.Shared
 
 #endregion
 
-#region Set Error Mode (copied from BCL)
-
-        private static readonly Version s_threadErrorModeMinOsVersion = new Version(6, 1, 0x1db0);
-
-        internal static int SetErrorMode(int newMode)
-        {
-#if FEATURE_OSVERSION
-            if (Environment.OSVersion.Version < s_threadErrorModeMinOsVersion)
-            {
-                return SetErrorMode_VistaAndOlder(newMode);
-            }
-#endif
-            int num;
-            SetErrorMode_Win7AndNewer(newMode, out num);
-            return num;
-        }
-
-        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
-        [DllImport("kernel32.dll", EntryPoint = "SetThreadErrorMode", SetLastError = true)]
-        private static extern bool SetErrorMode_Win7AndNewer(int newMode, out int oldMode);
-
-        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass", Justification = "Class name is NativeMethodsShared for increased clarity")]
-        [DllImport("kernel32.dll", EntryPoint = "SetErrorMode", ExactSpelling = true)]
-        private static extern int SetErrorMode_VistaAndOlder(int newMode);
-
-#endregion
-
 #region Wrapper methods
 
         /// <summary>
@@ -1636,8 +1609,10 @@ namespace Microsoft.Build.Shared
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-
         internal static extern bool CloseHandle(IntPtr hObject);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern bool SetThreadErrorMode(int newMode, out int oldMode);
 
 #endregion
 

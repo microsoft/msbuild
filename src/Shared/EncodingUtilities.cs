@@ -219,16 +219,6 @@ namespace Microsoft.Build.Shared
 
             string useUtf8 = string.IsNullOrEmpty(encodingSpecification) ? EncodingUtilities.UseUtf8Detect : encodingSpecification;
 
-#if FEATURE_OSVERSION
-            // UTF8 is only supported in Windows 7 (6.1) or greater.
-            var windows7 = new Version(6, 1);
-
-            if (Environment.OSVersion.Version < windows7)
-            {
-                useUtf8 = EncodingUtilities.UseUtf8Never;
-            }
-#endif
-
             switch (useUtf8.ToUpperInvariant())
             {
                 case EncodingUtilities.UseUtf8Always:

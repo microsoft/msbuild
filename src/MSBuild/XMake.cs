@@ -89,6 +89,13 @@ namespace Microsoft.Build.CommandLine
             ProjectCacheFailure
         }
 
+#if FEATURE_OSVERSION
+        /// <summary>
+        /// True if the Main method was invoked. False indicates that we're running hosted in another process (e.g. unit tests).
+        /// </summary>
+        private static bool s_executingMainEntryPoint;
+#endif
+
         /// <summary>
         /// Whether the static constructor ran successfully.
         /// </summary>
@@ -214,6 +221,10 @@ namespace Microsoft.Build.CommandLine
 #endif
             )
         {
+#if FEATURE_OSVERSION
+            s_executingMainEntryPoint = true;
+#endif
+
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
@@ -1545,11 +1556,14 @@ namespace Microsoft.Build.CommandLine
         private static void VerifyThrowSupportedOS()
         {
 #if FEATURE_OSVERSION
-            if ((Environment.OSVersion.Platform == PlatformID.Win32S) ||        // Win32S
-                (Environment.OSVersion.Platform == PlatformID.Win32Windows) ||  // Windows 95, Windows 98, Windows ME
-                (Environment.OSVersion.Platform == PlatformID.WinCE) ||         // Windows CE
-                ((Environment.OSVersion.Platform == PlatformID.Win32NT) &&      // Windows NT 4.0 and earlier
-                (Environment.OSVersion.Version.Major <= 4)))
+            // We require Windows 10 but the OS may lie about the version if the .exe is not properly manifested
+            // (such as e.g. the unit test console runner).
+            var minimumVersion = s_executingMainEntryPoint
+                ? new Version(10, 0) // Windows 10
+                : new Version(6, 2); // Windows 10 pretending to be Windows 8
+
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT ||
+                Environment.OSVersion.Version < minimumVersion)
             {
                 // If we're running on any of the unsupported OS's, fail immediately.  This way,
                 // we don't run into some obscure error down the line, totally confusing the user.
