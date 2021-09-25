@@ -20,6 +20,8 @@
 </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
+
     <PackageReference Include="Shouldly" />
     <PackageReference Include="System.Net.Http" />
     <PackageDownload Include="NuGet.CommandLine" Version="[$(NuGetCommandLinePackageVersion)]" />
@@ -36,9 +38,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\Constants.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="..\Shared\EncodingStringWriter.cs">
       <Link>EncodingStringWriter.cs</Link>
     </Compile>

@@ -98,6 +98,7 @@ if ($runtime -eq "Desktop") {
 
         FileToCopy "$bootstrapBinDirectory\Microsoft.Bcl.AsyncInterfaces.dll"
         FileToCopy "$bootstrapBinDirectory\Microsoft.Data.Entity.targets"
+        FileToCopy "$bootstrapBinDirectory\Microsoft.IO.Redist.dll"
         FileToCopy "$bootstrapBinDirectory\Microsoft.ServiceModel.targets"
         FileToCopy "$bootstrapBinDirectory\Microsoft.WinFx.targets"
         FileToCopy "$bootstrapBinDirectory\Microsoft.WorkflowBuildExtensions.targets"

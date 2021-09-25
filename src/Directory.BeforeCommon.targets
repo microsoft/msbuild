@@ -142,4 +142,9 @@
     <DocumentationFile Condition=" '$(GenerateDocumentationFile)' == 'true' ">$(IntermediateOutputPath)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(MonoBuild)' != 'true' and $([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETFramework'">
+    <DefineConstants>$(DefineConstants);FEATURE_MSIOREDIST</DefineConstants>
+    <FeatureMSIORedist>true</FeatureMSIORedist>
+  </PropertyGroup>
+
 </Project>

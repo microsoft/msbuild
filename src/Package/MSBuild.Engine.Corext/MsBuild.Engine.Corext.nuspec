@@ -31,6 +31,7 @@
     <file src="$X86BinPath$/Microsoft.Build.Framework.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.Build.Tasks.Core.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/Microsoft.Build.Utilities.Core.dll" target="v15.0/bin" />
+    <file src="$X86BinPath$/Microsoft.IO.Redist.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/System.Collections.Immutable.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/System.Memory.dll" target="v15.0/bin" />
     <file src="$X86BinPath$/System.Text.Json.dll" target="v15.0/bin" />
@@ -87,6 +88,7 @@
     <file src="$X86BinPath$/Microsoft.Build.Framework.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.Build.Tasks.Core.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/Microsoft.Build.Utilities.Core.dll" target="v15.0/bin/amd64" />
+    <file src="$X86BinPath$/Microsoft.IO.Redist.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/System.Collections.Immutable.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/System.Memory.dll" target="v15.0/bin/amd64" />
     <file src="$X86BinPath$/System.Text.Json.dll" target="v15.0/bin/amd64" />
