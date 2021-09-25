@@ -79,7 +79,16 @@ namespace Microsoft.Build.Tasks
                 {
                     if (state.ResolvingNamespace)
                     {
-                        if (t.InnerText == ".")
+                        // If we see a ';' while resolving a namespace, we assume it's a file-scoped namespace
+                        // namespace foo.bar; <- At this point in code, we're at the semicolon.
+                        // class test { ... }
+                        // https://github.com/dotnet/csharplang/blob/088f20b6f9b714a7b68f6d792d54def0f3b3057e/proposals/csharp-10.0/file-scoped-namespaces.md
+                        if (t.InnerText == ";")
+                        {
+                            state.PushNamespacePart(state.Namespace);
+                            state.Reset();
+                        }
+                        else if (t.InnerText == ".")
                         {
                             state.Namespace += ".";
                         }

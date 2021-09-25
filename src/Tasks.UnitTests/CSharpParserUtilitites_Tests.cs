@@ -17,22 +17,28 @@ namespace Microsoft.Build.UnitTests
 
         // Simplest case of getting a fully-qualified class name from
         // a c# file.
-        [Fact]
-        public void Simple()
+        [Theory]
+        [InlineData("namespace MyNamespace { class MyClass {} }")]
+        [InlineData("namespace MyNamespace ; class MyClass {} ")] // file-scoped namespaces
+        public void Simple(string fileContents)
         {
-            AssertParse("namespace MyNamespace { class MyClass {} }", "MyNamespace.MyClass");
+            AssertParse(fileContents, "MyNamespace.MyClass");
         }
 
-        [Fact]
-        public void EmbeddedComment()
+        [Theory]
+        [InlineData("namespace /**/ MyNamespace /**/ { /**/ class /**/ MyClass/**/{}} //")]
+        [InlineData("namespace /**/ MyNamespace /**/ ; /**/ class /**/ MyClass/**/{} //")] // file-scoped namespaces
+        public void EmbeddedComment(string fileContents)
         {
-            AssertParse("namespace /**/ MyNamespace /**/ { /**/ class /**/ MyClass/**/{}} //", "MyNamespace.MyClass");
+            AssertParse(fileContents, "MyNamespace.MyClass");
         }
 
-        [Fact]
-        public void MinSpace()
+        [Theory]
+        [InlineData("namespace MyNamespace{class MyClass{}}")]
+        [InlineData("namespace MyNamespace;class MyClass{}")] // file-scoped namespaces
+        public void MinSpace(string fileContents)
         {
-            AssertParse("namespace MyNamespace{class MyClass{}}", "MyNamespace.MyClass");
+            AssertParse(fileContents, "MyNamespace.MyClass");
         }
 
         [Fact]
@@ -41,16 +47,20 @@ namespace Microsoft.Build.UnitTests
             AssertParse("class MyClass{}", "MyClass");
         }
 
-        [Fact]
-        public void SneakyComment()
+        [Theory]
+        [InlineData("/*namespace MyNamespace { */ class MyClass {} /* } */")]
+        [InlineData("/*namespace MyNamespace ; */ class MyClass {}")] // file-scoped namespaces
+        public void SneakyComment(string fileContents)
         {
-            AssertParse("/*namespace MyNamespace { */ class MyClass {} /* } */", "MyClass");
+            AssertParse(fileContents, "MyClass");
         }
 
-        [Fact]
-        public void CompoundNamespace()
+        [Theory]
+        [InlineData("namespace MyNamespace.Feline { class MyClass {} }")]
+        [InlineData("namespace MyNamespace.Feline ; class MyClass {} ")] // file-scoped namespaces
+        public void CompoundNamespace(string fileContents)
         {
-            AssertParse("namespace MyNamespace.Feline { class MyClass {} }", "MyNamespace.Feline.MyClass");
+            AssertParse(fileContents, "MyNamespace.Feline.MyClass");
         }
 
         [Fact]
@@ -71,16 +81,20 @@ namespace Microsoft.Build.UnitTests
             AssertParse("namespace MyNamespace/**/.A{ namespace Feline . B {namespace Bovine.C {sealed class MyClass {} }} }", "MyNamespace.A.Feline.B.Bovine.C.MyClass");
         }
 
-        [Fact]
-        public void DoubleClass()
+        [Theory]
+        [InlineData("namespace MyNamespace{class Feline{}class Bovine}")]
+        [InlineData("namespace MyNamespace;class Feline{}class Bovine")] // file-scoped namespaces
+        public void DoubleClass(string fileContents)
         {
-            AssertParse("namespace MyNamespace{class Feline{}class Bovine}", "MyNamespace.Feline");
+            AssertParse(fileContents, "MyNamespace.Feline");
         }
 
-        [Fact]
-        public void EscapedKeywordClass()
+        [Theory]
+        [InlineData("namespace MyNamespace{class @class{}}")]
+        [InlineData("namespace MyNamespace;class @class{}")] // file-scoped namespaces
+        public void EscapedKeywordClass(string fileContents)
         {
-            AssertParse("namespace MyNamespace{class @class{}}", "MyNamespace.class");
+            AssertParse(fileContents, "MyNamespace.class");
         }
 
         [Fact]
@@ -90,7 +104,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void SkipInterveningNamespaces()
+        public void InterveningNamespaces()
         {
             AssertParse("namespace MyNamespace { namespace XXX {} class MyClass {} }", "MyNamespace.MyClass");
         }
@@ -174,10 +188,12 @@ namespace Microsoft.Build.UnitTests
             AssertParse("[assembly :AssemblyDelaySign(false)] namespace i { class a { } }", "i.a");
         }
 
-        [Fact]
-        public void AssemblyAttributeString()
+        [Theory]
+        [InlineData("[assembly :MyString(\"namespace\")] namespace i { class a { } }")]
+        [InlineData("[assembly :MyString(\"namespace\")] namespace i; class a { }")]
+        public void AssemblyAttributeString(string fileContents)
         {
-            AssertParse("[assembly :MyString(\"namespace\")] namespace i { class a { } }", "i.a");
+            AssertParse(fileContents, "i.a");
         }
 
         [Fact]
@@ -253,19 +269,20 @@ namespace Microsoft.Build.UnitTests
             AssertParse("namespace i { [MyString(\"}\")] class a { } }", "i.a");
         }
 
-        [Fact]
-        public void NameSpaceStructEnum()
+        [Theory]
+        [InlineData("namespace n { public struct s {  enum e {} } class c {} }")]
+        [InlineData("namespace n; public struct s {  enum e {} } class c {}")] // file-scoped namespace
+        public void NameSpaceStructEnum(string fileContents)
         {
-            AssertParse("namespace n { public struct s {  enum e {} } class c {} }", "n.c");
+            AssertParse(fileContents, "n.c");
         }
 
         [Fact]
         public void PreprocessorControllingTwoNamespaces()
         {
             // This works by coincidence since preprocessor directives are currently ignored.
-            AssertParse
-            (
-                @"
+            // Note: If the condition were #if (true), the result would still be n1.c
+            AssertParse(@"
 #if (false)
 namespace n1
 #else
@@ -275,29 +292,57 @@ namespace n2
                 ", "n2.c");
         }
 
-        [Fact]
-        public void PreprocessorControllingTwoNamespacesWithInterveningKeyword()
+        /// <summary>
+        /// The test "PreprocessorControllingTwoNamespaces" reveals that preprocessor directives are ignored.
+        /// This means that in the case of many namespaces before curly braces (despite that being invalid C#)
+        /// the last namespace would win. This test explicitly tests that.
+        /// </summary>
+        [Theory]
+        [InlineData(@"
+namespace n1
+    namespace n2
+    namespace n3
+    namespace n4
+    { class c { } }", "n4.c")]
+        [InlineData(@"
+namespace n1;
+namespace n2;
+namespace n3;
+namespace n4;
+class c {} ", "n1.n2.n3.n4.c")]
+        public void MultipleNamespaces_InvalidCSharp(string fileContents, string expected)
         {
             // This works by coincidence since preprocessor directives are currently ignored.
-            AssertParse
-            (
-                @"
+            AssertParse(fileContents, expected);
+        }
+
+        /// <summary>
+        /// Note: Preprocessor conditions are not implemented
+        /// </summary>
+        [Theory]
+        [InlineData(@"
 #if (false)
 namespace n1
 #else
 using a=b;
 namespace n2
 #endif    
-{ class c {} }
-                ", "n2.c");
+{ class c {} }", "n2.c")]
+        [InlineData(@"
+#if (false)
+namespace n1;
+#else
+using a=b;
+namespace n2;
+#endif    
+{ class c {} }", "n1.n2.c")]
+        public void PreprocessorControllingTwoNamespacesWithInterveningKeyword(string fileContents, string expected)
+        {
+            AssertParse(fileContents, expected);
         }
 
-        [Fact]
-        public void Preprocessor()
-        {
-            AssertParse
-            (
-                @"
+        [Theory]
+        [InlineData(@"
 #if MY_CONSTANT                
 namespace i 
 {
@@ -307,8 +352,19 @@ namespace i
     }     
     #endregion
 }
-#endif // MY_CONSTANT
-                ", "i.a");
+#endif // MY_CONSTANT ")]
+        [InlineData(@"
+#if MY_CONSTANT                
+namespace i;
+    #region Put the class in a region
+    class a 
+    {
+    }     
+    #endregion
+#endif // MY_CONSTANT")]
+        public void Preprocessor(string fileContents)
+        {
+            AssertParse(fileContents, "i.a");
         }
 
         [Fact(Skip = "Preprocessor is not yet implemented.")]
@@ -333,16 +389,18 @@ namespace i
 
 
 
-        [Fact]
-        public void Regress_Mutation_SingleLineCommentsShouldBeIgnored()
-        {
-            AssertParse
-            (
-                @"
+        [Theory]
+        [InlineData(@"
 namespace n2
 // namespace n1
-{ class c {} }
-                ", "n2.c");
+{ class c {} }")]
+        [InlineData(@"
+namespace n2;
+// namespace n1
+class c {}")]
+        public void Regress_Mutation_SingleLineCommentsShouldBeIgnored(string fileContents)
+        {
+            AssertParse(fileContents, "n2.c");
         }
 
         /*
