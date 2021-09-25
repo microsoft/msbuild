@@ -60,20 +60,24 @@ MSBuild can be run on Unix systems that support .NET Core. Set-up instructions c
 
 You can turn on localized builds via the `/p:LocalizedBuild=true` command line argument. For more information on localized builds and how to make contributions to MSBuild's translations, see our [localization documentation](documentation/wiki/Localization.md)
 
-#### Getting Started
-
+### Interested in contributing?
 Before you contribute, please read through the contributing and developer guides to get an idea of what kinds of pull requests we accept.
 
 * [Contributing Guide](documentation/wiki/Contributing-Code.md)
-
 * **Developer Guide on:**
    - [.NET Core](documentation/wiki/Building-Testing-and-Debugging-on-.Net-Core-MSBuild.md)
    - [Full Framework](documentation/wiki/Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md)
    - [Mono](documentation/wiki/Building-Testing-and-Debugging-on-Mono-MSBuild.md)
 
-Looking for something to work on? This list of [up for grabs issues](https://github.com/Microsoft/msbuild/issues?q=is%3Aopen+is%3Aissue+label%3Aup-for-grabs) is a great place to start.
+* See our [up for grabs issues](https://github.com/Microsoft/msbuild/issues?q=is%3Aopen+is%3Aissue+label%3Aup-for-grabs) for a list of issues we think are great to onboard new developers.
+   - **Note:** Please leave a comment asking to be assigned the issue if you want to work on it.
+* See our [label documentation](documentation/wiki/labels.md) for descriptions of labels we use throughout the repo.
 
-You are also encouraged to start a discussion by filing an issue or creating a gist.
+### Other ways to contribute
+We encourage any contributions you decide to make to the repo!
+
+* [File an issue](https://github.com/dotnet/msbuild/issues/new/choose)
+* [Start a discussion](https://github.com/dotnet/msbuild/discussions)
 
 ### MSBuild Components
 
