@@ -22,16 +22,19 @@ namespace Microsoft.Build.Unittest
 {
     internal static class SdkUtilities
     {
-        public static ProjectOptions CreateProjectOptionsWithResolver(SdkResolver resolver)
+        public static ResettableSdkResolverServiceState CreateProjectOptionsWithResolver(SdkResolver resolver, out ProjectOptions options)
         {
             var context = EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
             var sdkService = (SdkResolverService)context.SdkResolverService;
-            sdkService.InitializeForTests(null, new List<SdkResolver>() { resolver });
 
-            return new ProjectOptions
+            ResettableSdkResolverServiceState state = new ResettableSdkResolverServiceState(sdkService, null, new List<SdkResolver>() { resolver });
+
+            options = new ProjectOptions
             {
                 EvaluationContext = context
             };
+
+            return state;
         }
 
         internal class ConfigurableMockSdkResolver : SdkResolver
@@ -182,6 +185,52 @@ namespace Microsoft.Build.Unittest
                 a.WorkUnitResult.Exception.ShouldBe(b.WorkUnitResult.Exception);
                 a.WorkUnitResult.ResultCode.ShouldBe(b.WorkUnitResult.ResultCode);
             }
+        }
+    }
+
+    /// <summary>
+    /// Helper disposable class to reset <see cref="SdkResolverService"/> state.
+    /// </summary>
+    internal class ResettableSdkResolverServiceState : IDisposable
+    {
+        private SdkResolverService _service;
+        private MainNodeSdkResolverService _mainNodeService;
+
+        public ResettableSdkResolverServiceState()
+        { }
+
+        public ResettableSdkResolverServiceState(ISdkResolverService service, SdkResolverLoader resolverLoader = null, IList<SdkResolver> resolvers = null)
+        {
+            switch (service)
+            {
+                case SdkResolverService sdkResolverService:
+                    Initialize(sdkResolverService, resolverLoader, resolvers);
+                    break;
+                case MainNodeSdkResolverService mainNodeService:
+                    Initialize(mainNodeService, resolverLoader, resolvers);
+                    break;
+                default:
+                    throw new NotImplementedException($"Unknown type; extend {nameof(ResettableSdkResolverServiceState)} to support {service.GetType}");
+            }
+        }
+
+        public void Initialize(SdkResolverService sdkResolverService, SdkResolverLoader resolverLoader = null, IList<SdkResolver> resolvers = null)
+        {
+            sdkResolverService.InitializeForTests(resolverLoader, resolvers);
+            _service = sdkResolverService;
+        }
+
+        public void Initialize(MainNodeSdkResolverService mainNodeService, SdkResolverLoader resolverLoader = null, IList<SdkResolver> resolvers = null)
+        {
+            mainNodeService.InitializeForTests(resolverLoader, resolvers);
+            _mainNodeService = mainNodeService;
+        }
+
+
+        public void Dispose()
+        {
+            _service?.InitializeForTests(resolverLoader: null, resolvers: null);
+            _mainNodeService?.InitializeForTests(resolverLoader: null, resolvers: null);
         }
     }
 }

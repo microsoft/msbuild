@@ -340,7 +340,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             // Use custom SDK resolution to ensure resolver context is logged.
             var mapping = new Dictionary<string, string> { { SdkName, _testSdkDirectory } };
-            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.FileBasedMockSdkResolver(mapping));
+            using var state = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.FileBasedMockSdkResolver(mapping),
+                out var projectOptions);
 
             // Create a normal project (p1) which imports an SDK style project (p2).
             var projectFolder = _env.CreateFolder().Path;
@@ -622,8 +623,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 null
             );
 
-            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(
-                new MockExpandedSdkResolver(_testSdkDirectory)
+            using var state = SdkUtilities.CreateProjectOptionsWithResolver(
+                new MockExpandedSdkResolver(_testSdkDirectory),
+                out var projectOptions
             );
 
             void AddProperty(string name, string value) =>

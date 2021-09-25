@@ -28,7 +28,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// A lock object used for this class.
         /// </summary>
-        private readonly object _lockObject = new object();
+        private static readonly object _lockObject = new object();
 
         /// <summary>
         /// Stores resolver state by build submission ID.
@@ -38,12 +38,17 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// Stores the list of SDK resolvers which were loaded.
         /// </summary>
-        private IList<SdkResolver> _resolvers;
+        /// <remarks>
+        /// This list is not expected to change within an MSBuild process lifetime, since
+        /// that would require adding/removing files from the MSBuild directory.
+        /// </remarks>
+        private static IList<SdkResolver> s_resolvers;
 
         /// <summary>
-        /// Stores an <see cref="SdkResolverLoader"/> which can load registered SDK resolvers.
+        /// Overrides the default <see cref="SdkResolverLoader"/> when set from
+        /// <see cref="InitializeForTests(SdkResolverLoader, IList{SdkResolver})"/>.
         /// </summary>
-        private SdkResolverLoader _sdkResolverLoader = new SdkResolverLoader();
+        private SdkResolverLoader _sdkResolverLoader = null;
 
         public SdkResolverService()
         {
@@ -90,7 +95,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         public virtual SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
         {
             // Lazy initialize the SDK resolvers
-            if (_resolvers == null)
+            if (s_resolvers == null)
             {
                 Initialize(loggingContext, sdkReferenceLocation);
             }
@@ -102,7 +107,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             loggingContext.LogComment(MessageImportance.Low, "SdkResolving", sdk.ToString());
 
-            foreach (SdkResolver sdkResolver in _resolvers)
+            foreach (SdkResolver sdkResolver in s_resolvers)
             {
                 SdkResolverContext context = new SdkResolverContext(buildEngineLogger, projectPath, solutionPath, ProjectCollection.Version, interactive, isRunningInVisualStudio)
                 {
@@ -181,12 +186,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <param name="resolvers">Explicit set of SdkResolvers to use for all SDK resolution.</param>
         internal void InitializeForTests(SdkResolverLoader resolverLoader = null, IList<SdkResolver> resolvers = null)
         {
-            if (resolverLoader != null)
-            {
-                _sdkResolverLoader = resolverLoader;
-            }
+            _sdkResolverLoader = resolverLoader;
 
-            _resolvers = resolvers;
+            s_resolvers = resolvers;
         }
 
         private static void LogWarnings(LoggingContext loggingContext, ElementLocation location, SdkResult result)
@@ -227,12 +229,15 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             lock (_lockObject)
             {
-                if (_resolvers != null)
+                if (s_resolvers != null)
                 {
                     return;
                 }
 
-                _resolvers = _sdkResolverLoader.LoadResolvers(loggingContext, location);
+                // In normal operation, we only need a transient SdkResolverLoader
+                // to load the resolvers and then go away. Tests may use a special
+                // _sdkResolverLoader set in InitializeForTests, though.
+                s_resolvers = (_sdkResolverLoader ?? new SdkResolverLoader()).LoadResolvers(loggingContext, location);
             }
         }
 
@@ -241,7 +246,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             // Do not set state for resolution requests that are not associated with a valid build submission ID
             if (submissionId != BuildEventContext.InvalidSubmissionId)
             {
-                ConcurrentDictionary<SdkResolver, object> resolverState = _resolverStateBySubmission.GetOrAdd(submissionId, new ConcurrentDictionary<SdkResolver, object>(NativeMethodsShared.GetLogicalCoreCount(), _resolvers.Count));
+                ConcurrentDictionary<SdkResolver, object> resolverState = _resolverStateBySubmission.GetOrAdd(submissionId, new ConcurrentDictionary<SdkResolver, object>(NativeMethodsShared.GetLogicalCoreCount(), s_resolvers.Count));
 
                 resolverState.AddOrUpdate(resolver, state, (sdkResolver, obj) => state);
             }

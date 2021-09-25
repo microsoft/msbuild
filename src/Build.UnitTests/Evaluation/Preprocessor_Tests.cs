@@ -845,10 +845,11 @@ namespace Microsoft.Build.UnitTests.Preprocessor
             {
                 string testSdkDirectory = env.CreateFolder().Path;
 
-                var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.FileBasedMockSdkResolver(new Dictionary<string, string>
+                using var state = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.FileBasedMockSdkResolver(new Dictionary<string, string>
                 {
                     {"MSBuildUnitTestSdk", testSdkDirectory}
-                }));
+                }),
+                out var projectOptions);
 
 
                 string sdkPropsPath = Path.Combine(testSdkDirectory, "Sdk.props");
@@ -949,7 +950,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
                     }
                 };
 
-                var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
+                using var state = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
                     new Build.BackEnd.SdkResolution.SdkResult(
                         new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
                         new [] { testDirectory},
@@ -957,7 +958,8 @@ namespace Microsoft.Build.UnitTests.Preprocessor
                         propertiesToAdd,
                         itemsToAdd,
                         warnings: null
-                        )));
+                        )),
+                    out var projectOptions);
 
                 string content = @"<Project>
 <Import Project='Import.props' Sdk='TestPropsAndItemsFromResolverSdk' />
@@ -1051,11 +1053,12 @@ namespace Microsoft.Build.UnitTests.Preprocessor
                 string sdk1 = env.CreateFolder().Path;
                 string sdk2 = env.CreateFolder().Path;
 
-                var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.FileBasedMockSdkResolver(new Dictionary<string, string>
+                var state = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.FileBasedMockSdkResolver(new Dictionary<string, string>
                 {
                     {"MSBuildUnitTestSdk1", sdk1},
                     {"MSBuildUnitTestSdk2", sdk2},
-                }));
+                }),
+                out var projectOptions);
 
                 string sdkPropsPath1 = Path.Combine(sdk1, "Sdk.props");
                 string sdkTargetsPath1 = Path.Combine(sdk1, "Sdk.targets");

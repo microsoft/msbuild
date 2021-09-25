@@ -17,6 +17,8 @@ using System.IO;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
+
+using static Microsoft.Build.Engine.UnitTests.BackEnd.SdkResolverService_Tests;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
 
 namespace Microsoft.Build.UnitTests.BackEnd
@@ -112,7 +114,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string projectPath = Path.Combine(projectFolder, "TestProject.proj");
             File.WriteAllText(projectPath, CleanupFileContents(contents));
 
-            ProjectInstance projectInstance = CreateProjectInstance(projectPath, MSBuildDefaultToolsVersion, _projectCollection);
+            using var state = CreateProjectInstance(projectPath, MSBuildDefaultToolsVersion, _projectCollection, out ProjectInstance projectInstance);
 
             var data = new BuildRequestData(projectInstance, new[] { "GetCurrentProcessId", "GetResolverResults" }, _projectCollection.HostServices);
             var customparameters = new BuildParameters { EnableNodeReuse = false, Loggers = new ILogger[] { _logger } };
@@ -157,7 +159,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string projectWithSdkImportPath = Path.Combine(projectFolder, "ProjectWithSdkImport.proj");
             File.WriteAllText(projectWithSdkImportPath, CleanupFileContents(projectWithSdkImportContents));
 
-            ProjectInstance projectInstance = CreateProjectInstance(entryProjectPath, MSBuildDefaultToolsVersion, _projectCollection);
+            using var state = CreateProjectInstance(entryProjectPath, MSBuildDefaultToolsVersion, _projectCollection, out ProjectInstance projectInstance);
 
             var data = new BuildRequestData(projectInstance, new[] { "GetCurrentProcessId", "GetResolverResults" }, _projectCollection.HostServices);
             var customparameters = new BuildParameters { EnableNodeReuse = false, Loggers = new ILogger[] { _logger } };
@@ -200,11 +202,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             GetResolverResults("SdksImported").ShouldBeSameIgnoringOrder(new[] { "Sdk1", "Sdk2" });
         }
 
-        private ProjectInstance CreateProjectInstance(string projectPath, string toolsVersion, ProjectCollection projectCollection)
+        private ResettableSdkResolverServiceState CreateProjectInstance(string projectPath, string toolsVersion, ProjectCollection projectCollection, out ProjectInstance instance)
         {
-            var sdkResolver = SetupSdkResolver(Path.GetDirectoryName(projectPath));
+            var (sdkResolver, state) = SetupSdkResolver(Path.GetDirectoryName(projectPath));
 
-            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(sdkResolver);
+            // No need to store the state object here: it would restore to the state of the one above.
+            SdkUtilities.CreateProjectOptionsWithResolver(sdkResolver, out var projectOptions);
 
             projectOptions.ProjectCollection = projectCollection;
             projectOptions.ToolsVersion = toolsVersion;
@@ -213,10 +216,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Project project = Project.FromProjectRootElement(projectRootElement, projectOptions);
 
-            return project.CreateProjectInstance(ProjectInstanceSettings.None, projectOptions.EvaluationContext);
+            instance= project.CreateProjectInstance(ProjectInstanceSettings.None, projectOptions.EvaluationContext);
+
+            return state;
         }
 
-        private SdkResolver SetupSdkResolver(string projectFolder)
+        private (SdkResolver, ResettableSdkResolverServiceState) SetupSdkResolver(string projectFolder)
         {
             Directory.CreateDirectory(Path.Combine(projectFolder, "Sdk1"));
             Directory.CreateDirectory(Path.Combine(projectFolder, "Sdk2"));
@@ -256,21 +261,23 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         warnings: null
                     ));
 
+            ResettableSdkResolverServiceState state = new();
+
             EvaluationContext.TestOnlyHookOnCreate = context =>
             {
                 var sdkService = (SdkResolverService)context.SdkResolverService;
 
-                sdkService.InitializeForTests(null, new List<SdkResolver> { sdkResolver });
+                state.Initialize(sdkService, null, new List<SdkResolver> { sdkResolver });
             };
 
             ((IBuildComponentHost)_buildManager).RegisterFactory(BuildComponentType.SdkResolverService, type =>
             {
                 var resolverService = new MainNodeSdkResolverService();
-                resolverService.InitializeForTests(null, new List<SdkResolver> { sdkResolver });
+                state.Initialize(resolverService, null, new List<SdkResolver> { sdkResolver });
                 return resolverService;
             });
 
-            return sdkResolver;
+            return (sdkResolver, state);
         }
     }
 }

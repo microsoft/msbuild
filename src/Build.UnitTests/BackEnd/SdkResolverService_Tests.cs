@@ -39,7 +39,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void AssertAllResolverErrorsLoggedWhenSdkNotResolved()
         {
-            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
+            using ResettableSdkResolverServiceState state = new(SdkResolverService.Instance, new MockLoaderStrategy());
 
             SdkReference sdk = new SdkReference("notfound", "referencedVersion", "minimumVersion");
 
@@ -63,8 +63,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             var sdk = new SdkReference("foo", "1.0.0", null);
 
-            SdkResolverService.Instance.InitializeForTests(
-                null,
+            using ResettableSdkResolverServiceState state = new(SdkResolverService.Instance,
+            null,
                 new List<SdkResolver>
                 {
                     new SdkUtilities.ConfigurableMockSdkResolver(
@@ -87,7 +87,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void AssertResolverThrows()
         {
-            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy(includeErrorResolver: true));
+            using ResettableSdkResolverServiceState state = new(SdkResolverService.Instance, new MockLoaderStrategy(includeErrorResolver: true));
 
             SdkReference sdk = new SdkReference("1sdkName", "version1", "minimumVersion");
 
@@ -100,7 +100,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void AssertFirstResolverCanResolve()
         {
-            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
+            using ResettableSdkResolverServiceState state = new(SdkResolverService.Instance, new MockLoaderStrategy());
 
             SdkReference sdk = new SdkReference("1sdkName", "referencedVersion", "minimumVersion");
 
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void AssertFirstResolverErrorsSupressedWhenResolved()
         {
-            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
+            using ResettableSdkResolverServiceState state = new(SdkResolverService.Instance, new MockLoaderStrategy());
 
             // 2sdkName will cause MockSdkResolver1 to fail with an error reason. The error will not
             // be logged because MockSdkResolver2 will succeed.
@@ -137,7 +137,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             const int submissionId = 5;
 
-            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
+            using ResettableSdkResolverServiceState state = new(SdkResolverService.Instance, new MockLoaderStrategy());
 
             SdkReference sdk = new SdkReference("othersdk", "1.0", "minimumVersion");
 
@@ -153,7 +153,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             const int submissionId = BuildEventContext.InvalidSubmissionId;
 
-            SdkResolverService.Instance.InitializeForTests(new MockLoaderStrategy());
+            using ResettableSdkResolverServiceState state = new(SdkResolverService.Instance, new MockLoaderStrategy());
 
             SdkReference sdk = new SdkReference("othersdk", "1.0", "minimumVersion");
 
@@ -195,7 +195,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     ));
 
             var service = new CachingSdkResolverService();
-            service.InitializeForTests(
+            using ResettableSdkResolverServiceState state = new(service, 
                 null,
                 new List<SdkResolver>
                 {
@@ -282,7 +282,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     warnings: null
                     ));
 
-            SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
+            using ResettableSdkResolverServiceState state = new(SdkResolverService.Instance, null, new List<SdkResolver>() { resolver });
 
             var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
 
@@ -319,7 +319,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     warnings: null
                     ));
 
-            SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
+            using ResettableSdkResolverServiceState state = new(SdkResolverService.Instance, null, new List<SdkResolver>() { resolver });
 
             var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
 
@@ -366,7 +366,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     warnings: null
                     ));
 
-            SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
+            using ResettableSdkResolverServiceState state = new(SdkResolverService.Instance, null, new List<SdkResolver>() { resolver });
 
             var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
 
@@ -412,7 +412,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     warnings: null
                     ));
 
-            SdkResolverService.Instance.InitializeForTests(null, new List<SdkResolver>() { resolver });
+            using ResettableSdkResolverServiceState state = new(SdkResolverService.Instance, null, new List<SdkResolver>() { resolver });
 
             var result = SdkResolverService.Instance.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false);
 
@@ -451,7 +451,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 ));
 
             var service = new CachingSdkResolverService();
-            service.InitializeForTests(
+            using ResettableSdkResolverServiceState state = new(service, 
                 null,
                 new List<SdkResolver>
                 {
@@ -480,7 +480,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             var service = new CachingSdkResolverService();
 
-            service.InitializeForTests(
+            using ResettableSdkResolverServiceState state = new(service, 
                 resolvers: new List<SdkResolver>
                 {
                     new SdkUtilities.ConfigurableMockSdkResolver((sdkRference, resolverContext, factory) =>
@@ -511,7 +511,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             bool isRunningInVisualStudio = false;
 
             var service = new CachingSdkResolverService();
-            service.InitializeForTests(
+            using ResettableSdkResolverServiceState state = new(service, 
                 resolvers: new List<SdkResolver>
                 {
                     new SdkUtilities.ConfigurableMockSdkResolver((sdkRference, resolverContext, factory) =>

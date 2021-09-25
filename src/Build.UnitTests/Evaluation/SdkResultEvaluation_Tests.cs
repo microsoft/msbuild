@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 CreateMockSdkResultPropertiesAndItems(out propertiesToAdd, out itemsToAdd);
             }
 
-            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
+            using var state = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
                 new Build.BackEnd.SdkResolution.SdkResult(
                         new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
                         Enumerable.Empty<string>(),
@@ -118,7 +118,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         propertiesToAdd,
                         itemsToAdd,
                         warnings: null
-                    ))
+                    )),
+                out var projectOptions
                 );
 
             string projectContent = @"
@@ -168,7 +169,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     itemsToAdd,
                     warnings: null);
 
-            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(sdkResult));
+            using var state = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(sdkResult),
+                out var projectOptions);
 
             string projectContent = @"
                     <Project>
@@ -246,7 +248,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 CreateMockSdkResultPropertiesAndItems(out propertiesToAdd, out itemsToAdd);
             }
 
-            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
+            using var state = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
                 new Build.BackEnd.SdkResolution.SdkResult(
                         new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
                         new[] {
@@ -257,7 +259,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         propertiesToAdd,
                         itemsToAdd,
                         warnings: null
-                    ))
+                    )),
+                out var projectOptions
                 );
 
             string projectContent = @"
@@ -350,7 +353,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Dictionary<string, SdkResultItem> itemsToAdd;
             CreateMockSdkResultPropertiesAndItems(out propertiesToAdd, out itemsToAdd);
 
-            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
+            using var state = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
                 new Build.BackEnd.SdkResolution.SdkResult(
                         new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
                         new[] { Path.Combine(_testFolder, "Sdk") },
@@ -358,7 +361,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         propertiesToAdd,
                         itemsToAdd,
                         warnings: null
-                    ))
+                    )),
+                out var projectOptions
                 );
 
             string projectContent = @"
@@ -434,7 +438,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 }
             };
 
-            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
+            using var state = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
                 new Build.BackEnd.SdkResolution.SdkResult(
                         new SdkReference("TestSpecialCharactersFromSdkResolver", null, null),
                         Enumerable.Empty<string>(),
@@ -442,7 +446,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         propertiesToAdd,
                         itemsToAdd,
                         warnings: null
-                    ))
+                    )),
+                out var projectOptions
                 );
 
             string projectContent = @"
