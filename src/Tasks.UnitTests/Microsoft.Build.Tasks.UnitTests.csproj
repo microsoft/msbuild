@@ -68,6 +68,7 @@
       <Link>Shared\LongPathSupportDisabledFactAttribute.cs</Link>
     </Compile>
     <Compile Include="..\UnitTests.Shared\RequiresSymbolicLinksFactAttribute.cs" />
+    <Compile Include="..\UnitTests.Shared\RequiresSymbolicLinksTheoryAttribute.cs" />
 
     <EmbeddedResource Include="SampleResx" />
     <EmbeddedResource Include="AssemblyDependency\CacheFileSamples\Microsoft.VisualStudio.LanguageServices.Implementation.csprojAssemblyReference.cache" />

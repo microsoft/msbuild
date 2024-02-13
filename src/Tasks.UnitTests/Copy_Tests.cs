@@ -2802,19 +2802,40 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// DestinationFolder should work.
         /// </summary>
-        [RequiresSymbolicLinksFact]
-        public void CopyToDestinationFolderWithSymbolicLinkCheck()
+        /// <param name="useRelative">Use a relative path, e.g. obj/Debug</param>
+        [RequiresSymbolicLinksTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void CopyToDestinationFolderWithSymbolicLinkCheck(bool useRelative)
         {
-            string sourceFile = FileUtilities.GetTemporaryFile();
-            string temp = Path.GetTempPath();
-            string destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
-            string destFile = Path.Combine(destFolder, Path.GetFileName(sourceFile));
+            string currentDirectory = Directory.GetCurrentDirectory();
+            string sourceFolder = null;
+            string absoluteSourceFile = null;
+            string destFolder = null;
+            string destFile = null;
+
             try
             {
-                File.WriteAllText(sourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
+                string temp = Path.GetTempPath();
+
+                // Due to symlinks from /var to /private/var on MacOs
+                // Setting the current directory to /var/... returns a current directory of /private/var/...
+                // This causes the relative path from /private/var to /var to contain a lot of ../ components up to the root.
+                // Although that should work it is not what we are testing here.
+                Directory.SetCurrentDirectory(temp);
+                temp = Directory.GetCurrentDirectory();
+
+                sourceFolder = Path.Combine(temp, $"MSBuildSymLinkTemp{Environment.UserName}");
+                Directory.CreateDirectory(sourceFolder);
+                absoluteSourceFile = FileUtilities.GetTemporaryFile(sourceFolder, null, ".tmp", false);
+                destFolder = Path.Combine(temp, "2A333ED756AF4dc392E728D0F864A398");
+                destFile = Path.Combine(destFolder, Path.GetFileName(absoluteSourceFile));
+                string relativeSourceFile = useRelative ? absoluteSourceFile.Substring(temp.Length + 1) : absoluteSourceFile;
+
+                File.WriteAllText(absoluteSourceFile, "This is a source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                 // Don't create the dest folder, let task do that
-                ITaskItem[] sourceFiles = { new TaskItem(sourceFile) };
+                ITaskItem[] sourceFiles = { new TaskItem(relativeSourceFile) };
 
                 var me = new MockEngine(true);
                 var t = new Copy
@@ -2833,9 +2854,16 @@ namespace Microsoft.Build.UnitTests
                 Assert.True(File.Exists(destFile)); // "destination exists"
                 Assert.True((File.GetAttributes(destFile) & FileAttributes.ReparsePoint) != 0, "File was copied but is not a symlink");
 
+#if NET6_0_OR_GREATER
+                string expectedRelativeLink = Path.Combine("..", relativeSourceFile);
+                var info = new FileInfo(destFile);
+
+                Assert.Equal(expectedRelativeLink, info.LinkTarget);
+#endif
+
                 MockEngine.GetStringDelegate resourceDelegate = AssemblyResources.GetString;
 
-                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", sourceFile, destFile);
+                me.AssertLogContainsMessageFromResource(resourceDelegate, "Copy.SymbolicLinkComment", relativeSourceFile, destFile);
 
                 string destinationFileContents = File.ReadAllText(destFile);
                 Assert.Equal("This is a source temp file.", destinationFileContents); // "Expected the destination symbolic linked file to contain the contents of source file."
@@ -2847,9 +2875,8 @@ namespace Microsoft.Build.UnitTests
 
                 // Now we will write new content to the source file
                 // we'll then check that the destination file automatically
-                // has the same content (i.e. it's been hard linked)
-
-                File.WriteAllText(sourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
+                // has the same content (i.e. it's been linked)
+                File.WriteAllText(absoluteSourceFile, "This is another source temp file."); // HIGHCHAR: Test writes in UTF8 without preamble.
 
                 // Read the destination file (it should have the same modified content as the source)
                 destinationFileContents = File.ReadAllText(destFile);
@@ -2859,9 +2886,14 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                File.Delete(sourceFile);
-                File.Delete(destFile);
-                FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
+                Directory.SetCurrentDirectory(currentDirectory);
+                if (destFile != null)
+                {
+                    File.Delete(absoluteSourceFile);
+                    File.Delete(destFile);
+                    FileUtilities.DeleteWithoutTrailingBackslash(destFolder, true);
+                    FileUtilities.DeleteWithoutTrailingBackslash(sourceFolder, true);
+                }
             }
         }
 

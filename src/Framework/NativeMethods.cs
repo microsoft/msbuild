@@ -10,7 +10,6 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
@@ -1027,6 +1026,10 @@ internal static class NativeMethods
     internal static bool MakeSymbolicLink(string newFileName, string existingFileName, ref string errorMessage)
     {
         bool symbolicLinkCreated;
+
+        string targetDirectory = Path.GetDirectoryName(newFileName) ?? Directory.GetCurrentDirectory();
+        existingFileName = Path.IsPathRooted(existingFileName) ? existingFileName : GetRelativePath(targetDirectory, existingFileName);
+
         if (IsWindows)
         {
             Version osVersion = Environment.OSVersion.Version;
@@ -1042,10 +1045,127 @@ internal static class NativeMethods
         else
         {
             symbolicLinkCreated = symlink(existingFileName, newFileName) == 0;
-            errorMessage = symbolicLinkCreated ? null : Marshal.GetLastWin32Error().ToString();
+            errorMessage = symbolicLinkCreated ? null : "The link() library call failed with the following error code: " + Marshal.GetLastWin32Error();
         }
 
         return symbolicLinkCreated;
+    }
+
+    internal static string GetRelativePath(string relativeTo, string path)
+    {
+#if NETSTANDARD2_1 || NETCOREAPP2_0_OR_GREATER || NET5_0_OR_GREATER
+        return Path.GetRelativePath(relativeTo, path);
+#else
+        // Based upon .NET 7.0 runtime Path.GetRelativePath
+        relativeTo = Path.GetFullPath(relativeTo);
+        path = Path.GetFullPath(path);
+        int commonLength = GetCommonPathLength(relativeTo, path);
+        if (commonLength == 0)
+        {
+            return path;    // No common part, use absolute path
+        }
+
+        int relativeToLength = relativeTo.Length;
+        if (EndsInDirectorySeparator(relativeTo))
+        {
+            relativeToLength--;
+        }
+
+        bool pathEndsInSeparator = EndsInDirectorySeparator(path);
+        int pathLength = path.Length;
+        if (pathEndsInSeparator)
+        {
+            pathLength--;
+        }
+
+        if (relativeToLength == pathLength && commonLength >= relativeToLength)
+        {
+            return ".";
+        }
+
+        var sb = new System.Text.StringBuilder(Math.Max(relativeTo.Length, path.Length));
+
+        if (commonLength < relativeToLength)
+        {
+            sb.Append("..");
+
+            for (int i = commonLength + 1; i < relativeToLength; i++)
+            {
+                if (IsDirectorySeparator(relativeTo[i]))
+                {
+                    sb.Append(Path.DirectorySeparatorChar);
+                    sb.Append("..");
+                }
+            }
+        }
+        else if (IsDirectorySeparator(path[commonLength]))
+        {
+            // No parent segments and we need to eat the initial separator.
+            // (C:\Foo C:\Foo\Bar case)
+            commonLength++;
+        }
+
+        // Now add the rest of the "to" path, adding back the trailing separator
+        int differenceLength = pathLength - commonLength;
+        if (pathEndsInSeparator)
+        {
+            differenceLength++;
+        }
+
+        if (differenceLength > 0)
+        {
+            if (sb.Length > 0)
+            {
+                sb.Append(Path.DirectorySeparatorChar);
+            }
+
+            sb.Append(path.Substring(commonLength));
+        }
+
+        return sb.ToString();
+
+        static bool IsDirectorySeparator(char c) => c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar;
+        static bool EndsInDirectorySeparator(string path) => path.Length > 0 && IsDirectorySeparator(path[path.Length - 1]);
+        static int GetCommonPathLength(string first, string second)
+        {
+            int n = Math.Min(first.Length, second.Length);
+            int commonLength;
+            for (commonLength = 0; commonLength < n; commonLength++)
+            {
+                // Case sensitive compare, even some NTFS directories can be case sensitive
+                if (first[commonLength] != second[commonLength])
+                {
+                    break;
+                }
+            }
+
+            // If nothing matches
+            if (commonLength == 0)
+            {
+                return commonLength;
+            }
+
+            // Or we're a full string and equal length or match to a separator
+            if (commonLength == first.Length
+                && (commonLength == second.Length || IsDirectorySeparator(second[commonLength])))
+            {
+                return commonLength;
+            }
+
+            if (commonLength == second.Length && IsDirectorySeparator(first[commonLength]))
+            {
+                return commonLength;
+            }
+
+            // It's possible we matched somewhere in the middle of a segment e.g. C:\Foodie and C:\Foobar.
+            while (commonLength > 0 && !IsDirectorySeparator(first[commonLength - 1]))
+            {
+                commonLength--;
+            }
+
+            return commonLength;
+        }
+#endif
     }
 
     /// <summary>
