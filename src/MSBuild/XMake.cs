@@ -43,6 +43,7 @@ using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using SimpleErrorLogger = Microsoft.Build.Logging.SimpleErrorLogger.SimpleErrorLogger;
 using TerminalLogger = Microsoft.Build.Logging.TerminalLogger.TerminalLogger;
+using TerminalLoggerForwardingLogger = Microsoft.Build.Logging.TerminalLogger.TerminalLoggerNodeForwardingLogger;
 
 #nullable disable
 
@@ -2951,13 +2952,13 @@ namespace Microsoft.Build.CommandLine
 
 
         /// <summary>
-        /// Identifies if there is rsp files near the project file 
+        /// Identifies if there is rsp files near the project file
         /// </summary>
         /// <returns>true if there autoresponse file was found</returns>
         private static bool CheckAndGatherProjectAutoResponseFile(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches commandLineSwitches, bool recursing, string commandLine)
         {
             bool found = false;
-           
+
             var projectDirectory = GetProjectDirectory(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project]);
 
             if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
@@ -3936,8 +3937,8 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    // For performance, register this logger using the forwarding logger mechanism.
-                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", TerminalLogger.ConfigurableForwardingLoggerParameters), LoggerVerbosity.Quiet);
+                    LoggerDescription terminalLoggerDescription = new LoggerDescription(typeof(TerminalLoggerForwardingLogger).FullName, typeof(TerminalLoggerForwardingLogger).Assembly.FullName, null, null, LoggerVerbosity.Diagnostic);
+                    DistributedLoggerRecord forwardingLoggerRecord = new DistributedLoggerRecord(logger, terminalLoggerDescription);
                     distributedLoggerRecords.Add(forwardingLoggerRecord);
                 }
             }

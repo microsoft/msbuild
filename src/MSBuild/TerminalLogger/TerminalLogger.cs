@@ -1067,3 +1067,81 @@ internal sealed partial class TerminalLogger : INodeLogger
 
     #endregion
 }
+
+internal sealed class TerminalLoggerNodeForwardingLogger : IForwardingLogger
+{
+    public IEventRedirector? BuildEventRedirector { get; set; }
+    public int NodeId { get; set; }
+    public LoggerVerbosity Verbosity { get => LoggerVerbosity.Diagnostic; set { return; } }
+    public string? Parameters { get; set; }
+
+    public void Initialize(IEventSource eventSource, int nodeCount) => Initialize(eventSource);
+    public void Initialize(IEventSource eventSource)
+    {
+        eventSource.BuildStarted += ForwardEventUnconditionally;
+        eventSource.BuildFinished += ForwardEventUnconditionally;
+        eventSource.ProjectStarted += ForwardEventUnconditionally;
+        eventSource.ProjectFinished += ForwardEventUnconditionally;
+        eventSource.TargetStarted += ForwardEventUnconditionally;
+        eventSource.TargetFinished += ForwardEventUnconditionally;
+        eventSource.TaskStarted += TaskStarted;
+
+        eventSource.MessageRaised += MessageRaised;
+        eventSource.WarningRaised += ForwardEventUnconditionally;
+        eventSource.ErrorRaised += ForwardEventUnconditionally;
+
+        if (eventSource is IEventSource3 eventSource3)
+        {
+            eventSource3.IncludeTaskInputs();
+        }
+
+        if (eventSource is IEventSource4 eventSource4)
+        {
+            eventSource4.IncludeEvaluationPropertiesAndItems();
+        }
+    }
+
+    public void ForwardEventUnconditionally(object sender, BuildEventArgs e)
+    {
+        BuildEventRedirector?.ForwardEvent(e);
+    }
+
+    public void TaskStarted(object sender, TaskStartedEventArgs e)
+    {
+        // MSBuild tasks yield the build node, so forward this to the central node so it can update status
+        if (e.TaskName.Equals("MSBuild", StringComparison.OrdinalIgnoreCase))
+        {
+            BuildEventRedirector?.ForwardEvent(e);
+        }
+    }
+
+    public void MessageRaised(object sender, BuildMessageEventArgs e)
+    {
+        if (e.BuildEventContext is null)
+        {
+            return;
+        }
+
+        // SourceRoot additions are used in output reporting, so forward those along
+        if (e is TaskParameterEventArgs taskArgs)
+        {
+            if (taskArgs.Kind == TaskParameterMessageKind.AddItem)
+            {
+                if (taskArgs.ItemType.Equals("SourceRoot", StringComparison.OrdinalIgnoreCase))
+                {
+                    BuildEventRedirector?.ForwardEvent(taskArgs);
+                }
+            }
+        }
+
+        // High-priority messages are rendered for each project, so forward those along
+        if (e.Message is not null && e.Importance == MessageImportance.High)
+        {
+            BuildEventRedirector?.ForwardEvent(e);
+        }
+    }
+
+    public void Shutdown()
+    {
+    }
+}
