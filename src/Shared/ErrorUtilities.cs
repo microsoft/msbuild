@@ -545,6 +545,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
+#nullable enable
         /// <summary>
         /// Throws an ArgumentException if the string has zero length, unless it is
         /// null, in which case no exception is thrown.
@@ -556,6 +557,7 @@ namespace Microsoft.Build.Shared
                 ThrowArgumentLength(parameterName);
             }
         }
+#nullable disable
 
         /// <summary>
         /// Throws an ArgumentNullException if the given parameter is null.

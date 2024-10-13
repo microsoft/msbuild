@@ -76,6 +76,16 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Constructor that allows specifying the full path. Intended for unit tests only,
+        /// to avoid having to files to disk during tests just to see location paths populated.
+        /// </summary>
+        internal XmlDocumentWithLocation(bool? loadAsReadOnly, string fullPath)
+            : this(loadAsReadOnly)
+        {
+            _fullPath = fullPath;
+        }
+
+        /// <summary>
         /// Whether to load files read only
         /// </summary>
         private enum ReadOnlyLoadFlags
