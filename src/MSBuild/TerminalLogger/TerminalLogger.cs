@@ -245,6 +245,15 @@ internal sealed partial class TerminalLogger : INodeLogger
         _manualRefresh = true;
     }
 
+    /// <summary>
+    /// Private constructor invoked by static factory.
+    /// </summary>
+    private TerminalLogger(LoggerVerbosity verbosity, uint? originalConsoleMode) : this()
+    {
+        Verbosity = verbosity;
+        _originalConsoleMode = originalConsoleMode;
+    }
+
     #region INodeLogger implementation
 
     /// <inheritdoc/>
@@ -265,8 +274,6 @@ internal sealed partial class TerminalLogger : INodeLogger
     /// <inheritdoc/>
     public void Initialize(IEventSource eventSource)
     {
-        (_, _, _originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
-
         ParseParameters();
 
         eventSource.BuildStarted += BuildStarted;
@@ -1049,6 +1056,24 @@ internal sealed partial class TerminalLogger : INodeLogger
     #endregion
 
     #region Helpers
+
+    /// <summary>
+    /// Creates a Terminal logger or Console logger based on the environment.
+    /// This method is called by reflection from dotnet. Do not modify the name or parameters without adapting the SDK.
+    /// </summary>
+    public static ILogger CreateTerminalOrConsoleLogger(LoggerVerbosity verbosity)
+    {
+        bool isDisabled = (Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER") ?? string.Empty).Equals("off", StringComparison.InvariantCultureIgnoreCase);
+        (bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
+
+        if (isDisabled || !supportsAnsi || !outputIsScreen)
+        {
+            NativeMethodsShared.RestoreConsoleMode(originalConsoleMode);
+            return new ConsoleLogger(verbosity);
+        }
+
+        return new TerminalLogger(verbosity, originalConsoleMode);
+    }
 
     /// <summary>
     /// Print a build result summary to the output.
