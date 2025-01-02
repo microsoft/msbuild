@@ -2,9 +2,9 @@
 <Dependencies>
   <ProductDependencies>
     <!-- Intermediate is necessary for source build. -->
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="9.0.0-alpha.1.24604.1">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="9.0.0-alpha.1.24619.1">
       <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
-      <Sha>c81acaa80719d0ecfadfe41e3c0e3548bdc4e78d</Sha>
+      <Sha>e2b1d16fd66540b3a5813ec0ac1fd166688c3e0a</Sha>
       <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
@@ -85,17 +85,17 @@
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>b41381d5cd633471265e9cd72e933a7048e03062</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.13.0-rc.93">
+    <Dependency Name="NuGet.Build.Tasks" Version="6.13.0-rc.106">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>acc521c647aa484fc2202024f624c7a56bf9fe0f</Sha>
+      <Sha>949031c79ea7f5c15b59f31e26d5355fb23795ca</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.13.0-3.24607.3">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.13.0-3.24614.4">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>31f8433cb625e2aa74d148005003b21d5e3f67b7</Sha>
+      <Sha>633f34af4fe019eaf0c2e830bdc07c891ecd49f7</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn" Version="4.13.0-3.24607.3">
+    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn" Version="4.13.0-3.24614.4">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>31f8433cb625e2aa74d148005003b21d5e3f67b7</Sha>
+      <Sha>633f34af4fe019eaf0c2e830bdc07c891ecd49f7</Sha>
       <SourceBuild RepoName="roslyn" ManagedOnly="true" />
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="9.0.0-beta.24572.2">

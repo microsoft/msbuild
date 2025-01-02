@@ -22,6 +22,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using ExceptionHandling = Microsoft.Build.Shared.ExceptionHandling;
 
 namespace Microsoft.Build.Experimental.ProjectCache
 {

@@ -2199,7 +2199,7 @@ elementFormDefault="qualified">
     <xs:element name="UseWindowsForms" type="msb:boolean" substitutionGroup="msb:Property" />
     <xs:element name="UseWPF" type="msb:boolean" substitutionGroup="msb:Property" />
     <xs:element name="UseVSHostingProcess" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="UTF8OutPut" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="UTF8Output" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="VCTargetsPath" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="VSTO_TrustAssembliesLocation" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="WarningLevel" type="msb:StringPropertyType" substitutionGroup="msb:Property">
