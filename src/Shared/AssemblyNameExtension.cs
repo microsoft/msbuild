@@ -7,6 +7,10 @@ using System.Configuration.Assemblies;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+#if !TASKHOST
+using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
+#endif
 using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.Build.BackEnd;
@@ -187,7 +191,19 @@ namespace Microsoft.Build.Shared
         {
             try
             {
+#if TASKHOST
                 return new AssemblyNameExtension(AssemblyName.GetAssemblyName(path));
+#else
+
+                using (var fileStream = File.OpenRead(path))
+                using (var peReader = new PEReader(fileStream))
+                {
+                    var metadataReader = peReader.GetMetadataReader();
+                    var assemblyDef = metadataReader.GetAssemblyDefinition();
+
+                    return new AssemblyNameExtension(metadataReader.GetString(assemblyDef.Name));
+                }
+#endif
             }
             catch (FileLoadException)
             {
