@@ -54,9 +54,6 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <PackageReference Include="System.Text.Encoding.CodePages" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="System.Reflection.Metadata" />
   </ItemGroup>
 
