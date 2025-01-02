@@ -696,6 +696,9 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <PackageReference Include="Microsoft.Win32.Registry" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Reflection.Metadata" />
   </ItemGroup>
 
