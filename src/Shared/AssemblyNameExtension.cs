@@ -20,7 +20,7 @@ using Microsoft.Build.BackEnd;
 namespace Microsoft.Build.Shared
 {
     /// <summary>
-    /// Specifies the parts of the assembly name to partially match
+    /// Specifies the parts of the assembly name to partially match.
     /// </summary>
     [FlagsAttribute]
     internal enum PartialComparisonFlags : int
