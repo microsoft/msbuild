@@ -413,6 +413,11 @@
         <target state="translated">MSB3094: "{2}" refere-se ao(s) item(ns) {0} e "{3}" refere-se ao(s) item(ns) {1}. Eles devem ter o mesmo número de itens.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="new">An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: espaço inesperado na posição "{1}" da condição "{0}". Você esqueceu de remover um espaço?</target>
@@ -806,6 +811,11 @@ Erros: {3}</target>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
         <target state="translated">Ler a propriedade não inicializada "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownLoggingType">
+        <source>Logging type {0} is not understood by {1}.</source>
+        <target state="new">Logging type {0} is not understood by {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">

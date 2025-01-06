@@ -80,7 +80,7 @@ namespace Microsoft.Build.Utilities
                 };
             }
 
-            _tlogFiles = TrackedDependencies.ExpandWildcards(tlogFiles);
+            _tlogFiles = TrackedDependencies.ExpandWildcards(tlogFiles, _log);
             _tlogAvailable = TrackedDependencies.ItemsExist(_tlogFiles);
             DependencyTable = new Dictionary<string, Dictionary<string, DateTime>>(StringComparer.OrdinalIgnoreCase);
             if (_tlogFiles != null && constructOutputsFromTLogs)

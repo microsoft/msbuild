@@ -1353,7 +1353,7 @@ namespace Microsoft.Build.UnitTests
                     // Set env var to fail on drive enumerating wildcard detection
                     Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "1");
 
-                    (string[] fileList, FileMatcher.SearchAction action, string excludeFileSpec) = FileMatcher.Default.GetFiles(
+                    (string[] fileList, FileMatcher.SearchAction action, string excludeFileSpec, _) = FileMatcher.Default.GetFiles(
                         string.Empty,
                         driveEnumeratingWildcard);
 
@@ -1362,7 +1362,7 @@ namespace Microsoft.Build.UnitTests
                     excludeFileSpec.ShouldBe(string.Empty);
 
                     // Handle failing with drive enumerating exclude
-                    (fileList, action, excludeFileSpec) = FileMatcher.Default.GetFiles(
+                    (fileList, action, excludeFileSpec, _) = FileMatcher.Default.GetFiles(
                         string.Empty,
                         @"/*/*.cs",
                         new List<string> { driveEnumeratingWildcard });
@@ -1394,7 +1394,7 @@ namespace Microsoft.Build.UnitTests
                     // Set env var to log on drive enumerating wildcard detection
                     Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "0");
 
-                    (_, FileMatcher.SearchAction action, string excludeFileSpec) = FileMatcher.Default.GetFiles(
+                    (_, FileMatcher.SearchAction action, string excludeFileSpec, _) = FileMatcher.Default.GetFiles(
                         string.Empty,
                         driveEnumeratingWildcard);
 
@@ -1402,7 +1402,7 @@ namespace Microsoft.Build.UnitTests
                     excludeFileSpec.ShouldBe(string.Empty);
 
                     // Handle logging with drive enumerating exclude
-                    (_, action, excludeFileSpec) = FileMatcher.Default.GetFiles(
+                    (_, action, excludeFileSpec, _) = FileMatcher.Default.GetFiles(
                         string.Empty,
                         @"/*/*.cs",
                         new List<string> { driveEnumeratingWildcard });

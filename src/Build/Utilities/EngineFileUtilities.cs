@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -284,7 +284,10 @@ namespace Microsoft.Build.Internal
                             break;
 
                         default:
-                            throw new InternalErrorException($"Logging type {loggingMechanism.GetType()} is not understood by {nameof(GetFileList)}.");
+                            throw new InternalErrorException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                "UnknownLoggingType",
+                                loggingMechanism.GetType(),
+                                nameof(GetFileList)));
                     }
                 }
 
@@ -322,7 +325,10 @@ namespace Microsoft.Build.Internal
                             break;
 
                         default:
-                            throw new InternalErrorException($"Logging type {loggingMechanism.GetType()} is not understood by {nameof(GetFileList)}.");
+                            throw new InternalErrorException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                "UnknownLoggingType",
+                                loggingMechanism.GetType(),
+                                nameof(GetFileList)));
                     }
                 }
                 else
@@ -332,7 +338,30 @@ namespace Microsoft.Build.Internal
                     // as a relative path, we will get back a bunch of relative paths.
                     // If the filespec started out as an absolute path, we will get
                     // back a bunch of absolute paths
-                    (fileList, _, _) = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+                    (fileList, _, _, string globFailure) = fileMatcher.GetFiles(directoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+
+                    // log globing failure with the present logging mechanism
+                    if (globFailure != null)
+                    {
+                        switch (loggingMechanism)
+                        {
+                            case TargetLoggingContext targetLoggingContext:
+                                targetLoggingContext.LogCommentFromText(MessageImportance.Low, globFailure);
+                                break;
+                            case ILoggingService loggingService:
+                                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, globFailure);
+                                break;
+                            case EvaluationLoggingContext evaluationLoggingContext:
+                                evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, globFailure);
+                                break;
+                            default:
+                                throw new InternalErrorException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                    "UnknownLoggingType",
+                                    loggingMechanism.GetType(),
+                                    nameof(GetFileList)));
+                        }
+                    }
+
 
                     ErrorUtilities.VerifyThrow(fileList != null, "We must have a list of files here, even if it's empty.");
 

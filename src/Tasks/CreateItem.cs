@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -94,6 +94,7 @@ namespace Microsoft.Build.Tasks
             return !Log.HasLoggedErrors;
         }
 
+#nullable enable
         /// <summary>
         /// Create the list of output items.
         /// </summary>
@@ -137,11 +138,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Expand wildcards in the item list.
         /// </summary>
-        private (ITaskItem[] Element, bool NoLoggedErrors) TryExpandWildcards(ITaskItem[] expand, string attributeType)
+        private (ITaskItem[]? Element, bool NoLoggedErrors) TryExpandWildcards(ITaskItem[]? expand, string attributeType)
         {
             // Used to detect and log drive enumerating wildcard patterns.
             string[] files;
-            FileMatcher.SearchAction action = FileMatcher.SearchAction.None;
             string itemSpec = string.Empty;
 
             if (expand == null)
@@ -178,7 +178,11 @@ namespace Microsoft.Build.Tasks
                         }
                         else if (isLegalFileSpec)
                         {
-                            (files, action, _) = FileMatcher.Default.GetFiles(null /* use current directory */, i.ItemSpec);
+                            (files, _, _, string? globFailure) = FileMatcher.Default.GetFiles(null /* use current directory */, i.ItemSpec);
+                            if (globFailure != null)
+                            {
+                                Log.LogMessage(MessageImportance.Low, globFailure);
+                            }
 
                             foreach (string file in files)
                             {

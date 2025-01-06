@@ -2147,7 +2147,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="BuildCheck_BC0101_Title" xml:space="preserve">
     <value>Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</value>
-	<comment>'OutputPath' and 'IntermediateOutputPath' not to be translated.</comment>
+    <comment>'OutputPath' and 'IntermediateOutputPath' not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0101_MessageFmt" xml:space="preserve">
     <value>Projects {0} and {1} have conflicting output paths: {2}.</value>
@@ -2166,7 +2166,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="BuildCheck_BC0103_MessageAddendum" xml:space="preserve">
     <value>'{0}' with value: '{1}'</value>
-	<comment>Will be used as a parameter {0} in previous message.</comment>
+    <comment>Will be used as a parameter {0} in previous message.</comment>
   </data>
   <data name="BuildCheck_BC0104_Title" xml:space="preserve">
     <value>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</value>
@@ -2192,11 +2192,11 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="BuildCheck_BC0107_Title" xml:space="preserve">
     <value>'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</value>
-	  <comment>Terms in quotes are not to be translated.</comment>
+    <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0107_MessageFmt" xml:space="preserve">
     <value>Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</value>
-	  <comment>Terms in quotes are not to be translated.</comment>
+    <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0201_Title" xml:space="preserve">
     <value>A property that is accessed should be declared first.</value>
@@ -2215,6 +2215,12 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="BuildCheck_BC0203_MessageFmt" xml:space="preserve">
     <value>Property: '{0}' was declared/initialized, but it was never used.</value>
+  </data>
+  <data name="GlobExpansionFailed" xml:space="preserve">
+    <value>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</value>
+  </data>
+  <data name="UnknownLoggingType" xml:space="preserve">
+    <value>Logging type {0} is not understood by {1}.</value>
   </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
