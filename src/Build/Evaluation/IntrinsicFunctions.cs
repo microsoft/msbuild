@@ -31,13 +31,32 @@ namespace Microsoft.Build.Evaluation
     /// The Intrinsic class provides static methods that can be accessed from MSBuild's
     /// property functions using $([MSBuild]::Function(x,y)).
     /// </summary>
-    internal static class IntrinsicFunctions
+    internal static partial class IntrinsicFunctions
     {
+        private const string RegistrySdkSpecification = @"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$";
+
 #pragma warning disable CA1416 // Platform compatibility: we'll only use this on Windows
         private static readonly object[] DefaultRegistryViews = [RegistryView.Default];
 #pragma warning restore CA1416
 
-        private static readonly Lazy<Regex> RegistrySdkRegex = new Lazy<Regex>(() => new Regex(@"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$", RegexOptions.IgnoreCase));
+#if NET7_0_OR_GREATER
+        [GeneratedRegex(RegistrySdkSpecification, RegexOptions.IgnoreCase)]
+        private static partial Regex RegistrySdkPattern();
+#else
+        private static readonly Lazy<Regex> RegistrySdkPattern = new Lazy<Regex>(() => new Regex(RegistrySdkSpecification, RegexOptions.IgnoreCase));
+#endif
+
+        private static Regex RegistrySdkRegex
+        {
+            get
+            {
+#if NET7_0_OR_GREATER
+                return RegistrySdkPattern();
+#else
+                return RegistrySdkPattern.Value;
+#endif
+            }
+        }
 
         private static readonly Lazy<NuGetFrameworkWrapper> NuGetFramework = new Lazy<NuGetFrameworkWrapper>(() => NuGetFrameworkWrapper.CreateInstance());
 
@@ -279,7 +298,7 @@ namespace Microsoft.Build.Evaluation
                         // Fake common requests to HKLM that we can resolve
 
                         // See if this asks for a specific SDK
-                        var m = RegistrySdkRegex.Value.Match(keyName);
+                        var m = RegistrySdkRegex.Match(keyName);
 
                         if (m.Success && m.Groups.Count >= 1 && valueName.Equals("InstallRoot", StringComparison.OrdinalIgnoreCase))
                         {
