@@ -41,19 +41,19 @@
   <PropertyGroup>
     <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
     <MicrosoftVisualStudioSolutionPersistenceVersion>1.0.9</MicrosoftVisualStudioSolutionPersistenceVersion>
-    <SystemCollectionsImmutableVersion>8.0.0</SystemCollectionsImmutableVersion>
-    <SystemConfigurationConfigurationManagerVersion>8.0.0</SystemConfigurationConfigurationManagerVersion>
-    <SystemFormatsAsn1Version>8.0.1</SystemFormatsAsn1Version>
+    <SystemCollectionsImmutableVersion>9.0.0</SystemCollectionsImmutableVersion>
+    <SystemConfigurationConfigurationManagerVersion>9.0.0</SystemConfigurationConfigurationManagerVersion>
+    <SystemFormatsAsn1Version>9.0.0</SystemFormatsAsn1Version>
     <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
-    <SystemReflectionMetadataLoadContextVersion>8.0.0</SystemReflectionMetadataLoadContextVersion>
-    <SystemReflectionMetadataVersion>8.0.0</SystemReflectionMetadataVersion>
-    <SystemResourcesExtensionsVersion>8.0.0</SystemResourcesExtensionsVersion>
+    <SystemReflectionMetadataLoadContextVersion>9.0.0</SystemReflectionMetadataLoadContextVersion>
+    <SystemReflectionMetadataVersion>9.0.0</SystemReflectionMetadataVersion>
+    <SystemResourcesExtensionsVersion>9.0.0</SystemResourcesExtensionsVersion>
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
-    <SystemTextEncodingCodePagesVersion>7.0.0</SystemTextEncodingCodePagesVersion>
+    <SystemTextEncodingCodePagesVersion>9.0.0</SystemTextEncodingCodePagesVersion>
     <SystemTextRegularExpressionsVersion>4.3.1</SystemTextRegularExpressionsVersion>
-    <SystemTextJsonVersion>8.0.5</SystemTextJsonVersion>
-    <SystemThreadingChannelsVersion>8.0.0</SystemThreadingChannelsVersion>
-    <SystemThreadingTasksDataflowVersion>8.0.0</SystemThreadingTasksDataflowVersion>
+    <SystemTextJsonVersion>9.0.0</SystemTextJsonVersion>
+    <SystemThreadingChannelsVersion>9.0.0</SystemThreadingChannelsVersion>
+    <SystemThreadingTasksDataflowVersion>9.0.0</SystemThreadingTasksDataflowVersion>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>

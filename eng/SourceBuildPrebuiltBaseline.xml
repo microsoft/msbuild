@@ -5,19 +5,21 @@
   <IgnorePatterns>
     <!-- 8.0 packages are not allowed in the 8.0 build, because they're not "current", so baseline them. -->
     <UsagePattern IdentityGlob="System.CodeDom/*8.0.0*" />
-    <UsagePattern IdentityGlob="System.Collections.Immutable/*8.0.0*" />
-    <UsagePattern IdentityGlob="System.Configuration.ConfigurationManager/*8.0.0*" />
-    <UsagePattern IdentityGlob="System.Diagnostics.EventLog/*8.0.0*" />
-    <UsagePattern IdentityGlob="System.Formats.Asn1/*8.0.1*" />
-    <UsagePattern IdentityGlob="System.Reflection.Metadata/*8.0.0*" />
-    <UsagePattern IdentityGlob="System.Reflection.MetadataLoadContext/*8.0.0*" />
-    <UsagePattern IdentityGlob="System.Resources.Extensions/*8.0.0*" />
-    <UsagePattern IdentityGlob="System.Security.Cryptography.Pkcs/*8.0.0*" />
-    <UsagePattern IdentityGlob="System.Security.Cryptography.ProtectedData/*8.0.0*" />
-    <UsagePattern IdentityGlob="System.Security.Cryptography.Xml/*8.0.0*" />
-    <UsagePattern IdentityGlob="System.Text.Json/*8.0.5*" />
-    <UsagePattern IdentityGlob="System.Threading.Tasks.Dataflow/*8.0.0*" />
-    <UsagePattern IdentityGlob="System.Formats.Asn1/*8.0.1*" />
+    <UsagePattern IdentityGlob="System.Collections.Immutable/*9.0.0*" />
+    <UsagePattern IdentityGlob="System.Configuration.ConfigurationManager/*9.0.0*" />
+    <UsagePattern IdentityGlob="System.Diagnostics.EventLog/*9.0.0*" />
+    <UsagePattern IdentityGlob="System.Formats.Asn1/*9.0.0*" />
+    <UsagePattern IdentityGlob="System.Formats.Nrbf/*9.0.0*" />
+    <UsagePattern IdentityGlob="System.Reflection.Metadata/*9.0.0*" />
+    <UsagePattern IdentityGlob="System.Reflection.MetadataLoadContext/*9.0.0*" />
+    <UsagePattern IdentityGlob="System.Resources.Extensions/*9.0.0*" />
+    <UsagePattern IdentityGlob="System.Security.Cryptography.Pkcs/*9.0.0*" />
+    <UsagePattern IdentityGlob="System.Security.Cryptography.ProtectedData/*9.0.0*" />
+    <UsagePattern IdentityGlob="System.Security.Cryptography.Xml/*9.0.0*" />
+    <UsagePattern IdentityGlob="System.Text.Encoding.CodePages/*9.0.0*" />
+    <UsagePattern IdentityGlob="System.Text.Json/*9.0.0*" />
+    <UsagePattern IdentityGlob="System.Threading.Tasks.Dataflow/*9.0.0*" />
+    <UsagePattern IdentityGlob="System.Formats.Asn1/*9.0.0*" />
 	  <UsagePattern IdentityGlob="Microsoft.VisualStudio.SolutionPersistence/*1.0.9*" />
   </IgnorePatterns>
   <Usages>

@@ -42,6 +42,8 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)Microsoft.VisualStudio.SolutionPersistence.dll
   file source=$(X86BinPath)RuntimeContracts.dll
   file source=$(X86BinPath)System.Buffers.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
+  file source=$(X86BinPath)System.Formats.Nrbf.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
+  file source=$(X86BinPath)System.IO.Pipelines.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
   file source=$(X86BinPath)System.Memory.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
   file source=$(X86BinPath)System.Reflection.Metadata.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
   file source=$(X86BinPath)System.Reflection.MetadataLoadContext.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
@@ -56,6 +58,7 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)System.Runtime.CompilerServices.Unsafe.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=1
+  file source=$(X86BinPath)Microsoft.Bcl.HashCode.dll
   file source=$(X86BinPath)Microsoft.NET.StringTools.dll vs.file.ngenArchitecture=all
   file source=$(TaskHostBinPath)Microsoft.NET.StringTools.net35.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
@@ -189,6 +192,8 @@ folder InstallDir:\MSBuild\Current\Bin\amd64
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Buffers.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Formats.Nrbf.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.IO.Pipelines.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Memory.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Reflection.Metadata.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Reflection.MetadataLoadContext.dll vs.file.ngenArchitecture=all
@@ -199,10 +204,11 @@ folder InstallDir:\MSBuild\Current\Bin\amd64
   file source=$(X86BinPath)System.Threading.Tasks.Extensions.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.ValueTuple.dll
   file source=$(X86BinPath)System.Numerics.Vectors.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Resources.Extensions.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Resources.Extensions.dll
   file source=$(X86BinPath)System.Runtime.CompilerServices.Unsafe.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)Microsoft.Bcl.HashCode.dll
   file source=$(X86BinPath)Microsoft.NET.StringTools.dll vs.file.ngenArchitecture=all
   file source=$(TaskHostBinPath)Microsoft.NET.StringTools.net35.dll vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
