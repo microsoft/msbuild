@@ -33,6 +33,7 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal static partial class IntrinsicFunctions
     {
+        // lang=regex
         private const string RegistrySdkSpecification = @"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$";
 
 #pragma warning disable CA1416 // Platform compatibility: we'll only use this on Windows
