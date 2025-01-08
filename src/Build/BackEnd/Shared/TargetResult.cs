@@ -136,6 +136,22 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        public string TargetResultCodeToString()
+        {
+            switch (ResultCode)
+            {
+                case TargetResultCode.Failure:
+                    return nameof(TargetResultCode.Failure);
+                case TargetResultCode.Skipped:
+                    return nameof(TargetResultCode.Skipped);
+                case TargetResultCode.Success:
+                    return nameof(TargetResultCode.Success);
+                default:
+                    Debug.Fail($"Unknown enum value: {ResultCode}");
+                    return ResultCode.ToString();
+            }
+        }
+
         /// <summary>
         /// Returns the internal result for the target.
         /// </summary>

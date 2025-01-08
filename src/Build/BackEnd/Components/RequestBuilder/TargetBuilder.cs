@@ -484,7 +484,7 @@ namespace Microsoft.Build.BackEnd
                             // Execute all of the tasks on this target.
                             MSBuildEventSource.Log.TargetStart(currentTargetEntry.Name);
                             await currentTargetEntry.ExecuteTarget(taskBuilder, _requestEntry, _projectLoggingContext, _cancellationToken);
-                            MSBuildEventSource.Log.TargetStop(currentTargetEntry.Name, currentTargetEntry.Result?.ResultCode.ToString() ?? string.Empty);
+                            MSBuildEventSource.Log.TargetStop(currentTargetEntry.Name, currentTargetEntry.Result?.TargetResultCodeToString() ?? string.Empty);
                         }
 
                         break;
