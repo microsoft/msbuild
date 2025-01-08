@@ -20,34 +20,23 @@
     <UsingToolVSSDK>true</UsingToolVSSDK>
   </PropertyGroup>
   <!-- Production Dependencies -->
-  <!-- Condition consumption of maintenance-packages dependencies based on source build.
-       This is to prevent "package downgrade" errors coming from other packages that are
-       already consuming the newest version of these same dependencies. -->
-  <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' == 'true'">
-    <!-- Use newest package versions. -->
-    <SystemMemoryVersion>4.6.0</SystemMemoryVersion>
-    <SystemRuntimeCompilerServicesUnsafeVersion>6.1.0</SystemRuntimeCompilerServicesUnsafeVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' != 'true'">
-    <!-- Keep using older versions. Upgrade carefully. -->
+  <PropertyGroup>
+    <MicrosoftIORedistVersion>6.1.0</MicrosoftIORedistVersion>
+    <MicrosoftVisualStudioSolutionPersistenceVersion>1.0.9</MicrosoftVisualStudioSolutionPersistenceVersion>
+    <SystemCollectionsImmutableVersion>8.0.0</SystemCollectionsImmutableVersion>
+    <SystemConfigurationConfigurationManagerVersion>8.0.0</SystemConfigurationConfigurationManagerVersion>
+    <SystemFormatsAsn1Version>8.0.1</SystemFormatsAsn1Version>
     <!--
         Modifying the version of System.Memory is very high impact and causes downstream breaks in third-party tooling that uses the MSBuild API.
         When updating the version of System.Memory file a breaking change here: https://github.com/dotnet/docs/issues/new?assignees=gewarren&labels=breaking-change%2CPri1%2Cdoc-idea&template=breaking-change.yml&title=%5BBreaking+change%5D%3A+
         and follow the guidelines written here (internal-link): https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/1796/How-to-add-a-Known-Issue
     -->
-    <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
-    <SystemRuntimeCompilerServicesUnsafeVersion>6.0.0</SystemRuntimeCompilerServicesUnsafeVersion>
-  </PropertyGroup>
-  <PropertyGroup>
-    <MicrosoftIORedistVersion>6.0.1</MicrosoftIORedistVersion>
-    <MicrosoftVisualStudioSolutionPersistenceVersion>1.0.9</MicrosoftVisualStudioSolutionPersistenceVersion>
-    <SystemCollectionsImmutableVersion>8.0.0</SystemCollectionsImmutableVersion>
-    <SystemConfigurationConfigurationManagerVersion>8.0.0</SystemConfigurationConfigurationManagerVersion>
-    <SystemFormatsAsn1Version>8.0.1</SystemFormatsAsn1Version>
+    <SystemMemoryVersion>4.6.0</SystemMemoryVersion>
     <SystemNetHttpVersion>4.3.4</SystemNetHttpVersion>
     <SystemReflectionMetadataLoadContextVersion>8.0.0</SystemReflectionMetadataLoadContextVersion>
     <SystemReflectionMetadataVersion>8.0.0</SystemReflectionMetadataVersion>
     <SystemResourcesExtensionsVersion>8.0.0</SystemResourcesExtensionsVersion>
+    <SystemRuntimeCompilerServicesUnsafeVersion>6.1.0</SystemRuntimeCompilerServicesUnsafeVersion>
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
     <SystemTextEncodingCodePagesVersion>7.0.0</SystemTextEncodingCodePagesVersion>
     <SystemTextRegularExpressionsVersion>4.3.1</SystemTextRegularExpressionsVersion>
