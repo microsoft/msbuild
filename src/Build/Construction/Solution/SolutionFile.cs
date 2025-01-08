@@ -73,7 +73,7 @@ namespace Microsoft.Build.Construction
 #else
         private static readonly Lazy<Regex> s_crackProjectLinePattern = new Lazy<Regex>(
             () => new Regex(
-                CrackProjectLineSpecification, // End-of-line
+                CrackProjectLineSpecification,
                 RegexOptions.Compiled));
 
         private static readonly Lazy<Regex> s_crackPropertyLinePattern = new Lazy<Regex>(
