@@ -113,10 +113,7 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    using (Process currentProcess = Process.GetCurrentProcess())
-                    {
-                        CurrentHost = currentProcess.MainModule?.FileName ?? throw new InvalidOperationException("Failed to retrieve process executable.");
-                    }
+                    CurrentHost = EnvironmentUtilities.ProcessPath ?? throw new InvalidOperationException("Failed to retrieve process executable.");
                 }
             }
 

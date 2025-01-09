@@ -6,6 +6,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Shared;
+
 #if !RUNTIME_TYPE_NETCORE
 using System.Diagnostics;
 using System.Linq;
@@ -141,10 +143,10 @@ namespace Microsoft.Build.Framework
 
                 // Seems like MSBuild did not run from VS but from CLI.
                 // Identify current process and run it
-                string processName = Process.GetCurrentProcess().MainModule.FileName;
+                string? processName = EnvironmentUtilities.ProcessPath;
                 string processFileName = Path.GetFileNameWithoutExtension(processName);
 
-                if (string.IsNullOrEmpty(processFileName))
+                if (processName == null || string.IsNullOrEmpty(processFileName))
                 {
                     return null;
                 }

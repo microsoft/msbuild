@@ -37,9 +37,6 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
-    <Compile Include="..\Shared\EnvironmentUtilities.cs">
-      <Link>EnvironmentUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
       <Link>AssemblyDependency\AssemblyFoldersEx.cs</Link>
     </Compile>

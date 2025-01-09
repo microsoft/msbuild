@@ -35,10 +35,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    using (Process currentProcess = Process.GetCurrentProcess())
-                    {
-                        s_currentHost = currentProcess.MainModule.FileName;
-                    }
+                    s_currentHost = EnvironmentUtilities.ProcessPath;
                 }
             }
 

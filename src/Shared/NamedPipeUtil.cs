@@ -12,7 +12,7 @@ namespace Microsoft.Build.Shared
         {
             if (processId is null)
             {
-                processId = Process.GetCurrentProcess().Id;
+                processId = EnvironmentUtilities.CurrentProcessId;
             }
 
             string pipeName = $"MSBuild{processId}";

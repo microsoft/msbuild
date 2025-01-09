@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
 #nullable disable
@@ -52,7 +53,7 @@ namespace Microsoft.Build.Tasks
             if (string.IsNullOrEmpty(_dotnetCliPath))
             {
                 // Fallback to get dotnet path from current process which might be dotnet executable.
-                _dotnetCliPath = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                _dotnetCliPath = EnvironmentUtilities.ProcessPath;
             }
 
             // If dotnet path is not found, rely on dotnet via the system's PATH

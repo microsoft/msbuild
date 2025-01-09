@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <Compile Include="..\..\Shared\Constants.cs" />
+    <Compile Include="..\..\Shared\EnvironmentUtilities.cs" Link="Shared\EnvironmentUtilities.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Caching\BuildResultCacheEntry.cs" />
     <Compile Include="Caching\CacheEntry.cs" />

@@ -758,8 +758,8 @@ namespace Microsoft.Build.Execution
 #endif
                 case "2":
                     // Sometimes easier to attach rather than deal with JIT prompt
-                    Process currentProcess = Process.GetCurrentProcess();
-                    Console.WriteLine($"Waiting for debugger to attach ({currentProcess.MainModule!.FileName} PID {currentProcess.Id}).  Press enter to continue...");
+                    Console.WriteLine($"Waiting for debugger to attach ({EnvironmentUtilities.ProcessPath} PID {EnvironmentUtilities.CurrentProcessId}).  Press enter to continue...");
+
                     Console.ReadLine();
                     break;
             }

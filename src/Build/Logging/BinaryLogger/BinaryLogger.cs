@@ -500,13 +500,6 @@ namespace Microsoft.Build.Logging
             => (PathParameterExpander ?? ExpandPathParameter)(string.Empty);
 
         private static string ExpandPathParameter(string parameters)
-            => $"{DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")}--{ProcessId}--{StringUtils.GenerateRandomString(6)}";
-
-        private static int ProcessId
-#if NET
-            => Environment.ProcessId;
-#else
-            => System.Diagnostics.Process.GetCurrentProcess().Id;
-#endif
+            => $"{DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")}--{EnvironmentUtilities.CurrentProcessId}--{StringUtils.GenerateRandomString(6)}";
     }
 }

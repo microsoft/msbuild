@@ -14,6 +14,7 @@ using System.Globalization;
 using System.IO;
 using Microsoft.Build.BuildEngine.Shared;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BuildEngine
 {
@@ -452,9 +453,10 @@ namespace Microsoft.Build.BuildEngine
         {
             try
             {
-                if (!Process.GetProcessById(processId).HasExited)
+                using Process process = Process.GetProcessById(processId);
+                if (!process.HasExited)
                 {
-                    Process.GetProcessById(processId).Kill();
+                    process.Kill();
                 }
             }
             catch (ArgumentException)
@@ -490,9 +492,14 @@ namespace Microsoft.Build.BuildEngine
 
                 bool isInvalidProcessId = nodeData[nodeId].ProcessId == LocalNodeInfo.invalidProcessId;
 
-                if (!isInvalidProcessId && !Process.GetProcessById(nodeData[nodeId].ProcessId).HasExited)
+                if (!isInvalidProcessId)
                 {
-                    return true;
+                    using Process process = Process.GetProcessById(nodeData[nodeId].ProcessId);
+                    if (!process.HasExited)
+                    {
+                        return true;
+                    }
+                    
                 }
             }
             catch (ArgumentException)
@@ -685,7 +692,7 @@ namespace Microsoft.Build.BuildEngine
                         Hashtable environmentVariablesTable = new Hashtable(variableDictionary);
 
                         LocalCallDescriptorForInitializeNode callDescriptorInit =
-                                new LocalCallDescriptorForInitializeNode(environmentVariablesTable, nodeLoggers.ToArray(), nodeData[nodeIndex].NodeId, parentGlobalProperties, toolsetSearchLocations, Process.GetCurrentProcess().Id, startupDirectory);
+                                new LocalCallDescriptorForInitializeNode(environmentVariablesTable, nodeLoggers.ToArray(), nodeData[nodeIndex].NodeId, parentGlobalProperties, toolsetSearchLocations, EnvironmentUtilities.CurrentProcessId, startupDirectory);
                         nodeData[nodeIndex].NodeCommandQueue.Enqueue(callDescriptorInit);
 
                         EventWaitHandle nodeInUseEvent = new EventWaitHandle(false, EventResetMode.ManualReset, LocalNodeProviderGlobalNames.NodeInUseEventName(nodeData[nodeIndex].NodeNumber));

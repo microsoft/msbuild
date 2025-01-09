@@ -12,6 +12,7 @@ using System.IO;
 using System.Security.AccessControl;
 using System.Threading;
 using Microsoft.Build.BuildEngine.Shared;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BuildEngine
 {
@@ -536,7 +537,7 @@ namespace Microsoft.Build.BuildEngine
 
             // Write the initialization complete event out directly
             LocalCallDescriptorForInitializationComplete callDescriptor =
-                new LocalCallDescriptorForInitializationComplete(Process.GetCurrentProcess().Id);
+                new LocalCallDescriptorForInitializationComplete(EnvironmentUtilities.CurrentProcessId);
 
             // Post the message indicating that the initialization is complete
             engineCallback.PostMessageToParent(callDescriptor, true);
@@ -552,7 +553,8 @@ namespace Microsoft.Build.BuildEngine
             try
             {
                 // Check if the parent is still there
-                if (Process.GetProcessById(parentProcessId).HasExited)
+                using Process parentProcess = Process.GetProcessById(parentProcessId);
+                if (parentProcess.HasExited)
                 {
                     isParentAlive = false;
                 }

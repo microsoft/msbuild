@@ -810,9 +810,8 @@ namespace Microsoft.Build.CommandLine
             // Wait for the RunTask task runner thread before shutting down so that we can cleanly dispose all WaitHandles.
             _taskRunnerThread?.Join();
 
-            using StreamWriter debugWriter = _debugCommunications
-                ? File.CreateText(string.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), Process.GetCurrentProcess().Id))
-                : null;
+            using StreamWriter debugWriter = GetDebugWriter(_debugCommunications);
+
             debugWriter?.WriteLine("Node shutting down with reason {0}.", _shutdownReason);
 
 #if !CLR2COMPATIBILITY
@@ -859,6 +858,14 @@ namespace Microsoft.Build.CommandLine
 #endif
 
             return _shutdownReason;
+
+            static StreamWriter GetDebugWriter(bool debugCommunications)
+            {
+                StreamWriter debugWriter = debugCommunications
+                    ? File.CreateText(string.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), EnvironmentUtilities.CurrentProcessId))
+                    : null;
+                return debugWriter;
+            }
         }
 
         /// <summary>

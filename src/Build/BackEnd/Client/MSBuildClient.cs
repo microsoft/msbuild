@@ -473,7 +473,7 @@ namespace Microsoft.Build.Experimental
                 };
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
-                Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions), nodeId: 0);
+                using Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions), nodeId: 0);
                 CommunicationsUtilities.Trace("Server started with PID: {0}", msbuildProcess?.Id);
             }
             catch (Exception ex)

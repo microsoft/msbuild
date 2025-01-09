@@ -48,9 +48,6 @@
     <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
       <Link>Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\EnvironmentUtilities.cs">
-      <Link>Shared\EnvironmentUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>Shared\BuildEnvironmentHelper.cs</Link>
     </Compile>

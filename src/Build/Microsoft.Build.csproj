@@ -57,9 +57,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\EnvironmentUtilities.cs">
-      <Link>SharedUtilities\EnvironmentUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>SharedUtilities\BuildEnvironmentHelper.cs</Link>
     </Compile>

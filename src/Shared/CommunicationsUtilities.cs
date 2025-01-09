@@ -108,7 +108,8 @@ namespace Microsoft.Build.Internal
             fileVersionMinor = fileVersion.Minor;
             fileVersionBuild = fileVersion.Build;
             fileVersionPrivate = fileVersion.Revision;
-            sessionId = Process.GetCurrentProcess().SessionId;
+            using Process currentProcess = Process.GetCurrentProcess();
+            sessionId = currentProcess.SessionId;
         }
 
         // This is used as a key, so it does not need to be human readable.
@@ -836,7 +837,7 @@ namespace Microsoft.Build.Internal
                     fileName += ".txt";
 
                     using (StreamWriter file = FileUtilities.OpenWrite(
-                        String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId), append: true))
+                        string.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), EnvironmentUtilities.CurrentProcessId, nodeId), append: true))
                     {
                         long now = DateTime.UtcNow.Ticks;
                         float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;

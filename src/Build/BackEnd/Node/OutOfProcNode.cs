@@ -847,7 +847,8 @@ namespace Microsoft.Build.Execution
             _shutdownReason = buildComplete.PrepareForReuse ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
             if (_shutdownReason == NodeEngineShutdownReason.BuildCompleteReuse)
             {
-                ProcessPriorityClass priorityClass = Process.GetCurrentProcess().PriorityClass;
+                using Process currentProcess = Process.GetCurrentProcess();
+                ProcessPriorityClass priorityClass = currentProcess.PriorityClass;
                 if (priorityClass != ProcessPriorityClass.Normal && priorityClass != ProcessPriorityClass.BelowNormal)
                 {
                     // This isn't a priority class known by MSBuild. We should avoid connecting to this node.
@@ -860,7 +861,7 @@ namespace Microsoft.Build.Execution
                     {
                         if (!lowPriority || NativeMethodsShared.IsWindows)
                         {
-                            Process.GetCurrentProcess().PriorityClass = lowPriority ? ProcessPriorityClass.Normal : ProcessPriorityClass.BelowNormal;
+                            currentProcess.PriorityClass = lowPriority ? ProcessPriorityClass.Normal : ProcessPriorityClass.BelowNormal;
                         }
                         else
                         {

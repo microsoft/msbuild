@@ -92,13 +92,13 @@ namespace Microsoft.Build.Shared.Debugging
         {
             var processNameToBreakInto = Environment.GetEnvironmentVariable("MSBuildDebugProcessName");
             var thisProcessMatchesName = string.IsNullOrWhiteSpace(processNameToBreakInto) ||
-                                         Process.GetCurrentProcess().ProcessName.Contains(processNameToBreakInto);
+                                         EnvironmentUtilities.ProcessName.Contains(processNameToBreakInto);
 
             return thisProcessMatchesName;
         }
 
         public static readonly string ProcessInfoString =
-            $"{ProcessNodeMode.Value}_{Process.GetCurrentProcess().ProcessName}_PID={Process.GetCurrentProcess().Id}_x{(Environment.Is64BitProcess ? "64" : "86")}";
+            $"{ProcessNodeMode.Value}_{EnvironmentUtilities.ProcessName}_PID={EnvironmentUtilities.CurrentProcessId}_x{(Environment.Is64BitProcess ? "64" : "86")}";
 
         public static readonly bool ShouldDebugCurrentProcess = CurrentProcessMatchesDebugName();
 

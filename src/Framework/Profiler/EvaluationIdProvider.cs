@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.Threading;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -14,7 +15,7 @@ namespace Microsoft.Build.Framework.Profiler
     internal static class EvaluationIdProvider
     {
         private static long _sAssignedId = -1;
-        private static readonly long ProcessId = Process.GetCurrentProcess().Id;
+        private static readonly long ProcessId = EnvironmentUtilities.CurrentProcessId;
 
         /// <summary>
         /// Returns a unique evaluation id
