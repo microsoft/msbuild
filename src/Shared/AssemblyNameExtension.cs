@@ -6,20 +6,15 @@ using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Globalization;
 using System.IO;
-using System.IO.Pipes;
 using System.Reflection;
 #if !TASKHOST
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 #endif
 using System.Runtime.Serialization;
-using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Xml.Linq;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -240,19 +235,6 @@ namespace Microsoft.Build.Shared
             }
 
             return null;
-        }
-
-
-        // Helper method to calculate public key token
-        private static byte[] GetPublicKeyToken(byte[] publicKey)
-        {
-            using (var sha1 = SHA1.Create())
-            {
-                byte[] hash = sha1.ComputeHash(publicKey);
-                byte[] token = new byte[8];
-                Array.Copy(hash, hash.Length - 8, token, 0, 8);
-                return token;
-            }
         }
 
         /// <summary>
