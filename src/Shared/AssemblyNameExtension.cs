@@ -200,34 +200,31 @@ namespace Microsoft.Build.Shared
 #if TASKHOST
                 return new AssemblyNameExtension(AssemblyName.GetAssemblyName(path));
 #else
-
-                using (var fileStream = File.OpenRead(path))
-                using (var peReader = new PEReader(fileStream))
+                using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                using var pe = new PEReader(fs);
+                if (pe.HasMetadata)
                 {
-                    var metadataReader = peReader.GetMetadataReader();
-                    var assemblyDef = metadataReader.GetAssemblyDefinition();
+                    var reader = pe.GetMetadataReader();
+                    var def = reader.GetAssemblyDefinition();
 
-                    string name = metadataReader.GetString(assemblyDef.Name);
-                    Version version = assemblyDef.Version;
-                    string culture = metadataReader.GetString(assemblyDef.Culture);
-                    if (string.IsNullOrEmpty(culture))
+                    string name = reader.GetString(def.Name);
+                    Version version = def.Version;
+                    string culture = !def.Culture.IsNil ? reader.GetString(def.Culture) : "neutral";
+
+                    string publicKeyToken = "null";
+                    if (!def.PublicKey.IsNil)
                     {
-                        culture = "neutral";
+                        var publicKeyBytes = reader.GetBlobBytes(def.PublicKey);
+                        using (var sha256 = SHA256.Create())
+                        {
+                            var hash = sha256.ComputeHash(publicKeyBytes);
+                            var token = new byte[8];
+                            Array.Copy(hash, hash.Length - 8, token, 0, 8);
+                            publicKeyToken = BitConverter.ToString(token).Replace("-", "").ToLowerInvariant();
+                        }
                     }
 
-                    // Get public key token
-                    var publicKey = assemblyDef.PublicKey;
-                    byte[] publicKeyToken = null;
-                    if (!publicKey.IsNil)
-                    {
-                        var publicKeyBytes = metadataReader.GetBlobBytes(publicKey);
-                        publicKeyToken = GetPublicKeyToken(publicKeyBytes);
-                    }
-
-                    // Construct full assembly name
-                    string fullName = $"{name}, Version={version}, Culture={culture}, PublicKeyToken={BitConverter.ToString(publicKeyToken).Replace("-", "").ToLowerInvariant()}";
-
-                    return new AssemblyNameExtension(fullName);
+                    return new AssemblyNameExtension($"{name}, Version={version}, Culture={culture}, PublicKeyToken={publicKeyToken}");
                 }
 #endif
             }
