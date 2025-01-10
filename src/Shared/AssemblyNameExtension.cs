@@ -207,28 +207,19 @@ namespace Microsoft.Build.Shared
                         Name = reader.GetString(def.Name),
                         Version = def.Version,
                         CultureName = !def.Culture.IsNil ? reader.GetString(def.Culture) : null,
-                        ContentType = AssemblyContentType.Default,
-                        ProcessorArchitecture = ProcessorArchitecture.None,
-                        Flags = AssemblyNameFlags.None
+                        Flags = GetAssemblyNameFlags(def.Flags)
                     };
+
+                    // Set processor architecture from PE headers only
+                    var peHeaders = pe.PEHeaders;
+                    var machine = peHeaders.CoffHeader.Machine;
+                    var characteristics = peHeaders.CoffHeader.Characteristics;
+                    var corFlags = peHeaders.CorHeader.Flags;
 
                     if (!def.PublicKey.IsNil)
                     {
                         var publicKeyBytes = reader.GetBlobBytes(def.PublicKey);
                         assemblyName.SetPublicKey(publicKeyBytes);
-                        assemblyName.Flags |= AssemblyNameFlags.PublicKey;
-                    }
-
-                    // Handle assembly flags
-                    var attributes = def.Flags;
-                    if ((attributes & AssemblyFlags.PublicKey) != 0)
-                    {
-                        assemblyName.Flags |= AssemblyNameFlags.PublicKey;
-                    }
-
-                    if ((attributes & AssemblyFlags.Retargetable) != 0)
-                    {
-                        assemblyName.Flags |= AssemblyNameFlags.Retargetable;
                     }
 
                     return new AssemblyNameExtension(assemblyName);
@@ -248,6 +239,25 @@ namespace Microsoft.Build.Shared
 
             return null;
         }
+
+#if !TASKHOST
+        private static AssemblyNameFlags GetAssemblyNameFlags(AssemblyFlags flags)
+        {
+            var result = AssemblyNameFlags.None;
+
+            if ((flags & AssemblyFlags.PublicKey) != 0)
+            {
+                result |= AssemblyNameFlags.PublicKey;
+            }
+
+            if ((flags & AssemblyFlags.Retargetable) != 0)
+            {
+                result |= AssemblyNameFlags.Retargetable;
+            }
+
+            return result;
+        }
+#endif
 
         /// <summary>
         /// Run after the object has been deserialized
