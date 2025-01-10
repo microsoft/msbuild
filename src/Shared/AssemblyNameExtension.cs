@@ -12,7 +12,6 @@ using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 #endif
 using System.Runtime.Serialization;
-using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Build.BackEnd;
 
@@ -195,6 +194,7 @@ namespace Microsoft.Build.Shared
 #if TASKHOST
                 return new AssemblyNameExtension(AssemblyName.GetAssemblyName(path));
 #else
+
                 using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 using var pe = new PEReader(fs);
                 if (pe.HasMetadata)
@@ -202,24 +202,36 @@ namespace Microsoft.Build.Shared
                     var reader = pe.GetMetadataReader();
                     var def = reader.GetAssemblyDefinition();
 
-                    string name = reader.GetString(def.Name);
-                    Version version = def.Version;
-                    string culture = !def.Culture.IsNil ? reader.GetString(def.Culture) : "neutral";
+                    var assemblyName = new AssemblyName
+                    {
+                        Name = reader.GetString(def.Name),
+                        Version = def.Version,
+                        CultureName = !def.Culture.IsNil ? reader.GetString(def.Culture) : null,
+                        ContentType = AssemblyContentType.Default,
+                        ProcessorArchitecture = ProcessorArchitecture.None,
+                        Flags = AssemblyNameFlags.None
+                    };
 
-                    string publicKeyToken = "null";
                     if (!def.PublicKey.IsNil)
                     {
                         var publicKeyBytes = reader.GetBlobBytes(def.PublicKey);
-                        using (var sha256 = SHA256.Create())
-                        {
-                            var hash = sha256.ComputeHash(publicKeyBytes);
-                            var token = new byte[8];
-                            Array.Copy(hash, hash.Length - 8, token, 0, 8);
-                            publicKeyToken = BitConverter.ToString(token).Replace("-", "").ToLowerInvariant();
-                        }
+                        assemblyName.SetPublicKey(publicKeyBytes);
+                        assemblyName.Flags |= AssemblyNameFlags.PublicKey;
                     }
 
-                    return new AssemblyNameExtension($"{name}, Version={version}, Culture={culture}, PublicKeyToken={publicKeyToken}");
+                    // Handle assembly flags
+                    var attributes = def.Flags;
+                    if ((attributes & AssemblyFlags.PublicKey) != 0)
+                    {
+                        assemblyName.Flags |= AssemblyNameFlags.PublicKey;
+                    }
+
+                    if ((attributes & AssemblyFlags.Retargetable) != 0)
+                    {
+                        assemblyName.Flags |= AssemblyNameFlags.Retargetable;
+                    }
+
+                    return new AssemblyNameExtension(assemblyName);
                 }
 #endif
             }
