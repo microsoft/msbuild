@@ -1319,11 +1319,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 while (_eventQueue.Count >= _queueCapacity)
                 {
                     // Block and wait for dequeue event.
-                    _dequeueEvent.WaitOne();
+                    _dequeueEventDoubleCheckCopy.WaitOne();
                 }
 
                 _eventQueue.Enqueue(buildEvent);
-                _enqueueEvent.Set();
+                _enqueueEventDoubleCheckCopy.Set();
             }
             else
             {
@@ -1344,12 +1344,13 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             while (_eventQueue?.IsEmpty == false)
             {
-                _emptyQueueEvent?.WaitOne();
+                _emptyQueueEventDoubleCheckCopy?.WaitOne();
             }
+
             // To avoid race condition when last message has been removed from queue but
             //   not yet fully processed (handled by loggers), we need to make sure _emptyQueueEvent
             //   is set as it is guaranteed to be in set state no sooner than after event has been processed.
-            _emptyQueueEvent?.WaitOne();
+            _emptyQueueEventDoubleCheckCopy?.WaitOne();
         }
 
         /// <summary>
