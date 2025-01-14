@@ -62,8 +62,8 @@
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
     <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
     <MicrosoftDotNetXUnitExtensionsVersion>9.0.0-beta.24623.3</MicrosoftDotNetXUnitExtensionsVersion>
+    <NuGetBuildTasksVersion>6.13.0-rc.113</NuGetBuildTasksVersion>
     <MicrosoftNetCompilersToolsetVersion>4.13.0-3.25057.3</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.13.0-rc.108</NuGetBuildTasksVersion>
   </PropertyGroup>
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
     <BootstrapSdkVersion>9.0.200-preview.0.24603.3</BootstrapSdkVersion>
