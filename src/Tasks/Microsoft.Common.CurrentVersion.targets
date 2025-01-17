@@ -3847,7 +3847,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     contribute to incremental build inconsistencies.
     ============================================================
     -->
-  <Target Name="_GenerateCompileDependencyCache" Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildingProject)' == 'true'" DependsOnTargets="ResolveAssemblyReferences">
+  <Target Name="_GenerateCompileDependencyCache" Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildingProject)' == 'true'" DependsOnTargets="ResolveAssemblyReferences;_GenerateCompileInputs">
     <ItemGroup>
       <CustomAdditionalCompileInputs Include="$(IntermediateOutputPath)$(MSBuildProjectFile).CoreCompileInputs.cache" />
       <CoreCompileCache Include="@(Compile)" />
@@ -3856,6 +3856,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <CoreCompileCache Include="$(LangVersion)" />
       <CoreCompileCache Include="$(Deterministic)" />
       <CoreCompileCache Include="$(PathMap)" />
+      <CoreCompileCache Include="@(_CoreCompileResourceInputs)"/>
     </ItemGroup>
 
     <Hash
