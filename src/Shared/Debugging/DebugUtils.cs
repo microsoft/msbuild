@@ -34,6 +34,16 @@ namespace Microsoft.Build.Shared.Debugging
 
             if (Traits.Instance.DebugEngine)
             {
+                string debugEngineValue = FileUtilities.TrimAndStripAnyQuotes(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
+
+                if (string.IsNullOrWhiteSpace(debugDirectory)
+                    && !string.IsNullOrWhiteSpace(debugEngineValue)
+                    && Path.IsPathRooted(debugEngineValue))
+                {
+                    // DebugEngine value is a path, so use it as the directory, unless DEBUGPATH was set.
+                    debugDirectory = debugEngineValue;
+                }
+
                 if (!string.IsNullOrWhiteSpace(debugDirectory) && FileUtilities.CanWriteToDirectory(debugDirectory))
                 {
                     // Debug directory is writable; no need for fallbacks
