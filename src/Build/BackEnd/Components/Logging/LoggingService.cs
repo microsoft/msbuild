@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -10,12 +10,12 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
-using Microsoft.Build.Experimental.BuildCheck;
 
 #nullable disable
 
@@ -248,14 +248,31 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Event set when message is consumed from queue.
         /// </summary>
         private AutoResetEvent _dequeueEvent;
+
         /// <summary>
-        /// Event set when queue become empty.
+        /// Local copy of dequeue event to avoid race condition on shutdown operation.
+        /// </summary>
+        private AutoResetEvent _dequeueEventDoubleCheckCopy;
+
+        /// <summary>
+        /// Event set when queue become empty. 
         /// </summary>
         private ManualResetEvent _emptyQueueEvent;
+
         /// <summary>
-        /// Even set when message is added into queue.
+        /// Local copy of empty queue event to avoid race condition on shutdown operation.
+        /// </summary>
+        private ManualResetEvent _emptyQueueEventDoubleCheckCopy;
+
+        /// <summary>
+        /// Event set when message is added into queue.
         /// </summary>
         private AutoResetEvent _enqueueEvent;
+
+        /// <summary>
+        /// Local copy of enqueue event to avoid race condition on shutdown operation.
+        /// </summary>
+        private AutoResetEvent _enqueueEventDoubleCheckCopy;
 
         /// <summary>
         /// CTS for stopping logging event processing.
@@ -1302,11 +1319,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 while (_eventQueue.Count >= _queueCapacity)
                 {
                     // Block and wait for dequeue event.
-                    _dequeueEvent.WaitOne();
+                    _dequeueEventDoubleCheckCopy.WaitOne();
                 }
 
                 _eventQueue.Enqueue(buildEvent);
-                _enqueueEvent.Set();
+                _enqueueEventDoubleCheckCopy.Set();
             }
             else
             {
@@ -1327,12 +1344,13 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             while (_eventQueue?.IsEmpty == false)
             {
-                _emptyQueueEvent?.WaitOne();
+                _emptyQueueEventDoubleCheckCopy?.WaitOne();
             }
+
             // To avoid race condition when last message has been removed from queue but
             //   not yet fully processed (handled by loggers), we need to make sure _emptyQueueEvent
             //   is set as it is guaranteed to be in set state no sooner than after event has been processed.
-            _emptyQueueEvent?.WaitOne();
+            _emptyQueueEventDoubleCheckCopy?.WaitOne();
         }
 
         /// <summary>
@@ -1385,11 +1403,17 @@ namespace Microsoft.Build.BackEnd.Logging
         private void StartLoggingEventProcessing()
         {
             _eventQueue = new ConcurrentQueue<object>();
-            _dequeueEvent = new AutoResetEvent(false);
-            _emptyQueueEvent = new ManualResetEvent(false);
-            _enqueueEvent = new AutoResetEvent(false);
-            _loggingEventProcessingCancellation = new CancellationTokenSource();
 
+            _dequeueEvent = new AutoResetEvent(false);
+            _dequeueEventDoubleCheckCopy = _dequeueEvent;
+
+            _emptyQueueEvent = new ManualResetEvent(false);
+            _emptyQueueEventDoubleCheckCopy = _emptyQueueEvent;
+
+            _enqueueEvent = new AutoResetEvent(false);
+            _enqueueEventDoubleCheckCopy = _enqueueEvent;
+
+            _loggingEventProcessingCancellation = new CancellationTokenSource();
             _loggingEventProcessingThread = new Thread(LoggingEventProc);
             _loggingEventProcessingThread.Name = $"MSBuild LoggingService events queue pump: {this.GetHashCode()}";
             _loggingEventProcessingThread.IsBackground = true;
@@ -1398,33 +1422,31 @@ namespace Microsoft.Build.BackEnd.Logging
             void LoggingEventProc()
             {
                 var completeAdding = _loggingEventProcessingCancellation.Token;
-                WaitHandle[] waitHandlesForNextEvent = { completeAdding.WaitHandle, _enqueueEvent };
+                WaitHandle[] waitHandlesForNextEvent = { completeAdding.WaitHandle, _enqueueEventDoubleCheckCopy };
 
                 do
                 {
                     if (_eventQueue.TryDequeue(out object ev))
                     {
                         LoggingEventProcessor(ev);
-                        _dequeueEvent.Set();
+                        _dequeueEventDoubleCheckCopy?.Set();
                     }
                     else
                     {
-                        _emptyQueueEvent.Set();
+                        _emptyQueueEventDoubleCheckCopy?.Set();
 
-                        // Wait for next event, or finish.
                         if (!completeAdding.IsCancellationRequested && _eventQueue.IsEmpty)
                         {
                             WaitHandle.WaitAny(waitHandlesForNextEvent);
                         }
 
-                        _emptyQueueEvent.Reset();
+                        _emptyQueueEventDoubleCheckCopy?.Reset();
                     }
                 } while (!_eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
 
-                _emptyQueueEvent.Set();
+                _emptyQueueEventDoubleCheckCopy?.Set();
             }
         }
-
 
         /// <summary>
         /// Clean resources used for logging event processing queue.
@@ -1439,8 +1461,11 @@ namespace Microsoft.Build.BackEnd.Logging
 
             _eventQueue = null;
             _dequeueEvent = null;
+            _dequeueEventDoubleCheckCopy = null;
             _enqueueEvent = null;
+            _enqueueEventDoubleCheckCopy = null;
             _emptyQueueEvent = null;
+            _emptyQueueEventDoubleCheckCopy = null;
             _loggingEventProcessingCancellation = null;
             _loggingEventProcessingThread = null;
         }
