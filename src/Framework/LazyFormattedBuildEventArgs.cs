@@ -117,7 +117,17 @@ namespace Microsoft.Build.Framework
                     // Arguments may be ints, etc, so explicitly convert
                     // Convert.ToString returns String.Empty when it cannot convert, rather than throwing
                     // It returns null if the input is null.
-                    writer.Write(Convert.ToString(argument, CultureInfo.CurrentCulture) ?? "");
+                    string argValue;
+                    try
+                    {
+                        argValue = Convert.ToString(argument, CultureInfo.CurrentCulture) ?? "";
+                    }
+                    // Let's grace handle case where custom ToString implementation (that Convert.ToString fallbacks to) throws.
+                    catch (Exception e)
+                    {
+                        argValue = $"Argument conversion to string failed{Environment.NewLine}{e}";
+                    }
+                    writer.Write(argValue);
                 }
             }
             else
