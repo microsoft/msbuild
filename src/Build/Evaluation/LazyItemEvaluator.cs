@@ -384,7 +384,7 @@ namespace Microsoft.Build.Evaluation
                                 break;
                             }
 
-                            string fullPath = FileUtilities.GetFullPath(frag.TextFragment, frag.ProjectDirectory);
+                            string fullPath = FileUtilities.NormalizePathForComparisonNoThrow(frag.TextFragment, frag.ProjectDirectory);
                             if (itemsWithNoWildcards.ContainsKey(fullPath))
                             {
                                 // Another update will already happen on this path. Make that happen before evaluating this one.
