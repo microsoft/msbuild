@@ -183,28 +183,28 @@ folder InstallDir:\MSBuild\Current\Bin\amd64
   file source=$(X64BinPath)MSBuild.exe.config
   file source=$(TaskHostX64BinPath)MSBuildTaskHost.exe.config
 
-  file source=$(X86BinPath)Microsoft.Build.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)Microsoft.Build.dll
+  file source=$(X86BinPath)Microsoft.Build.Framework.dll
   file source=$(FrameworkBinPath)x64\Microsoft.Build.Framework.tlb
-  file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Buffers.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Memory.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Reflection.Metadata.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Reflection.MetadataLoadContext.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Text.Json.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)Microsoft.Bcl.AsyncInterfaces.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)Microsoft.IO.Redist.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Text.Encodings.Web.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Threading.Tasks.Extensions.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll
+  file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll
+  file source=$(X86BinPath)System.Buffers.dll
+  file source=$(X86BinPath)System.Memory.dll
+  file source=$(X86BinPath)System.Reflection.Metadata.dll
+  file source=$(X86BinPath)System.Reflection.MetadataLoadContext.dll
+  file source=$(X86BinPath)System.Text.Json.dll
+  file source=$(X86BinPath)Microsoft.Bcl.AsyncInterfaces.dll
+  file source=$(X86BinPath)Microsoft.IO.Redist.dll
+  file source=$(X86BinPath)System.Text.Encodings.Web.dll
+  file source=$(X86BinPath)System.Threading.Tasks.Extensions.dll
   file source=$(X86BinPath)System.ValueTuple.dll
-  file source=$(X86BinPath)System.Numerics.Vectors.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Resources.Extensions.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Runtime.CompilerServices.Unsafe.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)System.Collections.Immutable.dll vs.file.ngenArchitecture=all
-  file source=$(X86BinPath)Microsoft.NET.StringTools.dll vs.file.ngenArchitecture=all
-  file source=$(TaskHostBinPath)Microsoft.NET.StringTools.net35.dll vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)System.Numerics.Vectors.dll
+  file source=$(X86BinPath)System.Resources.Extensions.dll
+  file source=$(X86BinPath)System.Runtime.CompilerServices.Unsafe.dll
+  file source=$(X86BinPath)System.Threading.Tasks.Dataflow.dll
+  file source=$(X86BinPath)System.Collections.Immutable.dll
+  file source=$(X86BinPath)Microsoft.NET.StringTools.dll
+  file source=$(TaskHostBinPath)Microsoft.NET.StringTools.net35.dll
   file source=$(X86BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(X86BinPath)Microsoft.Common.CrossTargeting.targets
   file source=$(X86BinPath)Microsoft.Common.overridetasks

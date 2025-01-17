@@ -14,8 +14,8 @@ folder InstallDir:\MSBuild\Current\Bin\arm64
   file source=$(Arm64BinPath)MSBuild.exe.config
 
   file source=$(FrameworkBinPath)x64\Microsoft.Build.Framework.tlb
-  file source=$(Arm64BinPath)Microsoft.Build.dll vs.file.ngenArchitecture=arm64
-  file source=$(Arm64BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenArchitecture=arm64
+  file source=$(Arm64BinPath)Microsoft.Build.dll
+  file source=$(Arm64BinPath)Microsoft.Build.Tasks.Core.dll
   file source=$(Arm64BinPath)Microsoft.Common.CurrentVersion.targets
   file source=$(Arm64BinPath)Microsoft.Common.CrossTargeting.targets
   file source=$(Arm64BinPath)Microsoft.Common.overridetasks
