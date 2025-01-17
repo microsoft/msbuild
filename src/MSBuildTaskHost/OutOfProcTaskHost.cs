@@ -85,15 +85,33 @@ namespace Microsoft.Build.CommandLine
             {
 #if FEATURE_DEBUG_LAUNCH
                 case "1":
-                    Debugger.Launch();
-                    break;
+                    {
+                        Debugger.Launch();
+                        break;
+                    }
 #endif
                 case "2":
-                    // Sometimes easier to attach rather than deal with JIT prompt
-                    Process currentProcess = Process.GetCurrentProcess();
-                    Console.WriteLine($"Waiting for debugger to attach ({currentProcess.MainModule.FileName} PID {currentProcess.Id}).  Press enter to continue...");
-                    Console.ReadLine();
-                    break;
+                    {
+                        // Sometimes easier to attach rather than deal with JIT prompt
+                        Process currentProcess = Process.GetCurrentProcess();
+                        Console.WriteLine($"Waiting for debugger to attach ({currentProcess.MainModule.FileName} PID {currentProcess.Id}).  Press enter to continue...");
+                        Console.ReadLine();
+                        break;
+                    }
+                case "3":
+                    {
+                        // Sometimes easier to attach rather than deal with JIT prompt
+                        Process currentProcess = Process.GetCurrentProcess();
+#pragma warning disable CS0436 // Type conflicts with imported type
+                        Shared.Debugging.VisualStudioDebuggerUtility.AttachCurrentProcessToParentVSProcess(enableLog: true);
+                        if (Environment.GetEnvironmentVariable("MSBUILDDEBUGNOBP") != "1")
+                        {
+                            Debugger.Break();
+                        }
+                        Debugger.Break();
+#pragma warning restore CS0436 // Type conflicts with imported type
+                        break;
+                    }
             }
 
             bool restart = false;

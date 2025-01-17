@@ -70,6 +70,7 @@
       <Link>CopyOnWriteDictionary.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Constants.cs" />
+    <Compile Include="..\Shared\Debugging\VisualStudioDebuggerUtility.cs" Link="Debugging\VisualStudioDebuggerUtility.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
     <Compile Include="..\Framework\ErrorUtilities.cs">
       <Link>ErrorUtilities.cs</Link>
@@ -250,5 +251,8 @@
     <!-- Disabled PdbGit because of warnings; it could/should be brought back.
     <PackageReference Include="PdbGit" /> -->
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Debugging\" />
   </ItemGroup>
 </Project>
