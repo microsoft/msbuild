@@ -539,26 +539,20 @@ namespace Microsoft.Build.Internal
             else
 #endif
             {
-                // Legacy approach with an early-abort for connection attempts from ancient MSBuild.exes
-                for (int i = 0; i < bytes.Length; i++)
+                int bytesRead = stream.Read(bytes, 0, bytes.Length);
+                if (bytesRead != bytes.Length)
                 {
-                    int read = stream.ReadByte();
+                    // We've unexpectly reached end of stream.
+                    // We are now in a bad state, disconnect on our end
+                    throw new IOException(String.Format(CultureInfo.InvariantCulture, "Unexpected end of stream while reading for handshake"));
+                }
 
-                    if (read == -1)
-                    {
-                        // We've unexpectly reached end of stream.
-                        // We are now in a bad state, disconnect on our end
-                        throw new IOException(String.Format(CultureInfo.InvariantCulture, "Unexpected end of stream while reading for handshake"));
-                    }
-
-                    bytes[i] = Convert.ToByte(read);
-
-                    if (i == 0 && byteToAccept != null && byteToAccept != bytes[0])
-                    {
-                        stream.WriteIntForHandshake(0x0F0F0F0F);
-                        stream.WriteIntForHandshake(0x0F0F0F0F);
-                        throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} instead of {1}.", bytes[0], byteToAccept));
-                    }
+                // Legacy approach with an early-abort for connection attempts from ancient MSBuild.exes
+                if (byteToAccept != null && byteToAccept != bytes[0])
+                {
+                    stream.WriteIntForHandshake(0x0F0F0F0F);
+                    stream.WriteIntForHandshake(0x0F0F0F0F);
+                    throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} instead of {1}.", bytes[0], byteToAccept));
                 }
             }
 

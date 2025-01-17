@@ -546,9 +546,8 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True to skip the target, false otherwise.</returns>
         private bool CheckSkipTarget(ref bool stopProcessingStack, TargetEntry currentTargetEntry)
         {
-            if (_buildResult.HasResultsForTarget(currentTargetEntry.Name))
+            if (_buildResult.TryGetResultsForTarget(currentTargetEntry.Name, out TargetResult targetResult))
             {
-                TargetResult targetResult = _buildResult[currentTargetEntry.Name] as TargetResult;
                 ErrorUtilities.VerifyThrowInternalNull(targetResult, "targetResult");
 
                 if (targetResult.ResultCode != TargetResultCode.Skipped)
@@ -665,12 +664,9 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Don't build any Before or After targets for which we already have results.  Unlike other targets,
                     // we don't explicitly log a skipped-with-results message because it is not interesting.
-                    if (_buildResult.HasResultsForTarget(targetSpecification.TargetName))
+                    if (_buildResult.TryGetResultsForTarget(targetSpecification.TargetName, out TargetResult targetResult) && targetResult.ResultCode != TargetResultCode.Skipped)
                     {
-                        if (_buildResult[targetSpecification.TargetName].ResultCode != TargetResultCode.Skipped)
-                        {
-                            continue;
-                        }
+                        continue;
                     }
                 }
 

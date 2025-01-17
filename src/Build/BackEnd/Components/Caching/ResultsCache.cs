@@ -317,7 +317,7 @@ namespace Microsoft.Build.BackEnd
             bool returnValue = true;
             foreach (string target in targets)
             {
-                if (!result.HasResultsForTarget(target) || (result[target].ResultCode == TargetResultCode.Skipped && !skippedResultsAreOK))
+                if (!result.TryGetResultsForTarget(target, out TargetResult targetResult) || (targetResult.ResultCode == TargetResultCode.Skipped && !skippedResultsAreOK))
                 {
                     if (targetsMissingResults != null)
                     {
@@ -333,7 +333,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // If the result was a failure and we have not seen any skipped targets up to this point, then we conclude we do
                     // have results for this request, and they indicate failure.
-                    if (result[target].ResultCode == TargetResultCode.Failure && (targetsMissingResults == null || targetsMissingResults.Count == 0))
+                    if (targetResult.ResultCode == TargetResultCode.Failure && (targetsMissingResults == null || targetsMissingResults.Count == 0))
                     {
                         return true;
                     }
