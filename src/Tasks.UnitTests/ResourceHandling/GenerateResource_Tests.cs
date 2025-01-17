@@ -2033,7 +2033,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             gr.Execute().ShouldBeTrue();
 
-            Utilities.AssertLogContainsResource(gr, "GenerateResource.BinaryFormatterUse", "$this.Icon", "System.Drawing.Icon, System.Drawing");
+            Utilities.AssertLogContainsResource(gr, "GenerateResource.BinaryFormatterUse", "$this.Icon");
         }
 
         /// <summary>

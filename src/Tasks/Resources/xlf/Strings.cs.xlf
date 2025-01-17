@@ -1178,10 +1178,10 @@
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.BinaryFormatterUse">
-        <source>MSB3825: Resource "{0}" of type "{1}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+        <source>MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://aka.ms/binaryformatter-migration-guide</source>
-        <target state="needs-review-translation">MSB3825: Prostředek {0} typu {1} může být deserializován přes BinaryFormatter za běhu. BinaryFormatter je zastaralý kvůli známým bezpečnostním rizikům a byl odebrán z rozhraní .NET 9+. Pokud ho chcete dál používat, nastavte vlastnost GenerateResourceWarnOnBinaryFormatterUse na false.
-           Další informace: https://aka.ms/binaryformatter-migration-guide</target>
+        <target state="new">MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/binaryformatter-migration-guide</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">

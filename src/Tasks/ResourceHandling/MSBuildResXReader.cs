@@ -197,7 +197,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                         // Warn of BinaryFormatter exposure (SDK should turn this on by default in .NET 8+)
                         if (logWarningForBinaryFormatter)
                         {
-                            log?.LogWarningWithCodeFromResources(null, resxFilename, ((IXmlLineInfo)elem).LineNumber, ((IXmlLineInfo)elem).LinePosition, 0, 0, "GenerateResource.BinaryFormatterUse", name, typename);
+                            log?.LogWarningWithCodeFromResources(null, resxFilename, ((IXmlLineInfo)elem).LineNumber, ((IXmlLineInfo)elem).LinePosition, 0, 0, "GenerateResource.BinaryFormatterUse", name);
                         }
 
                         // BinaryFormatter from byte array

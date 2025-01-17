@@ -1169,7 +1169,7 @@
     <comment>{StrBegin="MSB3824: "}</comment>
   </data>
   <data name="GenerateResource.BinaryFormatterUse">
-    <value>MSB3825: Resource "{0}" of type "{1}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+    <value>MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://aka.ms/binaryformatter-migration-guide</value>
     <comment>{StrBegin="MSB3825: "}</comment>
   </data>
