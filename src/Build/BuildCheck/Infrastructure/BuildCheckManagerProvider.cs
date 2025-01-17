@@ -152,6 +152,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 new BuiltInCheckFactory([NoEnvironmentVariablePropertyCheck.SupportedRule.Id], NoEnvironmentVariablePropertyCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<NoEnvironmentVariablePropertyCheck>),
                 new BuiltInCheckFactory([EmbeddedResourceCheck.SupportedRule.Id], EmbeddedResourceCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<EmbeddedResourceCheck>),
                 new BuiltInCheckFactory([TargetFrameworkConfusionCheck.SupportedRule.Id], TargetFrameworkConfusionCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<TargetFrameworkConfusionCheck>),
+                new BuiltInCheckFactory([TargetFrameworkUnexpectedCheck.SupportedRule.Id], TargetFrameworkUnexpectedCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<TargetFrameworkUnexpectedCheck>),
             ],
 
             // BuildCheckDataSource.Execution

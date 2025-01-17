@@ -11,6 +11,7 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0105](#bc0105---embeddedresource-should-specify-culture-metadata) | Warning | N/A | 9.0.200 | Culture specific EmbeddedResource should specify Culture metadata. |
 | [BC0106](#bc0106---copytooutputdirectoryalways-should-be-avoided) | Warning | N/A | 9.0.200 | CopyToOutputDirectory='Always' should be avoided. |
 | [BC0107](#bc0107---targetframework-and-targetframeworks-specified-together) | Warning | N/A | 9.0.200 | TargetFramework and TargetFrameworks specified together. |
+| [BC0108](#bc0108---targetframework-or-targetframeworks-specified-in-non-sdk-style-project) | Warning | N/A | 9.0.300 | TargetFramework or TargetFrameworks specified in non-SDK style project. |
 | [BC0201](#bc0201---usage-of-undefined-property) | Warning | Project | 9.0.100 | Usage of undefined property. |
 | [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Project | 9.0.100 | Property first declared after it was used. |
 | [BC0203](#bc0203----property-declared-but-never-used) | None | Project | 9.0.100 | Property declared but never used. |
@@ -125,6 +126,16 @@ If you specify `TargetFramework` you are instructing the build to produce a sing
 ```
 dotnet build my-multi-target.csproj /p:TargetFramework=net9.0
 ```
+
+<a name="BC0108"></a>
+## BC0108 - TargetFramework or TargetFrameworks specified in SDK-less project.
+
+"'TargetFramework' nor 'TargetFrameworks' property should not be specified in projects not using .NET SDK."
+
+'TargetFramework' or 'TargetFrameworks' control the project output targets in modern .NET SDK projects. The older SDK-less projects interprets different properties for similar mechanism (like 'TargetFrameworkVersion') and the 'TargetFramework' or 'TargetFrameworks' are silently ignored.
+
+Make sure the Target Framework is specified appropriately for your project.
+
 
 <a name="BC0201"></a>
 ## BC0201 - Usage of undefined property.

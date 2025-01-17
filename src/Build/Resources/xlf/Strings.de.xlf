@@ -211,6 +211,16 @@
         <target state="translated">Vermeiden Sie die Angabe von "Always" für "CopyToOutputDirectory", da dies zu unnötigen Kopiervorgängen während des Buildvorgangs führen kann. Verwenden Sie den Metadatenwert "PreserveNewest" oder "IfDifferent", oder legen Sie die Eigenschaft "SkipUnchangedFilesOnCopyAlways" auf TRUE fest, um effektiveres Kopieren zu verwenden.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0108_MessageFmt">
+        <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
+        <target state="new">Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0108_Title">
+        <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
+        <target state="new">'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">Auf die Eigenschaft „{0}“ wurde zugegriffen, sie wurde jedoch nie initialisiert.</target>

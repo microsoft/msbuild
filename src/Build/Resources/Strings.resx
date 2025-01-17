@@ -2198,6 +2198,14 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</value>
     <comment>Terms in quotes are not to be translated.</comment>
   </data>
+  <data name="BuildCheck_BC0108_Title" xml:space="preserve">
+    <value>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</value>
+    <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0108_MessageFmt" xml:space="preserve">
+    <value>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</value>
+    <comment>Terms in quotes are not to be translated.</comment>
+  </data>
   <data name="BuildCheck_BC0201_Title" xml:space="preserve">
     <value>A property that is accessed should be declared first.</value>
   </data>
