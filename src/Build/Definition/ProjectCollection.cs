@@ -14,6 +14,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -1157,14 +1158,29 @@ namespace Microsoft.Build.Evaluation
         /// <returns>A loaded project.</returns>
         public Project LoadProject(string fileName, IDictionary<string, string> globalProperties, string toolsVersion)
         {
+            return LoadProjectWithOptions(fileName, new ProjectOptions { GlobalProperties = globalProperties, ToolsVersion = toolsVersion });
+        }
+
+        /// <summary>
+        /// Loads a project with the specified filename, tools version and global properties.
+        /// If a matching project is already loaded, it will be returned, otherwise a new project will be loaded.
+        /// </summary>
+        /// <param name="fileName">The project file to load</param>
+        /// <param name="projectOptions">The <see cref="ProjectOptions"/> to use.</param>
+        /// <returns>A loaded project.</returns>
+        public Project LoadProjectWithOptions(string fileName, ProjectOptions projectOptions)
+        {
             ErrorUtilities.VerifyThrowArgumentLength(fileName);
             fileName = FileUtilities.NormalizePath(fileName);
 
             using (_locker.EnterDisposableWriteLock())
             {
-                if (globalProperties == null)
+                // We can only work on this Collection.
+                projectOptions.ProjectCollection = this;
+
+                if (projectOptions.GlobalProperties == null)
                 {
-                    globalProperties = GlobalProperties;
+                    projectOptions.GlobalProperties = GlobalProperties;
                 }
                 else
                 {
@@ -1174,9 +1190,9 @@ namespace Microsoft.Build.Evaluation
                     // BUT remember that project global properties win -- don't override a property that already exists.
                     foreach (KeyValuePair<string, string> globalProperty in GlobalProperties)
                     {
-                        if (!globalProperties.ContainsKey(globalProperty.Key))
+                        if (!projectOptions.GlobalProperties.ContainsKey(globalProperty.Key))
                         {
-                            globalProperties.Add(globalProperty);
+                            projectOptions.GlobalProperties.Add(globalProperty);
                         }
                     }
                 }
@@ -1185,7 +1201,7 @@ namespace Microsoft.Build.Evaluation
                 // passed a relative path, the caller assumes we will prepend the current directory.
                 string toolsVersionFromProject = null;
 
-                if (toolsVersion == null)
+                if (projectOptions.ToolsVersion == null)
                 {
                     // Load the project XML to get any ToolsVersion attribute.
                     // If there isn't already an equivalent project loaded, the real load we'll do will be satisfied from the cache.
@@ -1194,7 +1210,7 @@ namespace Microsoft.Build.Evaluation
                     // Either way, no time wasted.
                     try
                     {
-                        ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(fileName, globalProperties, toolsVersion, ProjectRootElementCache, true /*explicitlyloaded*/);
+                        ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(fileName, projectOptions.GlobalProperties, projectOptions.ToolsVersion, ProjectRootElementCache, true /*explicitlyloaded*/);
                         toolsVersionFromProject = (xml.ToolsVersion.Length > 0) ? xml.ToolsVersion : DefaultToolsVersion;
                     }
                     catch (InvalidProjectFileException ex)
@@ -1205,14 +1221,14 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                string effectiveToolsVersion = Utilities.GenerateToolsVersionToUse(toolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion, out _);
-                Project project = _loadedProjects.GetMatchingProjectIfAny(fileName, globalProperties, effectiveToolsVersion);
+                string effectiveToolsVersion = Utilities.GenerateToolsVersionToUse(projectOptions.ToolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion, out _);
+                Project project = _loadedProjects.GetMatchingProjectIfAny(fileName, projectOptions.GlobalProperties, effectiveToolsVersion);
 
                 if (project == null)
                 {
                     // The Project constructor adds itself to our collection,
                     // it is not done by us
-                    project = new Project(fileName, globalProperties, effectiveToolsVersion, this);
+                    project = Project.FromFile(fileName, projectOptions);
                 }
 
                 return project;
