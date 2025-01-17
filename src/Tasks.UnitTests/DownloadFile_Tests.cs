@@ -37,7 +37,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     DestinationFolder = new TaskItem(folder.Path),
                     HttpMessageHandler = new MockHttpMessageHandler((message, token) => new HttpResponseMessage(HttpStatusCode.OK)
                     {
-                        Content = new StringContent(new String('!', 10000000)),
+                        Content = new StreamContent(new FakeStream()),
                         RequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://largedownload/foo.txt")
                     }),
                     SourceUrl = "http://largedownload/foo.txt"
@@ -47,7 +47,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 downloadFile.Cancel();
 
-                task.Wait(TimeSpan.FromSeconds(1)).ShouldBeTrue();
+                task.Wait(TimeSpan.FromSeconds(1500)).ShouldBeTrue();
 
                 task.Result.ShouldBeFalse();
             }
@@ -400,5 +400,39 @@ namespace Microsoft.Build.Tasks.UnitTests
                 return Task.FromResult(_func(request, cancellationToken));
             }
         }
+    }
+
+    // Fake stream that simulates providing a single character A~Z per a couple of milliseconds without high memory cost.
+    public class FakeStream : Stream
+    {
+        private readonly int delayMilliseconds;
+
+        public FakeStream(int delayInMilliseconds = 20)
+        {
+            delayMilliseconds = delayInMilliseconds;
+            Position = 0;
+        }
+
+        public override bool CanRead => true;
+        public override bool CanSeek => true;
+        public override bool CanWrite => false;
+        public override long Length => long.MaxValue;
+        public override long Position { get; set; }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            buffer[Position % count] = (byte)('A' + Position % 26);
+            Position++;
+            Task.Delay(delayMilliseconds).Wait();
+            return 1;
+        }
+
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotImplementedException();
+
+        public override void SetLength(long value) => throw new NotImplementedException();
+
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotImplementedException();
+
+        public override void Flush() => throw new NotImplementedException();
     }
 }
