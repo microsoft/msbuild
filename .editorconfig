@@ -448,3 +448,9 @@ dotnet_diagnostic.xUnit1031.severity = none
 # The latter brings incosistency in the codebase and some times in one test case.
 # So we are disabling this rule with respect to the above mentioned reasons.
 dotnet_diagnostic.xUnit2013.severity = none
+
+
+# Build Checks
+[*.csproj]
+build_check.BC0201.AllowUninitializedPropertiesInConditions=true
+build_check.BC0202.AllowUninitializedPropertiesInConditions=true
