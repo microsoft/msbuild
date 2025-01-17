@@ -1639,7 +1639,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
 
   <Target
-    Name="_SplitProjectReferencesByFileExistence">
+    Name="_SplitProjectReferencesByFileExistence"
+    DependsOnTargets="AssignProjectConfiguration">
 
     <!--
         Use this task for matching projects with pre-resolved project outputs set by the IDE
