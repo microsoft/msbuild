@@ -80,6 +80,8 @@ namespace Microsoft.Build.Framework
 
             writer.WriteOptionalString(projectFile);
             writer.Write(succeeded);
+
+            ProjectBuildStats.WriteToStream(writer, ProjectBuildStats);
         }
 
         /// <summary>
@@ -93,6 +95,8 @@ namespace Microsoft.Build.Framework
 
             projectFile = reader.ReadByte() == 0 ? null : reader.ReadString();
             succeeded = reader.ReadBoolean();
+
+            ProjectBuildStats = ProjectBuildStats.ReadFromStream(reader, version);
         }
         #endregion
 
@@ -118,5 +122,11 @@ namespace Microsoft.Build.Framework
                 return RawMessage;
             }
         }
+
+        /// <summary>
+        /// Optional holder of stats for telemetry.
+        /// Not intended to be de/serialized for binlogs.
+        /// </summary>
+        internal ProjectBuildStats? ProjectBuildStats { get; set; }
     }
 }

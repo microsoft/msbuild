@@ -1394,7 +1394,7 @@ namespace Microsoft.Build.UnitTests
             return logger;
         }
 
-        public static BuildResult BuildProjectContentUsingBuildManager([StringSyntax(StringSyntaxAttribute.Xml)] string content, MockLogger logger, BuildParameters parameters = null)
+        public static BuildResult BuildProjectContentUsingBuildManager([StringSyntax(StringSyntaxAttribute.Xml)] string content, ILogger logger, BuildParameters parameters = null)
         {
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
@@ -1409,7 +1409,7 @@ namespace Microsoft.Build.UnitTests
 
         public static BuildResult BuildProjectFileUsingBuildManager(
             string projectFile,
-            MockLogger logger = null,
+            ILogger logger = null,
             BuildParameters parameters = null,
             IList<string> targetsToBuild = null)
         {

@@ -577,6 +577,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="success">Did the build succeede or not</param>
         void LogProjectFinished(BuildEventContext projectBuildEventContext, string projectFile, bool success);
 
+        void LogProjectFinished(BuildEventContext projectBuildEventContext, ProjectBuildStats projectBuildStats, string projectFile, bool success);
+
         /// <summary>
         /// Log that a target has started
         /// </summary>

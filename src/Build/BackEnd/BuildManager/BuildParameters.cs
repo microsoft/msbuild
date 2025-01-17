@@ -211,6 +211,8 @@ namespace Microsoft.Build.Execution
 
         private bool _isBuildCheckEnabled;
 
+        private bool _isTelemetryEnabled;
+
         /// <summary>
         /// The settings used to load the project under build
         /// </summary>
@@ -314,6 +316,7 @@ namespace Microsoft.Build.Execution
             LowPriority = other.LowPriority;
             Question = other.Question;
             IsBuildCheckEnabled = other.IsBuildCheckEnabled;
+            IsTelemetryEnabled = other.IsTelemetryEnabled;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
         }
 
@@ -849,6 +852,17 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Gets or sets an indication if telemetry is enabled.
+        /// This is reserved for future usage - we will likely add a whole dictionary of enablement per telemetry namespace
+        ///  as we plan to have variable sampling rate per various sources.
+        /// </summary>
+        internal bool IsTelemetryEnabled
+        {
+            get => _isTelemetryEnabled;
+            set => _isTelemetryEnabled = value;
+        }
+
+        /// <summary>
         /// Gets or sets the project cache description to use for all <see cref="BuildSubmission"/> or <see cref="GraphBuildSubmission"/>
         /// in addition to any potential project caches described in each project.
         /// </summary>
@@ -913,6 +927,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _interactive);
             translator.Translate(ref _question);
             translator.Translate(ref _isBuildCheckEnabled);
+            translator.Translate(ref _isTelemetryEnabled);
             translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
             translator.Translate(ref _reportFileAccesses);
 

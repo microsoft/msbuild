@@ -604,6 +604,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="success">Did the project pass or fail</param>
         /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
         public void LogProjectFinished(BuildEventContext projectBuildEventContext, string projectFile, bool success)
+            => LogProjectFinished(projectBuildEventContext, null, projectFile, success);
+
+        /// <summary>
+        /// Logs that a project has finished
+        /// </summary>
+        /// <param name="projectBuildEventContext">Event context for the project.</param>
+        /// <param name="projectBuildStats"></param>
+        /// <param name="projectFile">Project file being built</param>
+        /// <param name="success">Did the project pass or fail</param>
+        /// <exception cref="InternalErrorException">BuildEventContext is null</exception>
+        public void LogProjectFinished(BuildEventContext projectBuildEventContext, ProjectBuildStats projectBuildStats, string projectFile, bool success)
         {
             ErrorUtilities.VerifyThrow(projectBuildEventContext != null, "projectBuildEventContext");
 
@@ -613,6 +624,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     projectFile,
                     success);
             buildEvent.BuildEventContext = projectBuildEventContext;
+            buildEvent.ProjectBuildStats = projectBuildStats;
             ProcessLoggingEvent(buildEvent);
 
             // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.

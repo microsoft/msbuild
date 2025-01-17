@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -441,7 +442,15 @@ namespace Microsoft.Build.Execution
                 taskFactoryParameters.Add(XMakeAttributes.architecture, architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
             }
 
-            taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord, loggingContext, projectUsingTaskXml, ConversionUtilities.ValidBooleanTrue(overrideUsingTask));
+            taskRegistry.RegisterTask(
+                taskName,
+                AssemblyLoadInfo.Create(assemblyName, assemblyFile),
+                taskFactory,
+                taskFactoryParameters,
+                parameterGroupAndTaskElementRecord,
+                loggingContext,
+                projectUsingTaskXml,
+                ConversionUtilities.ValidBooleanTrue(overrideUsingTask));
         }
 
         private static Dictionary<string, string> CreateTaskFactoryParametersDictionary(int? initialCount = null)
@@ -686,7 +695,7 @@ namespace Microsoft.Build.Execution
             RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord,
             LoggingContext loggingContext,
             ProjectUsingTaskElement projectUsingTaskInXml,
-            bool overrideTask = false)
+            bool overrideTask)
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
             ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo);
@@ -713,7 +722,8 @@ namespace Microsoft.Build.Execution
                 taskFactory,
                 taskFactoryParameters,
                 inlineTaskRecord,
-                Interlocked.Increment(ref _nextRegistrationOrderId));
+                Interlocked.Increment(ref _nextRegistrationOrderId),
+                projectUsingTaskInXml.ContainingProject.FullPath);
 
             if (overrideTask)
             {
@@ -1159,9 +1169,52 @@ namespace Microsoft.Build.Execution
             private int _registrationOrderId;
 
             /// <summary>
+            /// Full path to the file that contains definition of this task.
+            /// </summary>
+            private string _definingFileFullPath;
+
+            /// <summary>
+            /// Execution statistics for the tasks.
+            /// Not translatable - the statistics are anyway expected to be reset after each project request.
+            /// </summary>
+            internal Stats Statistics { get; private init; } = new Stats();
+
+            internal class Stats()
+            {
+                public short ExecutedCount { get; private set; } = 0;
+                private readonly Stopwatch _executedSw  = new Stopwatch();
+
+                public TimeSpan ExecutedTime => _executedSw.Elapsed;
+
+                public void ExecutionStarted()
+                {
+                    _executedSw.Start();
+                    ExecutedCount++;
+                }
+
+                public void ExecutionStoped()
+                {
+                    _executedSw.Stop();
+                }
+
+                public void Reset()
+                {
+                    ExecutedCount = 0;
+                    _executedSw.Reset();
+                }
+            }
+
+            /// <summary>
             /// Constructor
             /// </summary>
-            internal RegisteredTaskRecord(string registeredName, AssemblyLoadInfo assemblyLoadInfo, string taskFactory, Dictionary<string, string> taskFactoryParameters, ParameterGroupAndTaskElementRecord inlineTask, int registrationOrderId)
+            internal RegisteredTaskRecord(
+                string registeredName,
+                AssemblyLoadInfo assemblyLoadInfo,
+                string taskFactory,
+                Dictionary<string, string> taskFactoryParameters,
+                ParameterGroupAndTaskElementRecord inlineTask,
+                int registrationOrderId,
+                string containingFileFullPath)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(assemblyLoadInfo, "AssemblyLoadInfo");
                 _registeredName = registeredName;
@@ -1189,11 +1242,32 @@ namespace Microsoft.Build.Execution
                 {
                     _parameterGroupAndTaskBody = new ParameterGroupAndTaskElementRecord();
                 }
+
+                _definingFileFullPath = containingFileFullPath;
             }
 
             private RegisteredTaskRecord()
             {
             }
+
+            public bool GetIsCustom()
+            {
+                return
+                    (
+                        // There are occurrences of inline tasks within common targets (Microsoft.CodeAnalysis.Targets - SetEnvironmentVariable),
+                        //  so we need to check file as well (the very last condition).
+                        !string.IsNullOrEmpty(_parameterGroupAndTaskBody?.InlineTaskXmlBody) ||
+                        (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyName) &&
+                         !IsMicrosoftAssembly(_taskFactoryAssemblyLoadInfo.AssemblyName)) ||
+                        (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyFile) &&
+                         !IsMicrosoftAssembly(Path.GetFileName(_taskFactoryAssemblyLoadInfo.AssemblyFile)) &&
+                         !FileClassifier.Shared.IsBuiltInLogic(_taskFactoryAssemblyLoadInfo.AssemblyFile)))
+                    // and let's consider all tasks imported by common targets as non custom logic.
+                    && !FileClassifier.Shared.IsBuiltInLogic(_definingFileFullPath);
+            }
+
+            private static bool IsMicrosoftAssembly(string assemblyName)
+                => assemblyName.StartsWith("Microsoft.", StringComparison.Ordinal);
 
             /// <summary>
             /// Gets the task name this record was registered with.
@@ -1546,7 +1620,7 @@ namespace Microsoft.Build.Execution
                         }
                     }
 
-                    _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, loadedType, RegisteredName, TaskFactoryParameters);
+                    _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, loadedType, RegisteredName, TaskFactoryParameters, Statistics);
                 }
 
                 return true;
@@ -1815,6 +1889,7 @@ namespace Microsoft.Build.Execution
                 translator.Translate(ref _taskFactory);
                 translator.Translate(ref _parameterGroupAndTaskBody);
                 translator.Translate(ref _registrationOrderId);
+                translator.Translate(ref _definingFileFullPath);
 
                 IDictionary<string, string> localParameters = _taskFactoryParameters;
                 translator.TranslateDictionary(ref localParameters, count => CreateTaskFactoryParametersDictionary(count));

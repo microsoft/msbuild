@@ -586,6 +586,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
+        public void LogProjectFinished(BuildEventContext projectBuildEventContext, ProjectBuildStats projectBuildStats, string projectFile, bool success)
+        {
+        }
+
         /// <summary>
         /// Logs a target started event
         /// </summary>

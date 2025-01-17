@@ -258,10 +258,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Log that the project has finished
         /// </summary>
         /// <param name="success">Did the build succeede or not</param>
-        internal void LogProjectFinished(bool success)
+        /// <param name="projectBuildStats"></param>
+        internal void LogProjectFinished(bool success, ProjectBuildStats projectBuildStats = null)
         {
             ErrorUtilities.VerifyThrow(this.IsValid, "invalid");
-            LoggingService.LogProjectFinished(BuildEventContext, _projectFullPath, success);
+            LoggingService.LogProjectFinished(BuildEventContext, projectBuildStats, _projectFullPath, success);
             this.IsValid = false;
         }
 

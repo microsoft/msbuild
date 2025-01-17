@@ -366,6 +366,15 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Helper for inspecting internal task registries that might or might not be initialized at this point.
+        /// </summary>
+        internal void InspectInternalTaskRegistry(Action<TaskRegistry> visitor)
+        {
+            visitor(_defaultTaskRegistry);
+            visitor(_overrideTaskRegistry);
+        }
+
+        /// <summary>
         /// Returns a ProjectImportPathMatch struct for the first property found in the expression for which
         /// project import search paths is enabled.
         /// <param name="expression">Expression to search for properties in (first level only, not recursive)</param>
