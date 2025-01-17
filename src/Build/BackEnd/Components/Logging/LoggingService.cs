@@ -1252,15 +1252,18 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if ((warningEvent = buildEvent as BuildWarningEventArgs) != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
-                warningEvent.ProjectFile = GetAndVerifyProjectFileFromContext(warningEvent.BuildEventContext);
+                warningEvent.ProjectFile = GetAndVerifyProjectFileFromContext(warningEvent, false);
             }
             else if ((errorEvent = buildEvent as BuildErrorEventArgs) != null && errorEvent.BuildEventContext != null && errorEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
-                errorEvent.ProjectFile = GetAndVerifyProjectFileFromContext(errorEvent.BuildEventContext);
+                errorEvent.ProjectFile = GetAndVerifyProjectFileFromContext(errorEvent, false);
             }
             else if ((messageEvent = buildEvent as BuildMessageEventArgs) != null && messageEvent.BuildEventContext != null && messageEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
-                messageEvent.ProjectFile = GetAndVerifyProjectFileFromContext(messageEvent.BuildEventContext);
+                // The AssemblyLoadBuildEventArgs are logged asynchronously, and build doesn't wait for those,
+                //  so it can happen that ProjectFinishedEventArgs occured first - removing the id->file mapping from map,
+                //  but AssemblyLoadsTracker still uses the BuildEventContext for that project
+                messageEvent.ProjectFile = GetAndVerifyProjectFileFromContext(messageEvent, buildEvent is AssemblyLoadBuildEventArgs);
             }
 
             if (OnlyLogCriticalEvents)
@@ -1927,14 +1930,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Get the project name from a context ID. Throw an exception if it's not found.
         /// </summary>
-        private string GetAndVerifyProjectFileFromContext(BuildEventContext context)
+        private string GetAndVerifyProjectFileFromContext(BuildEventArgs eventArgs, bool allowCacheMiss)
         {
+            BuildEventContext context = eventArgs.BuildEventContext!;
             _projectFileMap.TryGetValue(context.ProjectContextId, out string projectFile);
 
             // PERF: Not using VerifyThrow to avoid boxing an int in the non-error case.
-            if (projectFile == null)
+            if (projectFile == null && !allowCacheMiss)
             {
-                ErrorUtilities.ThrowInternalError("ContextID {0} should have been in the ID-to-project file mapping but wasn't!", context.ProjectContextId);
+                ErrorUtilities.ThrowInternalError(
+                    "ContextID {0} should have been in the ID-to-project file mapping but wasn't! Encountered during logging message: '{1}'",
+                    context.ProjectContextId, eventArgs.Message);
             }
 
             return projectFile;
