@@ -4,9 +4,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Security.Policy;
 using System.Threading;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.FileSystem;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -23,6 +25,8 @@ namespace Microsoft.Build.Evaluation.Context
     /// </summary>
     public class EvaluationContext
     {
+        private readonly ProjectLoadSettings? _projectLoadSettings;
+
         public enum SharingPolicy
         {
             /// <summary>
@@ -60,14 +64,16 @@ namespace Microsoft.Build.Evaluation.Context
         /// </summary>
         private ConcurrentDictionary<string, IReadOnlyList<string>> FileEntryExpansionCache { get; }
 
-        private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem, ISdkResolverService sdkResolverService = null,
+        private EvaluationContext(SharingPolicy policy, IFileSystem fileSystem, ProjectLoadSettings? projectLoadSettings, ISdkResolverService sdkResolverService = null,
             ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null)
         {
             Policy = policy;
 
+            _projectLoadSettings = projectLoadSettings;
             SdkResolverService = sdkResolverService ?? new CachingSdkResolverService();
             FileEntryExpansionCache = fileEntryExpansionCache ?? new ConcurrentDictionary<string, IReadOnlyList<string>>();
-            FileSystem = fileSystem ?? new CachingFileSystemWrapper(FileSystems.Default);
+            bool skipExistenceCheck = (_projectLoadSettings?.HasFlag(ProjectLoadSettings.IgnoreMissingImports) ?? false) && Traits.Instance.SkipExistenceCheckForCache;
+            FileSystem = fileSystem ?? new CachingFileSystemWrapper(FileSystems.Default, skipExistenceCheck);
             FileMatcher = new FileMatcher(FileSystem, FileEntryExpansionCache);
         }
 
@@ -78,7 +84,7 @@ namespace Microsoft.Build.Evaluation.Context
         public static EvaluationContext Create(SharingPolicy policy)
         {
             // Do not remove this method to avoid breaking binary compatibility.
-            return Create(policy, fileSystem: null);
+            return Create(policy, fileSystem: null, projectLoadSettings: null);
         }
 
         /// <summary>
@@ -93,6 +99,33 @@ namespace Microsoft.Build.Evaluation.Context
         /// </param>
         public static EvaluationContext Create(SharingPolicy policy, MSBuildFileSystemBase fileSystem)
         {
+            return Create(policy, fileSystem, projectLoadSettings: null);
+        }
+
+        /// <summary>
+        ///     Factory for <see cref="EvaluationContext" />
+        /// </summary>
+        /// <param name="policy">The <see cref="SharingPolicy"/> to use.</param>
+        /// <param name="projectLoadSettings">The <see cref="ProjectLoadSettings"/> to use.</param>
+        public static EvaluationContext Create(SharingPolicy policy, ProjectLoadSettings? projectLoadSettings)
+        {
+            // Do not remove this method to avoid breaking binary compatibility.
+            return Create(policy, fileSystem: null, projectLoadSettings: projectLoadSettings);
+        }
+
+        /// <summary>
+        ///     Factory for <see cref="EvaluationContext" />
+        /// </summary>
+        /// <param name="policy">The <see cref="SharingPolicy"/> to use.</param>
+        /// <param name="fileSystem">The <see cref="IFileSystem"/> to use.
+        ///     This parameter is compatible only with <see cref="SharingPolicy.Shared"/>.
+        ///     The method throws if a file system is used with <see cref="SharingPolicy.Isolated"/> or <see cref="SharingPolicy.SharedSDKCache"/>.
+        ///     The reasoning is that these values guarantee not reusing file system caches between evaluations,
+        ///     and the passed in <paramref name="fileSystem"/> might cache state.
+        /// </param>
+        /// <param name="projectLoadSettings">The <see cref="ProjectLoadSettings"/> to use.</param>
+        public static EvaluationContext Create(SharingPolicy policy, MSBuildFileSystemBase fileSystem, ProjectLoadSettings? projectLoadSettings)
+        {
             // Unsupported case: not-fully-shared context with non null file system.
             ErrorUtilities.VerifyThrowArgument(
                 policy == SharingPolicy.Shared || fileSystem == null,
@@ -100,7 +133,8 @@ namespace Microsoft.Build.Evaluation.Context
 
             var context = new EvaluationContext(
                 policy,
-                fileSystem);
+                fileSystem,
+                projectLoadSettings);
 
             TestOnlyHookOnCreate?.Invoke(context);
 
@@ -122,7 +156,7 @@ namespace Microsoft.Build.Evaluation.Context
                         return this;
                     }
                     // Create a copy if this context has already been used. Mark it used.
-                    EvaluationContext context = new EvaluationContext(Policy, fileSystem: null, sdkResolverService: Policy == SharingPolicy.SharedSDKCache ? SdkResolverService : null)
+                    EvaluationContext context = new EvaluationContext(Policy, fileSystem: null, projectLoadSettings: _projectLoadSettings, sdkResolverService: Policy == SharingPolicy.SharedSDKCache ? SdkResolverService : null)
                     {
                         _used = 1,
                     };
@@ -142,7 +176,7 @@ namespace Microsoft.Build.Evaluation.Context
         /// <returns>The new evaluation context.</returns>
         internal EvaluationContext ContextWithFileSystem(IFileSystem fileSystem)
         {
-            return new EvaluationContext(Policy, fileSystem, SdkResolverService, FileEntryExpansionCache)
+            return new EvaluationContext(Policy, fileSystem, null, SdkResolverService, FileEntryExpansionCache)
             {
                 _used = 1,
             };

@@ -13,12 +13,23 @@ namespace Microsoft.Build.Shared.FileSystem
     internal sealed class CachingFileSystemWrapper : IFileSystem
     {
         private readonly IFileSystem _fileSystem;
-        private readonly ConcurrentDictionary<string, bool> _existenceCache = new ConcurrentDictionary<string, bool>();
+        private readonly ConcurrentDictionary<string, bool> _existenceCache = null;
         private readonly ConcurrentDictionary<string, DateTime> _lastWriteTimeCache = new ConcurrentDictionary<string, DateTime>();
+        private readonly bool _skipExistenceCheck = false;
 
         public CachingFileSystemWrapper(IFileSystem fileSystem)
+            : this(fileSystem, false)
+        {
+        }
+
+        public CachingFileSystemWrapper(IFileSystem fileSystem, bool skipExistenceCheck = false)
         {
             _fileSystem = fileSystem;
+            _skipExistenceCheck = skipExistenceCheck;
+            if (!_skipExistenceCheck)
+            {
+                _existenceCache = new ConcurrentDictionary<string, bool>();
+            }
         }
 
         public bool FileOrDirectoryExists(string path)
@@ -83,7 +94,12 @@ namespace Microsoft.Build.Shared.FileSystem
 
         private bool CachedExistenceCheck(string path, Func<string, bool> existenceCheck)
         {
-            return _existenceCache.GetOrAdd(path, existenceCheck);
+            if (_skipExistenceCheck)
+            {
+                return true;
+            }
+
+            return _existenceCache != null && _existenceCache.GetOrAdd(path, existenceCheck);
         }
     }
 }

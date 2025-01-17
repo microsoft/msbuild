@@ -3712,7 +3712,7 @@ namespace Microsoft.Build.Evaluation
                 ProjectLoadSettings loadSettings,
                 EvaluationContext evaluationContext = null)
             {
-                evaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated);
+                evaluationContext = evaluationContext?.ContextForNewProject() ?? EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated, loadSettings);
 
                 Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(
                     _data,

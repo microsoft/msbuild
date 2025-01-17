@@ -103,7 +103,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             var projectCollection = _env.CreateProjectCollection().Collection;
             var fileSystem = new Helpers.LoggingFileSystem();
-            var evaluationContext = EvaluationContext.Create(EvaluationContext.SharingPolicy.Shared, fileSystem);
+            var evaluationContext = EvaluationContext.Create(EvaluationContext.SharingPolicy.Shared, fileSystem, null);
 
             foreach (var projectFile in projectFiles)
             {
@@ -133,7 +133,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void NonSharedContextShouldNotSupportBeingPassedAFileSystem(EvaluationContext.SharingPolicy policy)
         {
             var fileSystem = new Helpers.LoggingFileSystem();
-            Should.Throw<ArgumentException>(() => EvaluationContext.Create(policy, fileSystem));
+            Should.Throw<ArgumentException>(() => EvaluationContext.Create(policy, fileSystem, null));
         }
 
         [Theory]

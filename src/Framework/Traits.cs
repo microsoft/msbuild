@@ -50,6 +50,12 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public readonly bool CacheFileExistence = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildCacheFileExistence"));
 
+        /// <summary>
+        /// If user specifies IgnoreMissingImports along with this Environment variable then do not perform
+        /// existence check for the file cache for performance reasons.
+        /// </summary>
+        public readonly bool SkipExistenceCheckForCache = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDSKIPEXISTENCECHECKFORCACHE"));
+
         public readonly bool UseSimpleProjectRootElementCacheConcurrency = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildUseSimpleProjectRootElementCacheConcurrency"));
 
         /// <summary>
