@@ -10,7 +10,7 @@ vs.relatedProcessFiles
   vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\arm64\Microsoft.Build.Tasks.Core.dll"
 
 folder InstallDir:\MSBuild\Current\Bin\arm64
-  file source=$(Arm64BinPath)MSBuild.exe vs.file.ngenArchitecture=arm64
+  file source=$(Arm64BinPath)MSBuild.exe vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\arm64\MSBuild.exe" vs.file.ngenArchitecture=arm64
   file source=$(Arm64BinPath)MSBuild.exe.config
 
   file source=$(FrameworkBinPath)x64\Microsoft.Build.Framework.tlb
