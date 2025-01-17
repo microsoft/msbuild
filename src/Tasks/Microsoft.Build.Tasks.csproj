@@ -694,17 +694,25 @@
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\net472\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <PackageReference Include="Microsoft.Win32.Registry" />
-    <PackageReference Include="System.Reflection.Metadata" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <PackageReference Include="System.CodeDom" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <PackageReference Include="System.Security.Cryptography.Xml" />
 
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\netcore\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
+  </ItemGroup>
+
+  <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <ProjectReference Update="..\StringTools\StringTools.csproj" PrivateAssets="all" />
+    <PackageReference Update="System.CodeDom" PrivateAssets="all" />
+    <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
+    <PackageReference Update="System.Resources.Extensions" PrivateAssets="all" />
+    <PackageReference Update="System.Security.Cryptography.Pkcs" PrivateAssets="all" />
+    <PackageReference Update="System.Security.Cryptography.Xml" PrivateAssets="all" />
+    <PackageReference Update="System.Threading.Tasks.Dataflow" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Win32.Registry" PrivateAssets="all" />
+    <PackageReference Include="System.Reflection.Metadata" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

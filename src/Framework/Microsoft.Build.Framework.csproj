@@ -14,20 +14,17 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Collections" PrivateAssets="all" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="System.Collections.Immutable" />
     <!-- Promote CompilerServices.Unsafe from the old version we get from System.Memory on net472. -->
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
     <Reference Include="System.Xaml" />
   </ItemGroup>
 
+  <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <!-- Need Win32 API on .NET Standard to ping registry for some methods in ToolLocationHelper -->
-    <PackageReference Include="Microsoft.Win32.Registry" />
+    <PackageReference Include="System.Collections.Immutable" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

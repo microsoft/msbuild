@@ -31,8 +31,13 @@
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
   </ItemGroup>
 
+  <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <PackageReference Include="System.Text.Encoding.CodePages" />
+    <ProjectReference Update="..\StringTools\StringTools.csproj" PrivateAssets="all" />
+    <PackageReference Update="Microsoft.IO.Redist" PrivateAssets="all" />
+    <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
+    <PackageReference Update="System.Configuration.ConfigurationManager" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Win32.Registry" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Label="Shared Code">
