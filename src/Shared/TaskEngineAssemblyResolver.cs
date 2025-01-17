@@ -59,7 +59,7 @@ namespace Microsoft.Build.BackEnd.Logging
 #else
             _eventHandler = new Func<AssemblyLoadContext, AssemblyName, Assembly>(ResolveAssembly);
 
-            AssemblyLoadContext.Default.Resolving += _eventHandler;
+            AssemblyLoadContext.GetLoadContext(typeof(TaskEngineAssemblyResolver).Assembly).Resolving += _eventHandler;
 #endif
         }
 
@@ -75,7 +75,7 @@ namespace Microsoft.Build.BackEnd.Logging
 #if FEATURE_APPDOMAIN
                 AppDomain.CurrentDomain.AssemblyResolve -= _eventHandler;
 #else
-                AssemblyLoadContext.Default.Resolving -= _eventHandler;
+                AssemblyLoadContext.GetLoadContext(typeof(TaskEngineAssemblyResolver).Assembly).Resolving -= _eventHandler;
 #endif
                 _eventHandler = null;
             }
@@ -125,7 +125,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         AssemblyNameExtension argAssemblyName = new AssemblyNameExtension(assemblyName);
                         if (taskAssemblyName.Equals(argAssemblyName))
                         {
-                            return AssemblyLoadContext.Default.LoadFromAssemblyPath(_taskAssemblyFile);
+                            return assemblyLoadContext.LoadFromAssemblyPath(_taskAssemblyFile);
                         }
 #endif
                     }

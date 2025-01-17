@@ -30,8 +30,13 @@ namespace Microsoft.Build.Shared
             "Microsoft.Build.Utilities.Core",
         ];
 
+        /// <summary>
+        /// The <see cref="AssemblyLoadContext"/> in which the MSBuild assemblies are loaded.
+        /// </summary>
+        internal static AssemblyLoadContext ThisAssemblyLoadContext => GetLoadContext(typeof(MSBuildLoadContext).Assembly)!;
+
         public MSBuildLoadContext(string assemblyPath)
-            : base($"MSBuild plugin {assemblyPath}")
+            : base($"MSBuild plugin {assemblyPath}", ThisAssemblyLoadContext.IsCollectible)
         {
             _directory = Directory.GetParent(assemblyPath)!.FullName;
 
@@ -50,12 +55,12 @@ namespace Microsoft.Build.Shared
         {
             if (WellKnownAssemblyNames.Contains(assemblyName.Name!))
             {
-                // Force MSBuild assemblies to be loaded in the default ALC
+                // Force MSBuild assemblies to be loaded in the same ALC
                 // and unify to the current version.
-                return null;
+                return ThisAssemblyLoadContext.LoadFromAssemblyName(assemblyName);
             }
 
-            // respect plugin.dll.json with the AssemblyDependencyResolver
+            // respect plugin.deps.json with the AssemblyDependencyResolver
             string? assemblyPath = _resolver?.ResolveAssemblyToPath(assemblyName);
             if (assemblyPath != null)
             {
@@ -83,7 +88,7 @@ namespace Microsoft.Build.Shared
                     continue;
                 }
 
-                AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
+                AssemblyName candidateAssemblyName = GetAssemblyName(candidatePath);
                 if (candidateAssemblyName.Version != assemblyName.Version)
                 {
                     continue;
@@ -95,13 +100,13 @@ namespace Microsoft.Build.Shared
             // If the Assembly is provided via a file path, the following rules are used to load the assembly:
             // - the assembly from the user specified path is loaded, if it exists, into the custom ALC, or
             // - if the simple name of the assembly exists in the same folder as msbuild.exe, then that assembly gets loaded
-            //   into the default ALC (so it's shared with other uses).
+            //   into MSBuild's ALC (so it's shared with other uses).
             var assemblyNameInExecutableDirectory = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
                 $"{assemblyName.Name}.dll");
 
             if (FileSystems.Default.FileExists(assemblyNameInExecutableDirectory))
             {
-                return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyNameInExecutableDirectory);
+                return ThisAssemblyLoadContext.LoadFromAssemblyPath(assemblyNameInExecutableDirectory);
             }
 
             return null;

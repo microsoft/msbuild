@@ -26,8 +26,6 @@ namespace Microsoft.Build.Shared
 
         private bool _resolvingHandlerHookedUp = false;
 
-        private static readonly Version _currentAssemblyVersion = new Version(Microsoft.Build.Shared.MSBuildConstants.CurrentAssemblyVersion);
-
         public void AddDependencyLocation(string fullPath)
         {
             if (fullPath == null)
@@ -71,7 +69,7 @@ namespace Microsoft.Build.Shared
             {
                 if (!_resolvingHandlerHookedUp)
                 {
-                    AssemblyLoadContext.Default.Resolving += TryResolveAssembly;
+                    MSBuildLoadContext.ThisAssemblyLoadContext.Resolving += TryResolveAssembly;
                     _resolvingHandlerHookedUp = true;
                 }
 
@@ -81,7 +79,7 @@ namespace Microsoft.Build.Shared
                     return assembly;
                 }
 
-                return LoadAndCache(AssemblyLoadContext.Default, fullPath);
+                return LoadAndCache(MSBuildLoadContext.ThisAssemblyLoadContext, fullPath);
             }
         }
 
@@ -108,33 +106,16 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        private Assembly TryGetWellKnownAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
-        {
-            if (!MSBuildLoadContext.WellKnownAssemblyNames.Contains(assemblyName.Name))
-            {
-                return null;
-            }
-
-            // Ensure we are attempting to load a matching version
-            // of the Microsoft.Build.* assembly.
-            assemblyName.Version = _currentAssemblyVersion;
-
-            string[] searchPaths = [Assembly.GetExecutingAssembly().Location];
-            return TryResolveAssemblyFromPaths(context, assemblyName, searchPaths);
-        }
-
         private Assembly TryResolveAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
         {
             lock (_guard)
             {
-                Assembly assembly = TryGetWellKnownAssembly(context, assemblyName);
-
-                if (assembly != null)
+                if (MSBuildLoadContext.WellKnownAssemblyNames.Contains(assemblyName.Name))
                 {
-                    return assembly;
+                    return MSBuildLoadContext.ThisAssemblyLoadContext.LoadFromAssemblyName(assemblyName);
                 }
 
-                if (_namesToAssemblies.TryGetValue(assemblyName.FullName, out assembly))
+                if (_namesToAssemblies.TryGetValue(assemblyName.FullName, out Assembly assembly))
                 {
                     return assembly;
                 }
@@ -180,7 +161,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <remarks>
-        /// Assumes we have a lock on _guard
+        /// Assumes we have a lock on _guard.
         /// </remarks>
         private Assembly LoadAndCache(AssemblyLoadContext context, string fullPath)
         {
