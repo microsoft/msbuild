@@ -881,8 +881,10 @@ namespace Microsoft.Build.UnitTests
                 propertyName: "a",
                 previousValue: "b",
                 newValue: "c",
-                location: "d",
-                message: "Property reassignment: $(a)=\"c\" (previous value: \"b\") at d",
+                file: "file.cs",
+                line: 10,
+                column: 20,
+                message: "Property reassignment: $(a)=\"c\" (previous value: \"b\") at file.cs (10,20)",
                 helpKeyword: "e",
                 senderName: "f");
 

@@ -25,6 +25,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private ProjectPropertyGroupTaskInstance _taskInstance;
 
+        private readonly PropertyTrackingSetting _propertyTrackingSettings;
+
         /// <summary>
         /// Create a new PropertyGroup task.
         /// </summary>
@@ -32,10 +34,12 @@ namespace Microsoft.Build.BackEnd
         /// <param name="loggingContext">The logging context</param>
         /// <param name="projectInstance">The project instance</param>
         /// <param name="logTaskInputs">Flag to determine whether or not to log task inputs.</param>
-        public PropertyGroupIntrinsicTask(ProjectPropertyGroupTaskInstance taskInstance, TargetLoggingContext loggingContext, ProjectInstance projectInstance, bool logTaskInputs)
+        /// <param name="settingValue">Flag to determine whether or not property tracking enabled.</param>
+        public PropertyGroupIntrinsicTask(ProjectPropertyGroupTaskInstance taskInstance, TargetLoggingContext loggingContext, ProjectInstance projectInstance, bool logTaskInputs, int settingValue)
             : base(loggingContext, projectInstance, logTaskInputs)
         {
             _taskInstance = taskInstance;
+            _propertyTrackingSettings = (PropertyTrackingSetting)settingValue;
         }
 
         /// <summary>
@@ -85,6 +89,8 @@ namespace Microsoft.Build.BackEnd
                             string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(property.Value, ExpanderOptions.ExpandAll, property.Location);
                             bucket.Expander.PropertiesUseTracker.CheckPreexistingUndefinedUsage(property, evaluatedValue, LoggingContext);
 
+                            LogPropertyInTargetAssignment(property, evaluatedValue);
+
                             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents)
                             {
                                 LoggingContext.LogComment(MessageImportance.Low, "PropertyGroupLogMessage", property.Name, evaluatedValue);
@@ -108,6 +114,51 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Logs property assignment information during target execution, providing detailed tracking of property value changes.
+        /// </summary>
+        /// <param name="property">The property instance being assigned or modified.</param>
+        /// <param name="evaluatedValue">The new evaluated value of the property.</param>
+        private void LogPropertyInTargetAssignment(ProjectPropertyGroupTaskPropertyInstance property, string evaluatedValue)
+        {
+            if (_propertyTrackingSettings == 0 || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+            {
+                return;
+            }
+
+            var previousPropertyValue = Project.GetProperty(property.Name)?.EvaluatedValue;
+
+            if (previousPropertyValue == null
+                && (_propertyTrackingSettings & PropertyTrackingSetting.PropertyInitialValueSet) == PropertyTrackingSetting.PropertyInitialValueSet)
+            {
+                var args = new PropertyInitialValueSetEventArgs(
+                    property.Name,
+                    evaluatedValue,
+                    propertySource: string.Empty,
+                    property.Location.File,
+                    property.Location.Line,
+                    property.Location.Column,
+                    ResourceUtilities.GetResourceString("PropertyAssignment"))
+                { BuildEventContext = LoggingContext.BuildEventContext };
+
+                LoggingContext.LogBuildEvent(args);
+            }
+            else if ((_propertyTrackingSettings & PropertyTrackingSetting.PropertyReassignment) == PropertyTrackingSetting.PropertyReassignment)
+            {
+                var args = new PropertyReassignmentEventArgs(
+                    property.Name,
+                    previousPropertyValue,
+                    evaluatedValue,
+                    property.Location.File,
+                    property.Location.Line,
+                    property.Location.Column,
+                    message: ResourceUtilities.GetResourceString("PropertyReassignment"))
+                { BuildEventContext = LoggingContext.BuildEventContext, };
+
+                LoggingContext.LogBuildEvent(args);
             }
         }
 

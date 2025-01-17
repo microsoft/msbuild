@@ -12,7 +12,6 @@ using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -159,6 +158,11 @@ namespace Microsoft.Build.Evaluation
         private readonly PropertyDictionary<ProjectPropertyInstance> _environmentProperties;
 
         /// <summary>
+        /// Properties passed from the command line (e.g. by using /p:).
+        /// </summary>
+        private readonly HashSet<string> _propertiesFromCommandLine;
+
+        /// <summary>
         /// The cache to consult for any imports that need loading.
         /// </summary>
         private readonly ProjectRootElementCacheBase _projectRootElementCache;
@@ -201,6 +205,7 @@ namespace Microsoft.Build.Evaluation
             ProjectLoadSettings loadSettings,
             int maxNodeCount,
             PropertyDictionary<ProjectPropertyInstance> environmentProperties,
+            HashSet<string> propertiesFromCommandLine,
             IItemFactory<I, I> itemFactory,
             IToolsetProvider toolsetProvider,
             IDirectoryCacheFactory directoryCacheFactory,
@@ -253,6 +258,7 @@ namespace Microsoft.Build.Evaluation
             _loadSettings = loadSettings;
             _maxNodeCount = maxNodeCount;
             _environmentProperties = environmentProperties;
+            _propertiesFromCommandLine = propertiesFromCommandLine ?? [];
             _itemFactory = itemFactory;
             _projectRootElementCache = projectRootElementCache;
             _sdkResolverService = sdkResolverService;
@@ -301,6 +307,7 @@ namespace Microsoft.Build.Evaluation
             ProjectLoadSettings loadSettings,
             int maxNodeCount,
             PropertyDictionary<ProjectPropertyInstance> environmentProperties,
+            HashSet<string> propertiesFromCommandLine,
             ILoggingService loggingService,
             IItemFactory<I, I> itemFactory,
             IToolsetProvider toolsetProvider,
@@ -321,6 +328,7 @@ namespace Microsoft.Build.Evaluation
                 loadSettings,
                 maxNodeCount,
                 environmentProperties,
+                propertiesFromCommandLine,
                 itemFactory,
                 toolsetProvider,
                 directoryCacheFactory,
@@ -1240,7 +1248,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Put all the global properties into our property bag
+        /// Put all the global properties into our property bag.
         /// </summary>
         private int AddGlobalProperties()
         {
@@ -1251,7 +1259,13 @@ namespace Microsoft.Build.Evaluation
 
             foreach (ProjectPropertyInstance globalProperty in _data.GlobalPropertiesDictionary)
             {
-                _data.SetProperty(globalProperty.Name, ((IProperty)globalProperty).EvaluatedValueEscaped, true /* IS global property */, false /* may NOT be a reserved name */, loggingContext: _evaluationLoggingContext);
+                  _ = _data.SetProperty(
+                          globalProperty.Name,
+                          ((IProperty)globalProperty).EvaluatedValueEscaped,
+                          isGlobalProperty: true /* it is a global property, but it comes from command line and is tracked separately */,
+                          false /* may NOT be a reserved name */,
+                          loggingContext: _evaluationLoggingContext,
+                          isCommandLineProperty: _propertiesFromCommandLine.Contains(globalProperty.Name) /* IS coming from command line argument */);
             }
 
             return _data.GlobalPropertiesDictionary.Count;

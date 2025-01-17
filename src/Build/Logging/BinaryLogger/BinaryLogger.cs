@@ -80,6 +80,8 @@ namespace Microsoft.Build.Logging
         //    BuildCheckTracingEvent, BuildCheckAcquisitionEvent, BuildSubmissionStartedEvent
         // version 24:
         //    - new record kind: BuildCanceledEventArgs
+        // version 25:
+        //    - add extra information to PropertyInitialValueSetEventArgs and PropertyReassignmentEventArgs and change message formatting logic.
 
         // MAKE SURE YOU KEEP BuildEventArgsWriter AND StructuredLogViewer.BuildEventArgsWriter IN SYNC WITH THE CHANGES ABOVE.
         // Both components must stay in sync to avoid issues with logging or event handling in the products.
@@ -90,7 +92,7 @@ namespace Microsoft.Build.Logging
 
         // The current version of the binary log representation.
         // Changes with each update of the binary log format.
-        internal const int FileFormatVersion = 24;
+        internal const int FileFormatVersion = 25;
 
         // The minimum version of the binary log reader that can read log of above version.
         // This should be changed only when the binary log format is changed in a way that would prevent it from being

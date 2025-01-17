@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -69,7 +70,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (taskInstance is ProjectPropertyGroupTaskInstance propertyGroupTaskInstance)
             {
-                return new PropertyGroupIntrinsicTask(propertyGroupTaskInstance, loggingContext, projectInstance, logTaskInputs);
+                return new PropertyGroupIntrinsicTask(propertyGroupTaskInstance, loggingContext, projectInstance, logTaskInputs, Traits.Instance.LogPropertyTracking);
             }
             else if (taskInstance is ProjectItemGroupTaskInstance itemGroupTaskInstance)
             {

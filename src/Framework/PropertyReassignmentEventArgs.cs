@@ -41,12 +41,44 @@ namespace Microsoft.Build.Framework
             string message,
             string helpKeyword = null,
             string senderName = null,
-            MessageImportance importance = MessageImportance.Low) : base(message, helpKeyword, senderName, importance)
+            MessageImportance importance = MessageImportance.Low)
+            : base(message, helpKeyword, senderName, importance)
         {
-            this.PropertyName = propertyName;
-            this.PreviousValue = previousValue;
-            this.NewValue = newValue;
-            this.Location = location;
+            PropertyName = propertyName;
+            PreviousValue = previousValue;
+            NewValue = newValue;
+            Location = location;
+        }
+
+        /// <summary>
+        /// Creates an instance of the <see cref="PropertyReassignmentEventArgs"/> class.
+        /// </summary>
+        /// <param name="propertyName">The name of the property whose value was reassigned.</param>
+        /// <param name="previousValue">The previous value of the reassigned property.</param>
+        /// <param name="newValue">The new value of the reassigned property.</param>
+        /// <param name="file">The file associated with the event.</param>
+        /// <param name="line">The line number (0 if not applicable).</param>
+        /// <param name="column">The column number (0 if not applicable).</param>
+        /// <param name="message">The message of the property.</param>
+        /// <param name="helpKeyword">The help keyword.</param>
+        /// <param name="senderName">The sender name of the event.</param>
+        /// <param name="importance">The importance of the message.</param>
+        public PropertyReassignmentEventArgs(
+            string propertyName,
+            string previousValue,
+            string newValue,
+            string file,
+            int line,
+            int column,
+            string message,
+            string helpKeyword = null,
+            string senderName = null,
+            MessageImportance importance = MessageImportance.Low)
+            : base(subcategory: null, code: null, file: file, lineNumber: line, columnNumber: column, 0, 0, message, helpKeyword, senderName, importance)
+        {
+            PropertyName = propertyName;
+            PreviousValue = previousValue;
+            NewValue = newValue;
         }
 
         /// <summary>
@@ -73,12 +105,8 @@ namespace Microsoft.Build.Framework
         {
             get
             {
-                if (RawMessage == null)
-                {
-                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("PropertyReassignment", PropertyName, NewValue, PreviousValue, Location);
-                }
-
-                return RawMessage;
+                string formattedLocation = File != null ? $"{File} ({LineNumber},{ColumnNumber})" : Location;
+                return string.Format(RawMessage, PropertyName, NewValue, PreviousValue, formattedLocation);
             }
         }
 

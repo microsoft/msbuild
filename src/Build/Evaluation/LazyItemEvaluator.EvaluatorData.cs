@@ -311,9 +311,9 @@ namespace Microsoft.Build.Evaluation
                 return _wrappedData.SetProperty(propertyElement, evaluatedValueEscaped, loggingContext);
             }
 
-            public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable = false)
+            public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable = false, bool isCommandLineProperty = false)
             {
-                return _wrappedData.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext: loggingContext);
+                return _wrappedData.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext: loggingContext, isCommandLineProperty);
             }
         }
     }

@@ -87,16 +87,23 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Sets a property which does not come from the Xml.
         /// </summary>
-        public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable = false)
+        public P SetProperty(
+            string name,
+            string evaluatedValueEscaped,
+            bool isGlobalProperty,
+            bool mayBeReserved,
+            LoggingContext loggingContext,
+            bool isEnvironmentVariable = false,
+            bool isCommandLineProperty = false)
         {
             P? originalProperty = _wrapped.GetProperty(name);
-            P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, _evaluationLoggingContext, isEnvironmentVariable);
+            P newProperty = _wrapped.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, _evaluationLoggingContext, isEnvironmentVariable, isCommandLineProperty);
 
             this.TrackPropertyWrite(
                 originalProperty,
                 newProperty,
                 null,
-                this.DeterminePropertySource(isGlobalProperty, mayBeReserved, isEnvironmentVariable),
+                this.DeterminePropertySource(isGlobalProperty, mayBeReserved, isEnvironmentVariable, isCommandLineProperty),
                 loggingContext);
 
             return newProperty;
@@ -258,12 +265,12 @@ namespace Microsoft.Build.Evaluation
             if (predecessor == null)
             {
                 // If this property had no previous value, then track an initial value.
-                TrackPropertyInitialValueSet(property, source);
+                TrackPropertyInitialValueSet(property, source, location);
             }
             else
             {
                 // There was a previous value, and it might have been changed. Track that.
-                TrackPropertyReassignment(predecessor, property, location?.LocationString);
+                TrackPropertyReassignment(predecessor, property, location);
             }
 
             // If this property was an environment variable but no longer is, track it.
@@ -278,7 +285,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="property">The property being set.</param>
         /// <param name="source">The source of the property.</param>
-        private void TrackPropertyInitialValueSet(P property, PropertySource source)
+        /// <param name="location">The exact location of the property. Can be null if comes not form xml.</param>
+        private void TrackPropertyInitialValueSet(P property, PropertySource source, IElementLocation? location)
         {
             if ((_settings & PropertyTrackingSetting.PropertyInitialValueSet) != PropertyTrackingSetting.PropertyInitialValueSet)
             {
@@ -286,11 +294,16 @@ namespace Microsoft.Build.Evaluation
             }
 
             var args = new PropertyInitialValueSetEventArgs(
-                    property.Name,
-                    property.EvaluatedValue,
-                    source.ToString(),
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("PropertyAssignment", property.Name, property.EvaluatedValue, source));
-            args.BuildEventContext = _evaluationLoggingContext.BuildEventContext;
+                property.Name,
+                property.EvaluatedValue,
+
+                // If the property is from XML, we don't need property source since a full location is available.
+                location == null ? EnumUtilities.GetEnumString(source) : string.Empty,
+                location?.File,
+                location?.Line ?? 0,
+                location?.Column ?? 0,
+                ResourceUtilities.GetResourceString("PropertyAssignment"))
+            { BuildEventContext = _evaluationLoggingContext.BuildEventContext, };
 
             _evaluationLoggingContext.LogBuildEvent(args);
         }
@@ -301,7 +314,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="predecessor">The property's preceding state. Null if none.</param>
         /// <param name="property">The property's current state.</param>
         /// <param name="location">The location of this property's reassignment.</param>
-        private void TrackPropertyReassignment(P? predecessor, P property, string? location)
+        private void TrackPropertyReassignment(P? predecessor, P property, IElementLocation? location)
         {
             if (MSBuildNameIgnoreCaseComparer.Default.Equals(property.Name, "MSBuildAllProjects"))
             {
@@ -323,11 +336,13 @@ namespace Microsoft.Build.Evaluation
                 (_settings == 0 && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)))
             {
                 var args = new PropertyReassignmentEventArgs(
-                        property.Name,
-                        oldValue,
-                        newValue,
-                        location,
-                        message: null)
+                    property.Name,
+                    oldValue,
+                    newValue,
+                    location?.File,
+                    location?.Line ?? 0,
+                    location?.Column ?? 0,
+                    message: ResourceUtilities.GetResourceString("PropertyReassignment"))
                 { BuildEventContext = _evaluationLoggingContext.BuildEventContext, };
 
                 _evaluationLoggingContext.LogBuildEvent(args);
@@ -347,7 +362,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Determines the source of a property given the variables SetProperty arguments provided. This logic follows what's in <see cref="Evaluator{P,I,M,D}"/>.
         /// </summary>
-        private PropertySource DeterminePropertySource(bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable)
+        private PropertySource DeterminePropertySource(bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable, bool isCommandLineProperty)
         {
             if (isEnvironmentVariable)
             {
@@ -356,7 +371,7 @@ namespace Microsoft.Build.Evaluation
 
             if (isGlobalProperty)
             {
-                return PropertySource.Global;
+                return isCommandLineProperty ? PropertySource.CommandLine : PropertySource.Global;
             }
 
             return mayBeReserved ? PropertySource.BuiltIn : PropertySource.Toolset;
@@ -373,20 +388,21 @@ namespace Microsoft.Build.Evaluation
             BuiltIn,
             Global,
             Toolset,
-            EnvironmentVariable
+            EnvironmentVariable,
+            CommandLine,
         }
+    }
 
-        [Flags]
-        private enum PropertyTrackingSetting
-        {
-            None = 0,
+    [Flags]
+    internal enum PropertyTrackingSetting
+    {
+        None = 0,
 
-            PropertyReassignment = 1,
-            PropertyInitialValueSet = 1 << 1,
-            EnvironmentVariableRead = 1 << 2,
-            UninitializedPropertyRead = 1 << 3,
+        PropertyReassignment = 1,
+        PropertyInitialValueSet = 1 << 1,
+        EnvironmentVariableRead = 1 << 2,
+        UninitializedPropertyRead = 1 << 3,
 
-            All = PropertyReassignment | PropertyInitialValueSet | EnvironmentVariableRead | UninitializedPropertyRead
-        }
+        All = PropertyReassignment | PropertyInitialValueSet | EnvironmentVariableRead | UninitializedPropertyRead
     }
 }

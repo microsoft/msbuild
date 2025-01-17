@@ -1176,7 +1176,9 @@ namespace Microsoft.Build.Logging
                 propertyName,
                 previousValue,
                 newValue,
-                location,
+                fields.File,
+                fields.LineNumber,
+                fields.ColumnNumber,
                 fields.Message,
                 fields.HelpKeyword,
                 fields.SenderName,
@@ -1214,10 +1216,14 @@ namespace Microsoft.Build.Logging
                 propertyName,
                 propertyValue,
                 propertySource,
+                fields.File,
+                fields.LineNumber,
+                fields.ColumnNumber,
                 fields.Message,
                 fields.HelpKeyword,
                 fields.SenderName,
                 fields.Importance);
+
             SetCommonFields(e, fields);
 
             return e;

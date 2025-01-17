@@ -156,6 +156,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private readonly Dictionary<string, TaskFactoryWrapper> _intrinsicTasks = new Dictionary<string, TaskFactoryWrapper>(StringComparer.OrdinalIgnoreCase);
 
+        private readonly PropertyTrackingSetting _propertyTrackingSettings;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -172,6 +174,8 @@ namespace Microsoft.Build.BackEnd
             {
                 LogTaskInputs = Traits.Instance.EscapeHatches.LogTaskInputs;
             }
+
+            _propertyTrackingSettings = (PropertyTrackingSetting)Traits.Instance.LogPropertyTracking;
         }
 
         /// <summary>
@@ -1582,9 +1586,55 @@ namespace Microsoft.Build.BackEnd
                             }
                         }
 
+                        LogPropertyInTaskAssignment(outputTargetName, outputString, parameterLocation);
                         _batchBucket.Lookup.SetProperty(ProjectPropertyInstance.Create(outputTargetName, outputString, parameterLocation, _projectInstance.IsImmutable));
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Logs property assignment information during task execution, based on configured property tracking settings.
+        /// </summary>
+        /// <param name="propertyName">The name of the property being assigned or reassigned.</param>
+        /// <param name="propertyValue">The new value being assigned to the property.</param>
+        /// <param name="location">The source location where the property assignment occurs.</param>
+        private void LogPropertyInTaskAssignment(string propertyName, string propertyValue, IElementLocation location)
+        {
+            if (_propertyTrackingSettings == 0 || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+            {
+                return;
+            }
+
+            var previousPropertyValue = _projectInstance.GetProperty(propertyName)?.EvaluatedValue;
+
+            if (previousPropertyValue == null && (_propertyTrackingSettings & PropertyTrackingSetting.PropertyInitialValueSet) == PropertyTrackingSetting.PropertyInitialValueSet)
+            {
+                var args = new PropertyInitialValueSetEventArgs(
+                    propertyName,
+                    propertyValue,
+                    propertySource: string.Empty,
+                    location.File,
+                    location.Line,
+                    location.Column,
+                    ResourceUtilities.GetResourceString("PropertyAssignment"))
+                { BuildEventContext = _targetLoggingContext.BuildEventContext };
+
+                _targetLoggingContext.LogBuildEvent(args);
+            }
+            else if ((_propertyTrackingSettings & PropertyTrackingSetting.PropertyReassignment) == PropertyTrackingSetting.PropertyReassignment)
+            {
+                var args = new PropertyReassignmentEventArgs(
+                    propertyName,
+                    previousPropertyValue,
+                    propertyValue,
+                    location.File,
+                    location.Line,
+                    location.Column,
+                    message: ResourceUtilities.GetResourceString("PropertyReassignment"))
+                { BuildEventContext = _targetLoggingContext.BuildEventContext };
+
+                _targetLoggingContext.LogBuildEvent(args);
             }
         }
 

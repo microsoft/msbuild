@@ -59,6 +59,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\EnumUtilities.cs">
+      <Link>SharedUtilities\EnumUtilities.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\EnvironmentUtilities.cs">
       <Link>SharedUtilities\EnvironmentUtilities.cs</Link>
     </Compile>

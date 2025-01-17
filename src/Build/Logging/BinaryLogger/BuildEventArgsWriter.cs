@@ -567,11 +567,12 @@ namespace Microsoft.Build.Logging
 
         private BinaryLogRecordKind Write(PropertyReassignmentEventArgs e)
         {
-            WriteMessageFields(e, writeMessage: false, writeImportance: true);
+            WriteMessageFields(e, writeMessage: true, writeImportance: true);
             WriteDeduplicatedString(e.PropertyName);
             WriteDeduplicatedString(e.PreviousValue);
             WriteDeduplicatedString(e.NewValue);
             WriteDeduplicatedString(e.Location);
+
             return BinaryLogRecordKind.PropertyReassignment;
         }
 

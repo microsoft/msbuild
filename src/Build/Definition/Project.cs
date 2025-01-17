@@ -3721,6 +3721,7 @@ namespace Microsoft.Build.Evaluation
                     loadSettings,
                     ProjectCollection.MaxNodeCount,
                     ProjectCollection.EnvironmentProperties,
+                    ProjectCollection.PropertiesFromCommandLine,
                     loggingServiceForEvaluation,
                     new ProjectItemFactory(Owner),
                     ProjectCollection,
@@ -4437,7 +4438,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Sets a property which is not derived from Xml.
             /// </summary>
-            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable = false)
+            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable = false, bool isCommandLineProperty = false)
             {
                 ProjectProperty property = ProjectProperty.Create(Project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext);
                 Properties.Set(property);

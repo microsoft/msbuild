@@ -1791,7 +1791,7 @@ namespace Microsoft.Build.Execution
         /// immutable if we are immutable.
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
-        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable)
+        ProjectPropertyInstance IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext, bool isEnvironmentVariable, bool isCommandLineProperty)
         {
             // Mutability not verified as this is being populated during evaluation
             ProjectPropertyInstance property = ProjectPropertyInstance.Create(name, evaluatedValueEscaped, mayBeReserved, _isImmutable, isEnvironmentVariable, loggingContext);
@@ -3175,6 +3175,7 @@ namespace Microsoft.Build.Execution
                 projectLoadSettings ?? buildParameters.ProjectLoadSettings, /* Use override ProjectLoadSettings if specified */
                 buildParameters.MaxNodeCount,
                 buildParameters.EnvironmentPropertiesInternal,
+                buildParameters.PropertiesFromCommandLine,
                 loggingService,
                 new ProjectItemInstanceFactory(this),
                 buildParameters.ToolsetProvider,
