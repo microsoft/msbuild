@@ -55,7 +55,11 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public override bool DirectoryExists(string path)
         {
-            return NativeMethodsShared.DirectoryExistsWindows(path);
+#if NETFRAMEWORK
+            return Microsoft.IO.Directory.Exists(path);
+#else
+            return Directory.Exists(path);
+#endif
         }
 
         public override bool FileExists(string path)
@@ -69,7 +73,11 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public override bool FileOrDirectoryExists(string path)
         {
-            return NativeMethodsShared.FileOrDirectoryExistsWindows(path);
+#if NETFRAMEWORK
+            return FileExists(path) || DirectoryExists(path);
+#else
+            return Path.Exists(path);
+#endif
         }
 
         public override DateTime GetLastWriteTimeUtc(string path)

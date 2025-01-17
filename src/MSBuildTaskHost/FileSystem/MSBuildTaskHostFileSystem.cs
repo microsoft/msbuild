@@ -20,7 +20,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public bool FileOrDirectoryExists(string path)
         {
-            return NativeMethodsShared.FileOrDirectoryExists(path);
+            return FileExists(path) || DirectoryExists(path);
         }
 
         public FileAttributes GetAttributes(string path)
@@ -35,7 +35,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public bool DirectoryExists(string path)
         {
-            return NativeMethodsShared.DirectoryExists(path);
+            return Directory.Exists(path);
         }
 
         public IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public bool FileExists(string path)
         {
-            return NativeMethodsShared.FileExists(path);
+            return File.Exists(path);
         }
     }
 }
