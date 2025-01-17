@@ -43,7 +43,7 @@ namespace Microsoft.Build.Construction
     /// to control its lifetime and not be surprised by edits via another project collection.
     /// </summary>
     [DebuggerDisplay("{FullPath} #Children={Count} DefaultTargets={DefaultTargets} ToolsVersion={ToolsVersion} InitialTargets={InitialTargets} ExplicitlyLoaded={IsExplicitlyLoaded}")]
-    public class ProjectRootElement : ProjectElementContainer
+    public partial class ProjectRootElement : ProjectElementContainer
     {
         // Constants for default (empty) project file.
         private const string EmptyProjectFileContent = "{0}<Project{1}{2}>\r\n</Project>";
@@ -58,11 +58,29 @@ namespace Microsoft.Build.Construction
 
         private static readonly ProjectRootElementCacheBase.OpenProjectRootElement s_openLoaderPreserveFormattingDelegate = OpenLoaderPreserveFormatting;
 
+        private const string XmlDeclarationRegExSpecification = @"\A\s*\<\?\s*xml.*\?\>\s*\Z";
+
+#if NET7_0_OR_GREATER
+        [GeneratedRegex(XmlDeclarationRegExSpecification, RegexOptions.IgnorePatternWhitespace | RegexOptions.ExplicitCapture)]
+        private static partial Regex XmlDeclarationRegExPattern();
+#else
+        private static readonly Lazy<Regex> XmlDeclarationRegExPattern = new Lazy<Regex>(() => new Regex(XmlDeclarationRegExSpecification), isThreadSafe: true);
+#endif
+
         /// <summary>
         /// Used to determine if a file is an empty XML file if it ONLY contains an XML declaration like &lt;?xml version="1.0" encoding="utf-8"?&gt;.
         /// </summary>
-        private static readonly Lazy<Regex> XmlDeclarationRegEx = new Lazy<Regex>(() => new Regex(@"\A\s*\<\?\s*xml.*\?\>\s*\Z"), isThreadSafe: true);
-
+        private static Regex XmlDeclarationRegEx
+        {
+            get
+            {
+#if NET7_0_OR_GREATER
+                return XmlDeclarationRegExPattern();
+#else
+                return XmlDeclarationRegExPattern.Value;
+#endif
+            }
+        }
         /// <summary>
         /// The default encoding to use / assume for a new project.
         /// </summary>
@@ -1963,7 +1981,7 @@ namespace Microsoft.Build.Construction
 
                 // If the file is only whitespace or the XML declaration then it empty
                 //
-                return String.IsNullOrEmpty(contents) || XmlDeclarationRegEx.Value.IsMatch(contents);
+                return String.IsNullOrEmpty(contents) || XmlDeclarationRegEx.IsMatch(contents);
             }
             catch (Exception)
             {
