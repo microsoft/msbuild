@@ -54,6 +54,11 @@
     <SystemTextJsonVersion>8.0.5</SystemTextJsonVersion>
     <SystemThreadingChannelsVersion>8.0.0</SystemThreadingChannelsVersion>
     <SystemThreadingTasksDataflowVersion>8.0.0</SystemThreadingTasksDataflowVersion>
+    <MicrosoftVisualStudioOpenTelemetryVersion>0.1.700-beta</MicrosoftVisualStudioOpenTelemetryVersion>
+    <OpenTelemetryVersion>1.9.0</OpenTelemetryVersion>
+    <SystemDiagnosticsDiagnosticSourceVersion>9.0.0</SystemDiagnosticsDiagnosticSourceVersion>
+    <MicrosoftBclAsyncInterfacesVersion>8.0.0</MicrosoftBclAsyncInterfacesVersion>
+    <MicrosoftExtensionsPrimitivesVersion>8.0.0</MicrosoftExtensionsPrimitivesVersion>
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>

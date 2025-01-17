@@ -23,6 +23,23 @@
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
     <Reference Include="System.Xaml" />
+    <!-- Telemetry in Framework-->
+    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector" />
+    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" />
+    <PackageReference Include="OpenTelemetry" />
+    <PackageReference Include="Microsoft.Extensions.Primitives" />
+  </ItemGroup>
+
+  <!-- VS is bad at parsing this and it randomly fails to compile.
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' AND '$(Configuration)' == 'Debug'">
+    <!-\- Exporter that works with .NET aspire only for debugging. Release should use hooked exporter. -\->
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+  </ItemGroup>
+ -->
+
+ <!-- Framework and standard don't have DiagnosticSource. -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
@@ -44,6 +61,7 @@
       <Link>Shared\IMSBuildElementLocation.cs</Link>
     </Compile>
   </ItemGroup>
+  
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <Compile Remove="XamlTypes\**" />

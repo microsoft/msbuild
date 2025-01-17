@@ -246,6 +246,7 @@ namespace Microsoft.Build.CommandLine
 
             DebuggerLaunchCheck();
 
+            OpenTelemetryManager.Initialize(true);
             // Initialize new build telemetry and record start of this build.
             KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
 
@@ -296,6 +297,7 @@ namespace Microsoft.Build.CommandLine
                 DumpCounters(false /* log to console */);
             }
 
+            OpenTelemetryManager.Shutdown();
             return exitCode;
         }
 

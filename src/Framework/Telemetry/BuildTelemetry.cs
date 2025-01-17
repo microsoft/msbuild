@@ -10,7 +10,7 @@ namespace Microsoft.Build.Framework.Telemetry
     /// <summary>
     /// Telemetry of build.
     /// </summary>
-    internal class BuildTelemetry : TelemetryBase
+    internal class BuildTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     {
         public override string EventName => "build";
 
@@ -166,6 +166,52 @@ namespace Microsoft.Build.Framework.Telemetry
             }
 
             return properties;
+        }
+        public IList<TelemetryItem> GetActivityProperties() 
+        {
+            List<TelemetryItem> telemetryItems = new();
+
+            if (StartAt.HasValue && FinishedAt.HasValue)
+            {
+                telemetryItems.Add(new TelemetryItem("BuildDurationInMilliseconds", (FinishedAt.Value - StartAt.Value).TotalMilliseconds, false));
+            }
+
+            if (InnerStartAt.HasValue && FinishedAt.HasValue)
+            {
+                telemetryItems.Add(new TelemetryItem("InnerBuildDurationInMilliseconds", (FinishedAt.Value - InnerStartAt.Value).TotalMilliseconds, false));
+            }
+
+            if (Host != null)
+            {
+                telemetryItems.Add(new TelemetryItem("BuildEngineHost", Host, false));
+            }
+
+            if (Success.HasValue)
+            {
+                telemetryItems.Add(new TelemetryItem("BuildSuccess", Success, false));
+            }
+
+            if (Target != null)
+            {
+                telemetryItems.Add(new TelemetryItem("BuildTarget", Target, true));
+            }
+
+            if (Version != null)
+            {
+                telemetryItems.Add(new TelemetryItem("BuildEngineVersion", Version.ToString(), false));
+            }
+
+            if (BuildCheckEnabled != null)
+            {
+                telemetryItems.Add(new TelemetryItem("BuildCheckEnabled", BuildCheckEnabled, false));
+            }
+
+            if (SACEnabled != null)
+            {
+                telemetryItems.Add(new TelemetryItem("SACEnabled", SACEnabled, false));
+            }
+
+            return telemetryItems;
         }
     }
 }

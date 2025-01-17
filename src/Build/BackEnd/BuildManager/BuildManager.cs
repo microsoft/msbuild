@@ -493,6 +493,7 @@ namespace Microsoft.Build.Execution
                 parameters.DetailedSummary = true;
                 parameters.LogTaskInputs = true;
             }
+            OpenTelemetryManager.Initialize(false);
 
             lock (_syncLock)
             {
@@ -1081,6 +1082,14 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
 
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
+                            Activity? endOfBuildTelemetry = OpenTelemetryManager.DefaultActivitySource?
+                                .StartActivity("Build")?
+                                .WithTags(_buildTelemetry)
+                                .WithStartTime(_buildTelemetry.InnerStartAt);
+
+                            endOfBuildTelemetry?.Dispose();
+                            OpenTelemetryManager.ForceFlush();
+
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
                         }
