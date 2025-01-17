@@ -141,6 +141,8 @@ jobs:
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
       arguments: '-msbuildEngine dotnet -onlyDocChanged $(onlyDocChanged)'
+    env:
+      MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -267,6 +269,8 @@ jobs:
   steps:
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
     displayName: CI Build
+    env: 
+        MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
@@ -324,6 +328,8 @@ jobs:
   steps:
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
     displayName: CI Build
+    env: 
+        MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
