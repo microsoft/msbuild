@@ -3584,6 +3584,7 @@ namespace Microsoft.Build.Utilities
             {
                 toolPath = Path.Combine(toolPath, fileName);
 
+                // Rollback see https://developercommunity.visualstudio.com/t/Unable-to-locate-MSBuild-path-with-Lates/10824132 
                 if (!File.Exists(toolPath))
                 {
                     toolPath = null;

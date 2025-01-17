@@ -37,6 +37,13 @@ variables:
     value: true # Enable loc for vs17.14
   - name: Codeql.Enabled
     value: true
+  - group: AzureDevOps-Artifact-Feeds-Pats
+  - name: cfsNugetWarnLevel
+    value: warn
+  - name: nugetMultiFeedWarnLevel
+    value: none
+  - name: NugetSecurityAnalysisWarningLevel
+    value: none
 
 resources:
   repositories:
@@ -119,6 +126,14 @@ extends:
         steps:
         - task: NuGetToolInstaller@1
           displayName: 'Install NuGet.exe'
+
+        - task: PowerShell@2
+          displayName: Setup Private Feeds Credentials
+          inputs:
+            filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+            arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+          env:
+            Token: $(dn-bot-dnceng-artifact-feeds-rw)
 
         - task: NuGetCommand@2
           displayName: Restore internal tools

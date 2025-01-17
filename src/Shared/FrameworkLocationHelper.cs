@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -1390,6 +1390,7 @@ namespace Microsoft.Build.Shared
                 // Assume if either MSBuild.exe or Microsoft.Build.dll are shipped, there is a valid install.
                 // Note: net481 did not ship an ARM64 MSBuild.exe, so checking its dll's is the fallback for a valid install.
                 // Context: https://github.com/dotnet/msbuild/pull/7689
+                // Rollback see https://developercommunity.visualstudio.com/t/Unable-to-locate-MSBuild-path-with-Lates/10824132 
                 if (this._hasMsBuild &&
                     generatedPathToDotNetFramework != null &&
                     (!File.Exists(Path.Combine(generatedPathToDotNetFramework, NativeMethodsShared.IsWindows ? "MSBuild.exe" : "mcs.exe")) &&
