@@ -19,6 +19,8 @@
     <UsagePattern IdentityGlob="System.Threading.Tasks.Dataflow/*8.0.0*" />
     <UsagePattern IdentityGlob="System.Formats.Asn1/*8.0.1*" />
     <UsagePattern IdentityGlob="Microsoft.VisualStudio.SolutionPersistence/*1.0.*" />
+    <!-- Defined in Version.Details.xml - live version used in SB. -->
+    <UsagePattern IdentityGlob="System.Diagnostics.DiagnosticSource/*8.0.1*" />
   </IgnorePatterns>
   <Usages>
   </Usages>

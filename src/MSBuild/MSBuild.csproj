@@ -176,6 +176,7 @@
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" /><!-- for consistency with Framework via transitives -->
   </ItemGroup>
   <!-- Manually download this library for RoslynCodeTaskFactory.
            See target AddRefAssemblies below. -->
@@ -204,6 +205,12 @@
   <!-- Xsds are not TF or arch-specific so copy once them in the outer build -->
   <Target Name="CopyXsds" BeforeTargets="Build" Condition="'$(IsInnerBuild)' != 'true'">
     <Copy SourceFiles="@(XsdsForVS)" DestinationFiles="@(XsdsForVS-&gt;'$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'xsd'))%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="AvoidValueTupleConflict" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <Reference Remove="@(Reference->WithMetadataValue(`NuGetPackageId`, `System.ValueTuple`))" />
+    </ItemGroup>
   </Target>
 
   <!-- Include MSBuild.deps.json and MSBuild.runtimeconfig.json in ContentWithTargetPath so they will be copied to the output folder of projects

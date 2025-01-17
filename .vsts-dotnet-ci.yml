@@ -70,6 +70,8 @@ jobs:
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
       arguments: -onlyDocChanged $(onlyDocChanged)
+    env:
+      MSBUILD_TELEMETRY_SAMPLE_RATE: '0.5'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -196,12 +198,16 @@ jobs:
     inputs:
       filename: 'eng/cibuild.cmd'
       arguments: '-configuration Release -test'
+    env:
+      MSBUILD_TELEMETRY_SAMPLE_RATE: '0.5'
     condition: eq(variables.onlyDocChanged, 0)
   - task: BatchScript@1
     displayName: cibuild.cmd without test
     inputs:
       filename: 'eng/cibuild.cmd'
       arguments: '-configuration Release'
+    env:
+      MSBUILD_TELEMETRY_SAMPLE_RATE: '0.5'
     condition: eq(variables.onlyDocChanged, 1)
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results

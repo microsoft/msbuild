@@ -176,7 +176,7 @@ namespace Microsoft.Build.Experimental
                 bool serverIsAlreadyRunning = ServerIsRunning();
                 if (KnownTelemetry.PartialBuildTelemetry != null)
                 {
-                    KnownTelemetry.PartialBuildTelemetry.InitialServerState = serverIsAlreadyRunning ? "hot" : "cold";
+                    KnownTelemetry.PartialBuildTelemetry.InitialMSBuildServerState = serverIsAlreadyRunning ? "hot" : "cold";
                 }
                 if (!serverIsAlreadyRunning)
                 {
@@ -521,7 +521,7 @@ namespace Microsoft.Build.Experimental
                 ? null
                 : new PartialBuildTelemetry(
                     startedAt: KnownTelemetry.PartialBuildTelemetry.StartAt.GetValueOrDefault(),
-                    initialServerState: KnownTelemetry.PartialBuildTelemetry.InitialServerState,
+                    initialServerState: KnownTelemetry.PartialBuildTelemetry.InitialMSBuildServerState,
                     serverFallbackReason: KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason);
 
             return new ServerNodeBuildCommand(

@@ -4,8 +4,6 @@
 using System;
 using System.Globalization;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -36,7 +34,7 @@ namespace Microsoft.Build.Framework
 
         public EscapeHatches EscapeHatches { get; }
 
-        internal readonly string MSBuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION");
+        internal readonly string? MSBuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION");
 
         /// <summary>
         /// Do not expand wildcards that match a certain pattern
@@ -67,7 +65,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Allow the user to specify that two processes should not be communicating via an environment variable.
         /// </summary>
-        public static readonly string MSBuildNodeHandshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
+        public static readonly string? MSBuildNodeHandshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
 
         /// <summary>
         /// Override property "MSBuildRuntimeType" to "Full", ignoring the actual runtime type of MSBuild.
@@ -134,6 +132,16 @@ namespace Microsoft.Build.Framework
 
         public readonly bool InProcNodeDisabled = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
 
+
+        /// <summary>
+        /// Variables controlling opt out at the level of not initializing telemetry infrastructure. Set to "1" or "true" to opt out.
+        /// mirroring
+        /// https://learn.microsoft.com/en-us/dotnet/core/tools/telemetry
+        /// </summary>
+        public bool SdkTelemetryOptOut = IsEnvVarOneOrTrue("DOTNET_CLI_TELEMETRY_OPTOUT");
+        public bool FrameworkTelemetryOptOut = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTOUT");
+        public double? TelemetrySampleRateOverride = ParseDoubleFromEnvironmentVariable("MSBUILD_TELEMETRY_SAMPLE_RATE");
+
         public static void UpdateFromEnvironment()
         {
             // Re-create Traits instance to update values in Traits according to current environment.
@@ -148,6 +156,21 @@ namespace Microsoft.Build.Framework
             return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)
                 ? result
                 : defaultValue;
+        }
+
+        private static double? ParseDoubleFromEnvironmentVariable(string environmentVariable)
+        {
+            return double.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out double result)
+                ? result
+                : null;
+        }
+
+        private static bool IsEnvVarOneOrTrue(string name)
+        {
+            string? value = Environment.GetEnvironmentVariable(name);
+            return value != null &&
+                   (value.Equals("1", StringComparison.OrdinalIgnoreCase) ||
+                    value.Equals("true", StringComparison.OrdinalIgnoreCase));
         }
     }
 
@@ -423,7 +446,6 @@ namespace Microsoft.Build.Framework
             }
         }
 
-
         private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
         {
             var value = Environment.GetEnvironmentVariable(environmentVariable);
@@ -539,7 +561,7 @@ namespace Microsoft.Build.Framework
         /// <remarks>
         /// Clone from ErrorUtilities which isn't available in Framework.
         /// </remarks>
-        internal static void ThrowInternalError(string message, params object[] args)
+        internal static void ThrowInternalError(string message, params object?[] args)
         {
             throw new InternalErrorException(FormatString(message, args));
         }
@@ -558,7 +580,7 @@ namespace Microsoft.Build.Framework
         /// <remarks>
         /// Clone from ResourceUtilities which isn't available in Framework.
         /// </remarks>
-        internal static string FormatString(string unformatted, params object[] args)
+        internal static string FormatString(string unformatted, params object?[] args)
         {
             string formatted = unformatted;
 
@@ -568,7 +590,7 @@ namespace Microsoft.Build.Framework
 #if DEBUG
                 // If you accidentally pass some random type in that can't be converted to a string,
                 // FormatResourceString calls ToString() which returns the full name of the type!
-                foreach (object param in args)
+                foreach (object? param in args)
                 {
                     // Check it has a real implementation of ToString() and the type is not actually System.String
                     if (param != null)
