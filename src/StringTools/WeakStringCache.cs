@@ -36,9 +36,14 @@ namespace Microsoft.NET.StringTools
             public GCHandle WeakHandle;
 
             /// <summary>
+            /// Reference used for smaller strings retained by the cache.
+            /// </summary>
+            private string? referencedString;
+
+            /// <summary>
             /// Returns true if the string referenced by the handle is still alive.
             /// </summary>
-            public bool IsUsed => WeakHandle.Target != null;
+            public bool IsUsed => referencedString is not null || WeakHandle.Target != null;
 
             /// <summary>
             /// Returns the string referenced by this handle if it is equal to the given internable.
@@ -47,13 +52,26 @@ namespace Microsoft.NET.StringTools
             /// <returns>The string matching the internable or null if the handle is referencing a collected string or the string is different.</returns>
             public string? GetString(ref InternableString internable)
             {
-                if (WeakHandle.IsAllocated && WeakHandle.Target is string str)
+                if (referencedString is not null && internable.Equals(referencedString))
                 {
-                    if (internable.Equals(str))
-                    {
-                        return str;
-                    }
+                    return referencedString;
                 }
+
+                if (!WeakHandle.IsAllocated)
+                {
+                    return null;
+                }
+
+                if (WeakHandle.Target is not string str)
+                {
+                    return null;
+                }
+
+                if (internable.Equals(str))
+                {
+                    return str;
+                }
+
                 return null;
             }
 
@@ -63,14 +81,28 @@ namespace Microsoft.NET.StringTools
             /// <param name="str">The string to set.</param>
             public void SetString(string str)
             {
-                if (!WeakHandle.IsAllocated)
+                const int stringLengthLimit = 500;
+                if (str.Length > stringLengthLimit)
                 {
-                    // The handle is not allocated - allocate it.
-                    WeakHandle = GCHandle.Alloc(str, GCHandleType.Weak);
+                    if (WeakHandle.IsAllocated)
+                    {
+                        WeakHandle.Target = str;
+                    }
+                    else
+                    {
+                        WeakHandle = GCHandle.Alloc(str, GCHandleType.Weak);
+                    }
+
+                    referencedString = null;
                 }
                 else
                 {
-                    WeakHandle.Target = str;
+                    if (WeakHandle.IsAllocated)
+                    {
+                        WeakHandle.Target = null;
+                    }
+
+                    referencedString = str;
                 }
             }
 
@@ -79,7 +111,10 @@ namespace Microsoft.NET.StringTools
             /// </summary>
             public void Free()
             {
-                WeakHandle.Free();
+                if (WeakHandle.IsAllocated)
+                {
+                    WeakHandle.Free();
+                }
             }
         }
 
@@ -106,12 +141,6 @@ namespace Microsoft.NET.StringTools
         }
 
         public void Dispose()
-        {
-            DisposeImpl();
-            GC.SuppressFinalize(this);
-        }
-
-        ~WeakStringCache()
         {
             DisposeImpl();
         }

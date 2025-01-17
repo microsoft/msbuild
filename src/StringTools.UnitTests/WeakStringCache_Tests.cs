@@ -86,7 +86,7 @@ namespace Microsoft.NET.StringTools.Tests
 
             for (int i = 0; i < numberOfStrings; i++)
             {
-                string strPart2 = string.Concat(Enumerable.Repeat("100570862200", i + 2));
+                string strPart2 = string.Concat(Enumerable.Repeat("100570862200", i + 100));
                 hashCodes[i] = AddString(string.Empty, strPart2, (string cachedString) =>
                 {
                     _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
@@ -124,7 +124,7 @@ namespace Microsoft.NET.StringTools.Tests
         public void RetainsStringUntilCollected()
         {
             // Add a string to the cache using a non-inlinable method to make sure it's not reachable from a GC root.
-            AddString("Random string ", "test", (string cachedString) =>
+            AddString(new string('r', 500), "test", (string cachedString) =>
             {
                 _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
                 {
