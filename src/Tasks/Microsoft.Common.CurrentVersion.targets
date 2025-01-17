@@ -3287,6 +3287,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <PropertyGroup>
       <RespectAlreadyAssignedItemCulture Condition="'$(RespectAlreadyAssignedItemCulture)' == ''">false</RespectAlreadyAssignedItemCulture>
+      <WarnOnCultureOverwritten Condition="'$(WarnOnCultureOverwritten)' == ''">false</WarnOnCultureOverwritten>
     </PropertyGroup>
 
     <MSBuildInternalMessage Condition="'@(ResxWithNoCulture)'!=''" ResourceName="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage" Severity="Warning" FormatArguments="MSB9000;ResxWithNoCulture" />
@@ -3306,7 +3307,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       </EmbeddedResource>
     </ItemGroup>
 
-    <AssignCulture Files="@(EmbeddedResource)" Condition="'%(Extension)'!='.licx'"  RespectAlreadyAssignedItemCulture="$(RespectAlreadyAssignedItemCulture)">
+    <AssignCulture Files="@(EmbeddedResource)" Condition="'%(Extension)'!='.licx'"  RespectAlreadyAssignedItemCulture="$(RespectAlreadyAssignedItemCulture)" WarnOnCultureOverwritten="$(WarnOnCultureOverwritten)">
       <!-- Create the list of culture resx and embedded resource files -->
       <Output TaskParameter="AssignedFilesWithCulture" ItemName="_MixedResourceWithCulture"/>
       <!-- Create the list of non-culture resx and embedded resource files -->

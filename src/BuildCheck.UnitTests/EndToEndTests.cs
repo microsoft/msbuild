@@ -169,7 +169,7 @@ public class EndToEndTests : IDisposable
 
         _env.SetCurrentDirectory(Path.Combine(workFolder.Path, entryProjectName));
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild("-check -restore /p:RespectCulture=" + (respectCulture ? "True" : "\"\""), out bool success);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild("-check -restore /p:WarnOnCultureOverwritten=True /p:RespectCulture=" + (respectCulture ? "True" : "\"\""), out bool success);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue();

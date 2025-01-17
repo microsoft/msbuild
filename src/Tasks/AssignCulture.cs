@@ -49,6 +49,11 @@ namespace Microsoft.Build.Tasks
         public bool RespectAlreadyAssignedItemCulture { get; set; } = false;
 
         /// <summary>
+        /// If the flag set to 'true' the task will log a warning when the culture metadata is overwritten by the task.
+        /// </summary>
+        public bool WarnOnCultureOverwritten { get; set; } = false;
+
+        /// <summary>
         /// This outgoing list of files is exactly the same as the incoming Files
         /// list except that an attribute name "Culture" will have been added if
         /// the particular file name is in the form:
@@ -160,7 +165,7 @@ namespace Microsoft.Build.Tasks
                             ConversionUtilities.ValidBooleanFalse(AssignedFiles[i].GetMetadata(ItemMetadataNames.withCulture)));
 
                         // The culture was explicitly specified, but not opted in via 'RespectAlreadyAssignedItemCulture' and different will be used
-                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14) &&
+                        if (WarnOnCultureOverwritten &&
                             !string.IsNullOrEmpty(existingCulture) &&
                             !MSBuildNameIgnoreCaseComparer.Default.Equals(existingCulture, info.culture))
                         {
