@@ -1,0 +1,13 @@
+﻿namespace InlineTask
+{
+    using Microsoft.Build.Utilities;
+
+    public class HelloWorld : Task
+    {
+        public override bool Execute()
+        {
+            Log.LogMessage("Hello, world!");
+            return !Log.HasLoggedErrors;
+        }
+    }
+}

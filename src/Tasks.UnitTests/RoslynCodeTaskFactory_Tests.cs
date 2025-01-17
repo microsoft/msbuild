@@ -20,7 +20,7 @@ using Shouldly;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
-
+using Xunit.Abstractions;
 using static VerifyXunit.Verifier;
 
 #nullable disable
@@ -34,11 +34,15 @@ namespace Microsoft.Build.Tasks.UnitTests
 
         private readonly VerifySettings _verifySettings;
 
-        public RoslynCodeTaskFactory_Tests()
+        private readonly ITestOutputHelper _testOutputHelper;
+
+        public RoslynCodeTaskFactory_Tests(ITestOutputHelper testOutputHelper)
         {
+            _testOutputHelper = testOutputHelper;
             UseProjectRelativeDirectory("TaskFactorySource");
 
             _verifySettings = new();
+            _verifySettings.UniqueForRuntime();
             _verifySettings.ScrubLinesContaining("Runtime Version:");
         }
 
@@ -76,6 +80,7 @@ Log.LogError(Alpha.GetString());
 
 </Project>
 ");
+
                 string output = RunnerUtilities.ExecMSBuild(inlineTask.Path, out bool success);
                 success.ShouldBeTrue(output);
                 output.ShouldContain("Alpha.GetString");
@@ -102,6 +107,8 @@ Log.LogError(Alpha.GetString());
                         <Import Project=""$(MSBuildBinPath)\Microsoft.CSharp.targets"" />
                     </Project>
 ");
+                
+                _testOutputHelper.WriteLine($"AssemblyProj: {assemblyProj.Path}, {assemblyProj.ToString()}");
                 TransientTestFile csFile = env.CreateFile(folder, "Class1.cs", @"
 using System;
 
@@ -113,7 +120,7 @@ namespace _5106 {
     }
 }
 ");
-                string output = RunnerUtilities.ExecMSBuild(assemblyProj.Path + $" /p:OutDir={Path.Combine(folder.Path, "subFolder")} /restore", out bool success);
+                string output = RunnerUtilities.ExecMSBuild(assemblyProj.Path + $" /p:OutDir={Path.Combine(folder.Path, "subFolder")} /restore", out bool success, _testOutputHelper);
                 success.ShouldBeTrue(output);
 
                 TransientTestFile inlineTask = env.CreateFile(folder, "5106.proj", @$"

@@ -38,6 +38,11 @@ namespace Microsoft.Build.Tasks
             "System.IO",
             "System.Linq",
             "System.Text",
+
+            #if RUNTIME_TYPE_NETCORE || NETCOREAPP
+            "System.Text.Json",
+            "System.Memory",
+            #endif
         };
 
         /// <summary>
@@ -53,7 +58,11 @@ namespace Microsoft.Build.Tasks
                     "Microsoft.Build.Framework",
                     "Microsoft.Build.Utilities.Core",
                     "mscorlib",
-                    "netstandard"
+                    "netstandard",
+                       #if RUNTIME_TYPE_NETCORE || NETCOREAPP
+            "System.Text.Json",
+            "System.Memory",
+            #endif
                 }
             },
             // CSharp specific assembly references
@@ -244,6 +253,7 @@ namespace Microsoft.Build.Tasks
             }
 
             CodeNamespace codeNamespace = new CodeNamespace("InlineCode");
+
             codeNamespace.Imports.AddRange(DefaultNamespaces.Union(taskInfo.Namespaces, StringComparer.OrdinalIgnoreCase).Select(i => new CodeNamespaceImport(i)).ToArray());
 
             codeNamespace.Types.Add(codeTypeDeclaration);
