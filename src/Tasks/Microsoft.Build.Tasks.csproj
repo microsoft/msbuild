@@ -207,6 +207,8 @@
     <Compile Include="FileIO\VerifyFileHash.cs" />
     <Compile Include="FileState.cs" />
     <Compile Include="Copy.cs" />
+    <Compile Include="CacheGet.cs" />
+    <Compile Include="CacheSet.cs" />
     <Compile Include="CreateCSharpManifestResourceName.cs" />
     <Compile Include="CreateVisualBasicManifestResourceName.cs" />
     <Compile Include="CreateItem.cs" />
