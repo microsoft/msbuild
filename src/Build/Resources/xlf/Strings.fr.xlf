@@ -241,6 +241,16 @@
         <target state="translated">Une propriété qui n'est pas utilisée ne doit pas être déclarée.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0301_MessageFmt">
+        <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
+        <target state="new">Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0301_Title">
+        <source>Downloads folder is untrusted for projects building.</source>
+        <target state="new">Downloads folder is untrusted for projects building.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">ÉCHEC de la génération de la question. La génération s’est arrêtée tôt, car elle a rencontré une cible ou une tâche qui n’était pas à jour.</target>

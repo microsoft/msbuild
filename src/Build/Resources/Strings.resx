@@ -2216,6 +2216,12 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="BuildCheck_BC0203_MessageFmt" xml:space="preserve">
     <value>Property: '{0}' was declared/initialized, but it was never used.</value>
   </data>
+  <data name="BuildCheck_BC0301_Title" xml:space="preserve">
+    <value>Downloads folder is untrusted for projects building.</value>
+  </data>
+  <data name="BuildCheck_BC0301_MessageFmt" xml:space="preserve">
+    <value>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</value>
+  </data>
   <data name="GlobExpansionFailed" xml:space="preserve">
     <value>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</value>
   </data>
